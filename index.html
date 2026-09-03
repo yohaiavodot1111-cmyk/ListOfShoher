@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>דו"ח אחד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#08213F; --navy-deep:#04142A;
+    --steel:#153A63; --slate:#1E4470;
+    --gold:#C8A24B; --gold-lt:#EBD79B; --gold-dp:#9C7A2E;
+    --paper:#EDF1F6; --card:#FFFFFF; --ink:#0F2039; --muted:#5A6B80; --line:#C7D2DF;
+    --present:#1F6B46; --late:#A8721C; --absent:#A32B2B; --danger:#B3261E;
+    --display:'Suez One', serif;
+    --sans:'Heebo', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--sans); color:var(--ink); background:var(--paper); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  @media (prefers-reduced-motion: no-preference){ .fade{animation:fade .35s ease both;} }
+  @keyframes fade{from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:none;}}
+
+  /* ============ כותרת מסמך ============ */
+  header.masthead{background:var(--navy); color:#fff; position:sticky; top:0; z-index:40;
+    box-shadow:0 2px 0 var(--gold), 0 3px 0 var(--navy-deep), 0 10px 24px rgba(4,20,42,.22);}
+  .masthead .bar{max-width:1180px; margin:0 auto; padding:15px 24px; display:flex; align-items:center; gap:18px;}
+  .crest{width:58px; height:58px; flex:0 0 auto;}
+  .titles{flex:1 1 auto; min-width:0;}
+  .titles .unit{font-size:13px; font-weight:700; color:var(--gold-lt); letter-spacing:.04em;}
+  .titles .sys{font-family:var(--display); font-size:34px; line-height:1.05; margin-top:2px; letter-spacing:-.01em;}
+  .whoami{text-align:left; font-size:13px; color:#B9C8DA; flex:0 0 auto;}
+  .whoami b{display:block; color:#fff; font-size:16px; font-weight:800; font-family:var(--sans);}
+  .whoami .rl{color:var(--gold-lt); font-weight:700;}
+  .whoami button{margin-top:7px;}
+
+  .docstrip{background:var(--navy-deep); border-top:1px solid rgba(235,215,155,.22);}
+  .docstrip .in{max-width:1180px; margin:0 auto; padding:9px 24px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    font-size:13.5px; color:#9FB3C9; font-weight:600;}
+  .docstrip b{color:#fff; font-weight:800;}
+  .stamp{border:1.5px solid var(--gold); color:var(--gold-lt); padding:2px 10px; border-radius:3px; font-size:12px; font-weight:800; letter-spacing:.06em;}
+
+  main{max-width:1180px; margin:0 auto; padding:26px 24px 90px;}
+
+  /* ============ פאנלים ============ */
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:5px; overflow:hidden; box-shadow:0 1px 2px rgba(8,33,63,.07);}
+  .panel + .panel{margin-top:22px;}
+  .panel > .head{background:var(--navy); color:#fff; border-bottom:3px solid var(--gold);
+    padding:15px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .panel > .head h2{font-family:var(--display); font-size:24px; margin:0; line-height:1.1;}
+  .panel > .head .sub{color:var(--gold-lt); font-size:14px; font-weight:700;}
+  .panel > .head .sub b{color:#fff;}
+  .panel > .body{padding:22px;}
+  .panel > .foot{padding:16px 22px; border-top:1px solid var(--line); background:#F7F9FC;}
+
+  /* ============ כפתורים ============ */
+  button{font-family:var(--sans); cursor:pointer; border:none; border-radius:4px; font-size:15.5px; font-weight:800;}
+  .btn{padding:12px 22px; background:var(--navy); color:#fff; border:2px solid var(--navy); transition:.14s;}
+  .btn:hover{background:var(--slate); border-color:var(--slate);}
+  .btn.gold{background:var(--gold); border-color:var(--gold-dp); color:var(--navy-deep);}
+  .btn.gold:hover{background:var(--gold-lt); border-color:var(--gold);}
+  .btn.ghost{background:#fff; color:var(--navy); border:2px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--navy);}
+  .btn.sm{padding:8px 14px; font-size:13.5px; border-width:1.5px;}
+  .btn.slim{background:#E7EDF5; color:var(--navy); border-color:#D2DDEA;}
+  .btn.slim:hover{background:#D8E3F0;}
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  button[disabled]{opacity:.45; cursor:not-allowed;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px;}
+
+  /* ============ התחברות ============ */
+  #login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 9px),
+      radial-gradient(900px 480px at 78% -12%, rgba(200,162,75,.16), transparent 62%),
+      var(--navy);}
+  .login-card{width:100%; max-width:452px; background:var(--card); border-radius:6px; overflow:hidden;
+    box-shadow:0 28px 70px rgba(4,20,42,.5); border-top:6px solid var(--gold);}
+  .login-card .top{background:var(--navy); color:#fff; text-align:center; padding:34px 26px 26px; border-bottom:3px solid var(--gold);}
+  .login-card .top .crest{width:88px; height:88px; margin:0 auto 14px;}
+  .login-card .top .unit{color:var(--gold-lt); font-size:14px; font-weight:700;}
+  .login-card .top .sys{font-family:var(--display); font-size:42px; line-height:1.02; margin-top:4px;}
+  .login-card .top .tag{font-size:13.5px; color:#A8BCD2; margin-top:8px; font-weight:600;}
+  .login-card .form{padding:28px;}
+  label{display:block; font-weight:800; font-size:15px; margin-bottom:9px;}
+  .hint{color:var(--muted); font-size:13.5px; margin-top:10px; line-height:1.5;}
+  input,select,textarea{width:100%; font-family:var(--sans); font-size:16.5px; font-weight:600; color:var(--ink);
+    padding:14px; border:2px solid var(--line); border-radius:4px; background:#fff;}
+  input::placeholder{color:#93A3B6; font-weight:500;}
+  .login-card .btn{width:100%; margin-top:18px; padding:15px; font-size:18px;}
+  .demo-note{margin-top:22px; padding-top:18px; border-top:2px solid var(--line);}
+  .demo-note .lbl{font-size:12.5px; color:var(--muted); margin-bottom:11px; text-align:center; font-weight:700;}
+  .demo-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+
+  /* ============ סטטוסים ============ */
+  .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:11px;}
+  @media(max-width:600px){.statusgrid{grid-template-columns:1fr 1fr;}}
+  .statuscell{border:2px solid var(--line); border-radius:4px; padding:16px 12px; text-align:center; background:#fff;
+    font-weight:800; font-size:16.5px; transition:.12s; user-select:none;}
+  .statuscell:hover{border-color:var(--slate);}
+  .statuscell.on{border-color:var(--gold); background:var(--navy); color:#fff; box-shadow:inset 0 0 0 3px rgba(200,162,75,.35);}
+  .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-start:8px; vertical-align:middle;}
+  .d-present{background:var(--present);} .d-late{background:var(--late);} .d-absent{background:var(--absent);}
+
+  .approval{font-size:13px; font-weight:800; padding:5px 11px; border-radius:3px; white-space:nowrap; border:1.5px solid;}
+  .ap-pending{background:#FFF6E4; color:#8A5D10; border-color:#E7CF97;}
+  .ap-ok{background:#E7F3EC; color:var(--present); border-color:#B4D9C4;}
+  .ap-changed{background:#EAEFFA; color:#2C3F84; border-color:#BCC9EC;}
+  .ap-none{background:#FBE6E6; color:var(--danger); border-color:#EDBDBD;}
+
+  .banner{border-radius:4px; padding:15px 18px; font-weight:700; margin-bottom:20px; border:2px solid; border-inline-start-width:6px;}
+  .banner.ok{background:#E7F3EC; border-color:#9FCDB3; color:var(--present);}
+  .banner.warn{background:#FFF6E4; border-color:#E1C384; color:#8A5D10;}
+  .banner.lock{background:#E9EEF5; border-color:#B6C6D8; color:var(--navy);}
+
+  /* ============ מסדרה ============ */
+  .roster{width:100%; border-collapse:collapse; font-size:15.5px;}
+  .roster th{text-align:right; font-weight:800; color:#fff; background:var(--steel); padding:13px 14px; font-size:14px; white-space:nowrap;
+    border-inline-start:1px solid rgba(255,255,255,.14);}
+  .roster th:first-child{border-inline-start:none;}
+  .roster td{padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  .roster tbody tr:nth-child(even) td{background:#F7F9FC;}
+  .roster tbody tr.norep td{background:#FCEDED;}
+  .roster tr:last-child td{border-bottom:none;}
+  .name{font-weight:800; font-size:16px;}
+  .idx{display:inline-block; min-width:24px; color:var(--muted); font-weight:700; font-size:13.5px;}
+  .candle{margin-inline-start:8px; font-size:16px;}
+  .reason-inp{padding:9px 11px; font-size:14.5px; border-width:1.5px;}
+  .rowactions{display:flex; gap:8px; flex-wrap:wrap;}
+  .sel-sm{padding:9px 11px; font-size:14.5px; border-width:1.5px; font-weight:700;}
+
+  .classtabs{display:flex; gap:0; flex-wrap:wrap; margin-bottom:22px; border-bottom:3px solid var(--navy);}
+  .tab{padding:11px 20px; border:2px solid var(--line); border-bottom:none; background:#DEE6EF; font-weight:800; color:var(--navy);
+    border-radius:4px 4px 0 0; margin-inline-end:4px; font-size:15.5px;}
+  .tab.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .tab .badge{display:inline-block; margin-inline-start:8px; background:var(--danger); color:#fff; border-radius:2px; font-size:12px; padding:1px 7px; font-weight:800;}
+  .tab.on .badge{background:var(--gold); color:var(--navy-deep);}
+
+  /* ============ דשבורד ============ */
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+  @media(max-width:680px){.stat-strip{grid-template-columns:1fr 1fr;}}
+  .stat{background:#fff; border:1px solid var(--line); border-top:5px solid var(--navy); border-radius:4px; padding:16px 18px;}
+  .stat .n{font-family:var(--display); font-size:46px; line-height:.95; color:var(--navy);}
+  .stat .l{color:var(--muted); font-size:14px; margin-top:7px; font-weight:700;}
+  .stat.gold{border-top-color:var(--gold);} .stat.gold .n{color:var(--gold-dp);}
+  .stat.red{border-top-color:var(--absent);} .stat.red .n{color:var(--absent);}
+  .stat.late{border-top-color:var(--late);} .stat.late .n{color:var(--late);}
+
+  /* ============ טופס הדוח ============ */
+  .formdoc{background:#fff; border:2.5px solid var(--navy); padding:0; margin-bottom:30px;}
+  .formhead{display:flex; align-items:stretch; border-bottom:2.5px solid var(--navy);}
+  .fh-side{padding:12px 16px; font-size:13px; font-weight:700; line-height:1.45; display:flex; flex-direction:column; justify-content:center; min-width:170px;}
+  .fh-right{border-inline-end:2px solid var(--navy); display:flex; flex-direction:row; align-items:center; gap:11px;}
+  .fh-right .crest{width:42px; height:42px;}
+  .fh-mid{flex:1 1 auto; text-align:center; padding:14px 10px; display:flex; flex-direction:column; justify-content:center;}
+  .fh-mid .t{font-family:var(--display); font-size:27px; line-height:1.1;}
+  .fh-mid .d{font-size:14px; font-weight:700; color:var(--muted); margin-top:5px;}
+  .fh-left{border-inline-start:2px solid var(--navy); text-align:center; gap:6px;}
+  .fh-left .stamp{display:inline-block; border-color:var(--navy); color:var(--navy);}
+  .rep{width:100%; border-collapse:collapse; font-size:14.5px;}
+  .rep th,.rep td{border:1.5px solid var(--navy); padding:8px 9px; text-align:center;}
+  .rep th{background:var(--navy); color:#fff; font-weight:800; font-size:14px;}
+  .rep td.names{text-align:right; width:23%; font-weight:700;}
+  .rep td.reason{text-align:right; width:29%;}
+  .rep .cls{font-family:var(--display); font-size:21px; background:#EDF1F6;}
+  .rep .num{font-weight:800; font-size:17px;}
+  .signrow{display:flex; gap:26px; padding:16px 18px; border-top:2.5px solid var(--navy); font-size:14px; font-weight:700; flex-wrap:wrap; color:var(--muted);}
+  .signrow span{flex:1 1 auto; min-width:170px;}
+  .signrow i{display:block; border-bottom:1.5px solid var(--navy); height:22px; margin-top:4px;}
+
+  .modal-bg{position:fixed; inset:0; background:rgba(4,20,42,.62); display:flex; align-items:center; justify-content:center; z-index:60; padding:22px;}
+  .modal{background:#fff; border-radius:5px; max-width:470px; width:100%; border-top:6px solid var(--gold); box-shadow:0 26px 60px rgba(4,20,42,.5);}
+  .modal .m-body{padding:26px;}
+  .modal h3{font-family:var(--display); font-size:24px; margin:0 0 12px;}
+  .modal .m-actions{display:flex; gap:10px; margin-top:22px;}
+  .modal .m-actions .btn{flex:1;}
+
+  .toast{position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:14px 20px; border-radius:4px;
+    box-shadow:0 14px 34px rgba(4,20,42,.42); z-index:80; font-weight:700; border-inline-start:5px solid var(--gold); max-width:340px;}
+  .toast.err{border-inline-start-color:var(--absent);}
+  .hidden{display:none !important;}
+  .center{text-align:center;} .muted{color:var(--muted); font-weight:600;}
+  .spinner{width:30px; height:30px; border:4px solid var(--line); border-top-color:var(--navy); border-radius:50%; animation:spin .8s linear infinite; margin:34px auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media print{
+    header.masthead, .docstrip, .toolbar, .no-print{display:none !important;}
+    body{background:#fff;} main{padding:0; max-width:none;}
+    .panel{border:none; box-shadow:none;} .panel > .body{padding:0;}
+    .formdoc{page-break-after:always; margin-bottom:0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ התחברות ============ -->
+<section id="login">
+  <div class="login-card fade">
+    <div class="top">
+      <div class="crest" id="crestLogin"></div>
+      <div class="unit">בית הספר הטכני לחניכי חיל האוויר</div>
+      <div class="sys">דו"ח אחד</div>
+      <div class="tag">מערכת דיווח נוכחות יומי</div>
+    </div>
+    <div class="form">
+      <label for="idInput">מספר אישי או תעודת זהות</label>
+      <input id="idInput" inputmode="numeric" autocomplete="off" placeholder="הזינו את המספר המזהה שלכם">
+      <button class="btn gold" id="loginBtn">כניסה למערכת</button>
+      <div class="hint">התלמידים מתחברים במספר האישי או בתעודת הזהות. המפקדים מתחברים במספר האישי.</div>
+      <div class="demo-note" id="demoNote">
+        <div class="lbl">תצוגת הדגמה. בחרו תפקיד כדי לסייר במערכת</div>
+        <div class="demo-grid">
+          <button class="btn ghost sm" data-demo="student">כניסה כתלמיד</button>
+          <button class="btn ghost sm" data-demo="makas">כניסה כמק"ס</button>
+          <button class="btn ghost sm" data-demo="head">כניסה כראש צוות</button>
+          <button class="btn ghost sm" data-demo="branch">כניסה כמפקדת שלוחה</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ אזור מחובר ============ -->
+<div id="portal" class="hidden">
+  <header class="masthead">
+    <div class="bar">
+      <div class="crest" id="crestBar"></div>
+      <div class="titles">
+        <div class="unit">בית הספר הטכני לחניכי חיל האוויר</div>
+        <div class="sys">דו"ח אחד</div>
+      </div>
+      <div class="whoami">
+        <b id="whoName"></b>
+        <span class="rl" id="whoRole"></span>
+        <div><button class="btn slim sm" id="logoutBtn">יציאה</button></div>
+      </div>
+    </div>
+  </header>
+  <div class="docstrip"><div class="in">
+    <div id="stripDate"></div>
+    <div id="stripScope"></div>
+    <div class="stamp">בלמ"ס</div>
+  </div></div>
+  <main id="view"></main>
+</div>
+
+<div id="modalHost"></div>
+
+<script>
+/* ============================================================
+   שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
+============================================================ */
+var LIVE = !!(window.google && google.script && google.script.run);
+
+function callServer(action){
+  var args = Array.prototype.slice.call(arguments, 1);
+  if(LIVE){
+    return new Promise(function(res, rej){
+      var runner = google.script.run
+        .withSuccessHandler(res)
+        .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
+      runner[action].apply(runner, args);
+    });
+  }
+  return new Promise(function(res, rej){
+    setTimeout(function(){ try{ res(DEMO[action].apply(null, args)); } catch(e){ rej(e); } }, 170);
+  });
+}
+
+var App = { token:null, profile:null, date:null };
+function todayStr(){ var d=new Date(), p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate()); }
+App.date = todayStr();
+
+var HE_DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+var HE_MONTHS=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+function niceDate(str){ var p=str.split('/'), d=new Date(+p[0],+p[1]-1,+p[2]);
+  return 'יום ' + HE_DAYS[d.getDay()] + ', ' + (+p[2]) + ' ב' + HE_MONTHS[+p[1]-1] + ' ' + p[0]; }
+function shortDate(str){ var p=str.split('/'); return (+p[2])+'.'+(+p[1])+'.'+p[0]; }
+
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function toast(msg,isErr){ var t=document.createElement('div'); t.className='toast'+(isErr?' err':''); t.textContent=msg;
+  document.body.appendChild(t); setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .4s';},2700);
+  setTimeout(function(){t.remove();},3200); }
+function spinner(){ return '<div class="spinner"></div>'; }
+function statusClass(s){ if(['נוכח','פעילות חוץ','טיול/סיור'].indexOf(s)>=0) return 'd-present';
+  if(s==='איחור') return 'd-late'; return 'd-absent'; }
+
+/* ============ סמל ============ */
+function crestSVG(){
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="סמל היחידה">'
+    +'<circle cx="50" cy="50" r="48" fill="#08213F"/>'
+    +'<circle cx="50" cy="50" r="45.5" fill="none" stroke="#C8A24B" stroke-width="3.2"/>'
+    +'<circle cx="50" cy="50" r="39" fill="none" stroke="#C8A24B" stroke-width="1" opacity=".55"/>'
+    +'<path d="M50 27 L12 51 Q29 48.5 34.5 55 Q42 49.5 50 51.5 Q58 49.5 65.5 55 Q71 48.5 88 51 Z" fill="#C8A24B"/>'
+    +'<path d="M50 55 L50 62" stroke="#C8A24B" stroke-width="3" stroke-linecap="round"/>'
+    +'<polygon points="50,58 53.1,66.4 62,66.4 54.8,71.6 57.5,80 50,74.8 42.5,80 45.2,71.6 38,66.4 46.9,66.4" fill="#EBD79B"/>'
+    +'</svg>';
+}
+el('crestLogin').innerHTML = crestSVG();
+el('crestBar').innerHTML = crestSVG();
+
+/* ============ התחברות ============ */
+el('loginBtn').addEventListener('click', doLogin);
+el('idInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+if(LIVE) el('demoNote').classList.add('hidden');
+document.querySelectorAll('[data-demo]').forEach(function(b){
+  b.addEventListener('click', function(){ demoLogin(b.getAttribute('data-demo')); });
+});
+
+function doLogin(){
+  var id = el('idInput').value.trim();
+  if(!id){ toast('יש להזין מספר מזהה', true); return; }
+  el('loginBtn').disabled=true; el('loginBtn').textContent='מתחבר';
+  callServer('login', id).then(function(r){
+    el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת';
+    if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
+    App.token=r.token; App.profile=r.profile; enterPortal();
+  }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
+}
+function demoLogin(kind){ callServer('login','demo:'+kind).then(function(r){ App.token=r.token; App.profile=r.profile; enterPortal(); }); }
+
+function enterPortal(){
+  el('login').classList.add('hidden'); el('portal').classList.remove('hidden');
+  var p=App.profile;
+  el('whoName').textContent = p.name||'';
+  el('whoRole').textContent = p.kind==='student' ? ('כיתה '+p.cls) : (p.role + (p.rank?(' | '+p.rank):''));
+  el('stripDate').innerHTML = 'מסדר בוקר <b>'+niceDate(App.date)+'</b>';
+  el('stripScope').innerHTML = p.kind==='student' ? 'דיווח אישי'
+    : ('היקף אחריות <b>'+(p.canSeeAll ? 'כלל השלוחה' : ('כיתות '+p.classes.join(', ')))+'</b>');
+  route();
+}
+el('logoutBtn').addEventListener('click', function(){
+  App.token=null; App.profile=null;
+  el('portal').classList.add('hidden'); el('login').classList.remove('hidden'); el('idInput').value='';
+});
+
+function route(){ return App.profile.kind==='student' ? renderStudent() : renderCommander(); }
+
+/* ============ מסך תלמיד ============ */
+var draft={status:null, reason:''};
+function renderStudent(){
+  el('view').innerHTML = spinner();
+  callServer('studentGetDay', App.token, App.date).then(function(d){
+    draft.status = d.report ? d.report.status : null;
+    draft.reason = d.report ? d.report.reason : '';
+    var locked = d.locked;
+    var bd = d.birthdays && d.birthdays.length
+      ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
+    var stateBanner='';
+    if(locked){
+      stateBanner = '<div class="banner lock">הדיווח שלך '+(d.report.approval==='שונה'?'עודכן על ידי המפקד':'אושר על ידי המפקד')+'. לא ניתן לשנות אותו.</div>';
+    } else if(d.report){
+      stateBanner = '<div class="banner warn">הדיווח נשלח וממתין לאישור המפקד. ניתן עדיין לעדכן אותו.</div>';
+    }
+    var cells = d.statuses.map(function(s){
+      return '<div class="statuscell'+(draft.status===s?' on':'')+'" data-s="'+esc(s)+'"><span class="dot '+statusClass(s)+'"></span>'+esc(s)+'</div>';
+    }).join('');
+
+    el('view').innerHTML = '<div class="fade">'+bd+stateBanner
+      + '<div class="panel"><div class="head"><h2>הדיווח היומי שלי</h2>'
+      +   '<span class="sub">שעת דיווח נוכחות אחרונה <b>'+esc(d.cutoff)+'</b></span></div>'
+      + '<div class="body">'
+      +   (d.afterCutoff && !d.report ? '<div class="banner warn">חלף מועד דיווח הנוכחות. לדיווח נוכחות יש לפנות למפקד. ניתן לדווח סטטוס אחר.</div>' : '')
+      +   '<div class="statusgrid" id="statusGrid">'+cells+'</div>'
+      +   '<div id="reasonWrap" class="'+(draft.status && draft.status!=='נוכח'?'':'hidden')+'" style="margin-top:20px">'
+      +     '<label for="reasonInp">פירוט הסיבה</label>'
+      +     '<textarea id="reasonInp" rows="2" placeholder="למשל: ביקור רופא, פעילות במסגרת אחרת">'+esc(draft.reason)+'</textarea>'
+      +   '</div>'
+      + '</div>'
+      + (locked ? '' : '<div class="foot"><button class="btn gold" id="submitBtn">שליחת הדיווח</button></div>')
+      + '</div></div>';
+
+    if(!locked){
+      document.querySelectorAll('#statusGrid .statuscell').forEach(function(c){
+        c.addEventListener('click', function(){
+          draft.status = c.getAttribute('data-s');
+          document.querySelectorAll('#statusGrid .statuscell').forEach(function(x){x.classList.remove('on');});
+          c.classList.add('on');
+          el('reasonWrap').classList.toggle('hidden', draft.status==='נוכח');
+        });
+      });
+      el('submitBtn').addEventListener('click', function(){
+        var reason = el('reasonInp') ? el('reasonInp').value.trim() : '';
+        if(!draft.status){ toast('יש לבחור סטטוס', true); return; }
+        if(draft.status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+        el('submitBtn').disabled=true;
+        callServer('studentSubmit', App.token, App.date, draft.status, reason)
+          .then(function(){ toast('הדיווח נשלח'); renderStudent(); })
+          .catch(function(e){ el('submitBtn').disabled=false; toast(e.message,true); });
+      });
+    }
+  }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+
+/* ============ מסך מפקד ============ */
+var cmdState={data:null, active:0};
+function renderCommander(){
+  el('view').innerHTML = spinner();
+  callServer('commanderGetClasses', App.token, App.date).then(function(d){
+    cmdState.data=d;
+    var p=App.profile;
+    var bar = p.canGenerate
+      ? '<div class="toolbar"><button class="btn gold" id="genBtn">הפקת דוח להיום</button>'
+        + (p.canSeeAll ? '<button class="btn ghost" id="dashBtn">מבט שלוחה</button>' : '') + '</div>'
+      : '';
+    if(!d.classes.length){
+      el('view').innerHTML='<div class="fade">'+bar+'<div class="panel"><div class="body muted">לא משויכות אליך כיתות לצפייה.</div></div></div>';
+      bindCmdTop(); return;
+    }
+    if(cmdState.active>=d.classes.length) cmdState.active=0;
+    var tabs = d.classes.map(function(c,i){
+      return '<button class="tab'+(i===cmdState.active?' on':'')+'" data-i="'+i+'">'+esc(c.cls)
+        + (c.pending>0?'<span class="badge">'+c.pending+'</span>':'') + '</button>';
+    }).join('');
+    el('view').innerHTML='<div class="fade">'+bar+'<div class="classtabs">'+tabs+'</div><div id="classPane"></div></div>';
+    bindCmdTop();
+    document.querySelectorAll('.classtabs .tab').forEach(function(t){
+      t.addEventListener('click', function(){ cmdState.active=+t.getAttribute('data-i'); renderCommander(); });
+    });
+    renderClassPane();
+  }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+function bindCmdTop(){
+  if(el('genBtn')) el('genBtn').addEventListener('click', openGenerate);
+  if(el('dashBtn')) el('dashBtn').addEventListener('click', renderDashboard);
+}
+
+function renderClassPane(){
+  var c=cmdState.data.classes[cmdState.active], statuses=cmdState.data.statuses, ok=c.canApprove;
+  var rows = c.students.map(function(s,i){
+    var candle = s.birthday ? '<span class="candle" title="יום הולדת">🕯️</span>' : '';
+    var apCls = s.approval==='אושר'?'ap-ok':(s.approval==='שונה'?'ap-changed':(s.approval==='ממתין'?'ap-pending':'ap-none'));
+    var sel = '<select class="sel-sm stat-sel" data-id="'+esc(s.id)+'" '+(ok?'':'disabled')+'>'
+      + statuses.map(function(o){ return '<option '+(o===s.status?'selected':'')+'>'+esc(o)+'</option>'; }).join('') + '</select>';
+    var reason = '<input class="reason-inp reason-cell" data-id="'+esc(s.id)+'" value="'+esc(s.reason)+'" placeholder="סיבה" '+(ok?'':'disabled')+'>';
+    var actions = ok
+      ? '<div class="rowactions">'+(s.noReport?'':'<button class="btn slim sm act-approve" data-id="'+esc(s.id)+'">אישור</button>')
+        + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">קביעה</button></div>'
+      : '<span class="muted">צפייה בלבד</span>';
+    return '<tr class="'+(s.noReport?'norep':'')+'">'
+      + '<td><span class="idx">'+(i+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
+      + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
+      + '<td><span class="approval '+apCls+'">'+esc(s.noReport?'לא דיווח':s.approval)+'</span></td>'
+      + '<td>'+actions+'</td></tr>';
+  }).join('');
+
+  var cutoffCtl = ok
+    ? '<div style="display:flex;align-items:center;gap:9px"><span class="sub">שעת נוכחות אחרונה</span>'
+      +'<input id="cutoffInp" type="time" value="'+esc(c.cutoff)+'" style="width:auto;padding:8px 10px;border-width:1.5px">'
+      +'<button class="btn slim sm" id="cutoffBtn">שמירה</button></div>'
+    : '<span class="sub">שעת נוכחות אחרונה <b>'+esc(c.cutoff)+'</b></span>';
+
+  el('classPane').innerHTML =
+    '<div class="panel"><div class="head"><h2>כיתה '+esc(c.cls)+'</h2>'+cutoffCtl+'</div>'
+    + '<div class="body" style="padding:0;overflow-x:auto"><table class="roster"><thead><tr>'
+    + '<th>שם החניך</th><th>סטטוס</th><th>סיבה</th><th>אישור</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    + (ok ? '<div class="foot"><button class="btn" id="approveAll">אישור כל הדיווחים בכיתה</button></div>' : '')
+    + '</div>';
+
+  if(ok){
+    document.querySelectorAll('.act-approve').forEach(function(b){ b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'),'approve'); }); });
+    document.querySelectorAll('.act-save').forEach(function(b){ b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'),'set'); }); });
+    el('approveAll').addEventListener('click', function(){
+      callServer('commanderApproveClass', App.token, App.date, c.cls).then(function(r){
+        if(r.missing && r.missing.length) toast('אושר. עדיין לא דיווחו: '+r.missing.join(', '), true);
+        else toast('כל הדיווחים אושרו');
+        renderCommander();
+      }).catch(function(e){ toast(e.message,true); });
+    });
+    el('cutoffBtn').addEventListener('click', function(){
+      callServer('setCutoff', App.token, c.cls, el('cutoffInp').value)
+        .then(function(){ toast('שעת הנוכחות עודכנה'); }).catch(function(e){ toast(e.message,true); });
+    });
+  }
+}
+
+function cmdAction(id, mode){
+  var sel=document.querySelector('.stat-sel[data-id="'+id+'"]');
+  var rin=document.querySelector('.reason-cell[data-id="'+id+'"]');
+  var status=sel?sel.value:'נוכח', reason=rin?rin.value.trim():'';
+  if(mode==='set' && status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+  callServer('commanderSetStatus', App.token, App.date, id, status, reason, mode==='approve'?'approve':'set')
+    .then(function(){ toast(mode==='approve'?'הדיווח אושר':'הסטטוס נקבע'); renderCommander(); })
+    .catch(function(e){ toast(e.message,true); });
+}
+
+/* ============ מבט שלוחה ============ */
+function renderDashboard(){ el('view').innerHTML=spinner();
+  callServer('branchOverview', App.token, App.date).then(function(d){
+    var totM=0,totP=0,totA=0,totL=0;
+    d.classes.forEach(function(c){ totM+=c.matzevet; totP+=c.present; totA+=c.absent; totL+=c.late; });
+    var rows = d.classes.map(function(c){
+      var st = c.complete ? '<span class="approval ap-ok">הושלם</span>' : '<span class="approval ap-pending">'+c.pending+' ממתינים</span>';
+      var nr = c.noReport>0 ? ' <span class="approval ap-none">'+c.noReport+' לא דיווחו</span>' : '';
+      return '<tr><td class="name">'+esc(c.cls)+'</td><td>'+c.matzevet+'</td><td>'+c.present+'</td><td>'+c.late+'</td><td>'+c.absent+'</td><td>'+st+nr+'</td></tr>';
+    }).join('');
+    el('view').innerHTML='<div class="fade">'
+      + '<div class="toolbar"><button class="btn ghost" id="backCmd">חזרה לכיתות</button>'
+      + (App.profile.canGenerate?'<button class="btn gold" id="genBtn2">הפקת דוח להיום</button>':'')+'</div>'
+      + '<div class="stat-strip">'
+      +   '<div class="stat gold"><div class="n">'+totM+'</div><div class="l">מצבת חניכים</div></div>'
+      +   '<div class="stat"><div class="n">'+totP+'</div><div class="l">נוכחים</div></div>'
+      +   '<div class="stat late"><div class="n">'+totL+'</div><div class="l">מאחרים</div></div>'
+      +   '<div class="stat red"><div class="n">'+totA+'</div><div class="l">נעדרים</div></div>'
+      + '</div>'
+      + '<div class="panel"><div class="head"><h2>מבט שלוחה לפי כיתה</h2>'
+      + '<span class="sub">'+(d.allComplete?'כל הכיתות אישרו':'טרם הושלם אישור בכל הכיתות')+'</span></div>'
+      + '<div class="body" style="padding:0;overflow-x:auto"><table class="roster"><thead><tr>'
+      + '<th>כיתה</th><th>מצבת</th><th>נוכחים</th><th>מאחרים</th><th>נעדרים</th><th>סטטוס אישור</th>'
+      + '</tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
+    el('backCmd').addEventListener('click', renderCommander);
+    if(el('genBtn2')) el('genBtn2').addEventListener('click', openGenerate);
+  }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+
+/* ============ הפקת דוח ============ */
+function openGenerate(){ runGenerate(false); }
+function runGenerate(force){
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body center">'+spinner()+'<div class="muted">מכין את הדוח</div></div></div></div>';
+  callServer('generateReport', App.token, App.date, force).then(function(r){
+    if(r.needConfirm){
+      host.innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body"><h3>אישור הפקה</h3><p>'+esc(r.message)+'</p>'
+        +'<div class="m-actions"><button class="btn gold" id="mYes">הפקה עם הנתונים הנוכחיים</button>'
+        +'<button class="btn ghost" id="mNo">ביטול</button></div></div></div></div>';
+      el('mYes').addEventListener('click', function(){ runGenerate(true); });
+      el('mNo').addEventListener('click', closeModal);
+      return;
+    }
+    showReport(r);
+  }).catch(function(e){ closeModal(); toast(e.message,true); });
+}
+
+function showReport(r){
+  closeModal();
+  el('view').innerHTML='<div class="fade">'
+    + '<div class="toolbar no-print"><button class="btn ghost" id="backFromRep">חזרה</button>'
+    + (r.pdf?'<button class="btn gold" id="dlPdf">הורדת PDF</button>':'')
+    + (r.xlsx?'<button class="btn" id="dlXlsx">הורדת Excel</button>':'')
+    + '<button class="btn ghost" id="printRep">הדפסה</button></div>'
+    + reportDoc(r.preview,'absent') + reportDoc(r.preview,'late') + '</div>';
+  el('backFromRep').addEventListener('click', route);
+  el('printRep').addEventListener('click', function(){ window.print(); });
+  if(el('dlPdf')) el('dlPdf').addEventListener('click', function(){ download(r.pdf); });
+  if(el('dlXlsx')) el('dlXlsx').addEventListener('click', function(){ download(r.xlsx); });
+}
+
+function reportDoc(data, kind){
+  var title = kind==='absent' ? 'דוח נעדרים יומי' : 'דוח מאחרים יומי';
+  var namesH = kind==='absent' ? 'שמות נעדרים' : 'שמות מאחרים';
+  var reasonH = kind==='absent' ? 'סיבת ההיעדרות' : 'סיבת האיחור';
+  var cntH = kind==='absent' ? 'נעדרים' : 'מאחרים';
+  var rows='';
+  data.blocks.forEach(function(b){
+    var list = kind==='absent'?b.absentList:b.lateList;
+    var cnt  = kind==='absent'?b.absentCount:b.lateCount;
+    var n = Math.max(6, list.length);
+    for(var i=0;i<n;i++){
+      var it=list[i]; rows+='<tr>';
+      if(i===0){
+        rows+='<td class="cls" rowspan="'+n+'">'+esc(b.cls)+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+b.matzevet+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+b.presentCount+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+cnt+'</td>';
+      }
+      rows+='<td class="names">'+(i+1)+'. '+(it?esc(it.name):'')+'</td>'
+          + '<td class="reason">'+(it?esc(it.reason):'')+'</td>'
+          + '<td>'+(it?it.days:'')+'</td></tr>';
+    }
+  });
+  return '<div class="formdoc">'
+    + '<div class="formhead">'
+    +   '<div class="fh-side fh-right"><div class="crest">'+crestSVG()+'</div>'
+    +     '<div>בית הספר הטכני<br>לחניכי חיל האוויר<br>שלוחת אשקלון</div></div>'
+    +   '<div class="fh-mid"><div class="t">'+title+'</div><div class="d">'+niceDate(data.date)+'</div></div>'
+    +   '<div class="fh-side fh-left"><div class="stamp">בלמ"ס</div>'
+    +     '<div style="margin-top:7px;color:var(--muted)">תאריך '+shortDate(data.date)+'</div></div>'
+    + '</div>'
+    + '<div style="overflow-x:auto"><table class="rep"><thead><tr>'
+    +   '<th>כיתה</th><th>מצבת חניכים</th><th>חניכים נוכחים</th><th>'+cntH+'</th>'
+    +   '<th>'+namesH+'</th><th>'+reasonH+'</th><th>סה"כ ימים</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    + '<div class="signrow"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>'
+    + '</div>';
+}
+
+function download(file){
+  var mime = /\.pdf$/.test(file.name) ? 'application/pdf'
+    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  var a=document.createElement('a'); a.href='data:'+mime+';base64,'+file.data; a.download=file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function closeModal(){ el('modalHost').innerHTML=''; }
+
+/* ============================================================
+   נתוני הדגמה. פועלים רק כשאין שרת.
+============================================================ */
+var DEMO = (function(){
+  var CLASSES=['ט3','ט5','י2','י5','יא2','יב2','יג','יד'];
+  var STATUSES=['נוכח','איחור','נעדר','פעילות חוץ','טיול/סיור','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
+  var PRESENT=['נוכח','פעילות חוץ','טיול/סיור'], LATE=['איחור'];
+  var ABSENT=['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
+  function tdy(){ return App.date; }
+  var first=['איתי','נועה','דניאל','שירה','יונתן','מאיה','עומר','תמר','אריאל','רון','ליאור','גל','אורי','הדס','אלון','נטע'];
+  var last=['כהן','לוי','מזרחי','פרץ','ביטון','אברהם','דהן','אזולאי','חדד','גבאי'];
+  var students=[], sid=1000;
+  function birthdayToday(){ var p=tdy().split('/'); return '2008/'+p[1]+'/'+p[2]; }
+  CLASSES.forEach(function(cls){
+    var count=8+(cls.length%3);
+    for(var i=0;i<count;i++){ sid++;
+      students.push({id:String(sid), first:first[sid%first.length], lastn:last[sid%last.length], cls:cls,
+        birth:(i===1?birthdayToday():'2008/05/14')});
+    }
+  });
+  function nm(s){ return s.first+' '+s.lastn; }
+  var reports={}; function key(d,id){ return d+'|'+id; }
+  (function seed(){
+    var d=tdy();
+    students.forEach(function(s,idx){
+      var r=idx%7, st='נוכח', reason='', ap='ממתין';
+      if(r===0){ st='איחור'; reason='פקק בכביש הגישה'; ap='אושר'; }
+      else if(r===1){ st='מחלה'; reason='מחלה עם אישור הורים'; ap='אושר'; }
+      else if(r===2){ st='נעדר'; reason='היעדרות מתואמת'; ap='שונה'; }
+      else if(r===3){ st='פעילות חוץ'; reason='נציג בטקס חטיבתי'; ap='אושר'; }
+      else if(r===4){ return; }
+      else { ap='אושר'; }
+      reports[key(d,s.id)]={date:d,id:s.id,cls:s.cls,status:st,reason:reason,reportedAt:'07:'+(10+idx%40),approval:ap};
+    });
+  })();
+  var cutoffs={}; CLASSES.forEach(function(c){ cutoffs[c]='08:00'; });
+  function roster(cls){ return students.filter(function(s){return s.cls===cls;}); }
+  function isBd(s){ var b=s.birth.split('/'), t=tdy().split('/'); return b[1]===t[1]&&b[2]===t[2]; }
+  var current=null;
+  var PROFILES={
+    student:function(){ var s=students[0]; return {kind:'student',id:s.id,name:nm(s),cls:s.cls}; },
+    makas:function(){ return {kind:'commander',id:'d1',name:'שילב חן',rank:'סמל',role:'מק"ס',classes:['יא2'],canGenerate:false,canSeeAll:false,canEditAny:false}; },
+    head:function(){ return {kind:'commander',id:'d2',name:'יוחאי אליהו',rank:'סמל',role:'ראש צוות',classes:['י2','י5'],canGenerate:true,canSeeAll:true,canEditAny:false}; },
+    branch:function(){ return {kind:'commander',id:'d3',name:'יסמין',rank:'סרן',role:'מפקד שלוחה',classes:[],canGenerate:true,canSeeAll:true,canEditAny:true}; }
+  };
+  function scope(p){ return p.canSeeAll?CLASSES.slice():p.classes.slice(); }
+  function approveScope(p){ return p.role==='מפקד שלוחה'?CLASSES.slice():p.classes.slice(); }
+  function overview(d){
+    var rows=CLASSES.map(function(cls){
+      var r=roster(cls), m=r.length, present=0,late=0,absent=0,noRep=0,pending=0;
+      r.forEach(function(s){ var rep=reports[key(d,s.id)], eff=rep?rep.status:'לא דיווח';
+        if(eff==='לא דיווח'){noRep++;absent++;} else if(LATE.indexOf(eff)>=0){late++;present++;}
+        else if(ABSENT.indexOf(eff)>=0){absent++;} else {present++;}
+        if(!rep||rep.approval==='ממתין') pending++;
+      });
+      return {cls:cls,matzevet:m,present:present,late:late,absent:absent,noReport:noRep,pending:pending,complete:pending===0};
+    });
+    return {date:d,classes:rows,allComplete:rows.every(function(x){return x.complete;})};
+  }
+  function weekDays(id,cat){ var base=(parseInt(id,10)||0)%3; return cat==='late'?(base?base:1):(base+1); }
+  return {
+    login:function(arg){ var kind=String(arg).indexOf('demo:')===0?String(arg).slice(5):'student';
+      current=(PROFILES[kind]||PROFILES.student)(); return {ok:true,token:'demo',profile:current}; },
+    studentGetDay:function(t,d){ var s=students[0], rep=reports[key(d,s.id)]||null;
+      var mates=roster(s.cls).filter(function(m){return isBd(m)&&m.id!==s.id;}).map(nm);
+      return {date:d,cls:s.cls,statuses:STATUSES,presentStatuses:PRESENT,cutoff:cutoffs[s.cls],now:'07:45',
+        afterCutoff:false,report:rep,locked:!!(rep&&(rep.approval==='אושר'||rep.approval==='שונה')),birthdays:mates}; },
+    studentSubmit:function(t,d,st,reason){ var s=students[0];
+      reports[key(d,s.id)]={date:d,id:s.id,cls:s.cls,status:st,reason:reason,reportedAt:'07:50',approval:'ממתין'}; return {ok:true}; },
+    commanderGetClasses:function(t,d){ var p=current, view=scope(p), app=approveScope(p);
+      return {date:d,statuses:STATUSES,profile:p,classes:view.map(function(cls){
+        var st=roster(cls).map(function(s){ var rep=reports[key(d,s.id)]||null;
+          return {id:s.id,name:nm(s),status:rep?rep.status:'לא דיווח',reason:rep?rep.reason:'',
+            approval:rep?rep.approval:'לא דיווח',reportedAt:rep?rep.reportedAt:'',birthday:isBd(s),noReport:!rep}; });
+        var pending=st.filter(function(x){return x.approval==='ממתין'||x.noReport;}).length;
+        return {cls:cls,canApprove:app.indexOf(cls)>=0,cutoff:cutoffs[cls],students:st,pending:pending,complete:pending===0};
+      })}; },
+    commanderSetStatus:function(t,d,id,st,reason,mode){
+      var s=students.filter(function(x){return x.id===id;})[0]; if(!s) throw new Error('לא נמצא');
+      var rep=reports[key(d,id)];
+      if(mode==='approve'){ if(!rep) throw new Error('אין דיווח לאשר'); rep.approval='אושר'; rep.approver=current.name; }
+      else { reports[key(d,id)]={date:d,id:id,cls:s.cls,status:st,reason:reason,reportedAt:rep?rep.reportedAt:'',approval:'שונה',approver:current.name}; }
+      return {ok:true}; },
+    commanderApproveClass:function(t,d,cls){ var missing=[];
+      roster(cls).forEach(function(s){ var rep=reports[key(d,s.id)];
+        if(!rep){ missing.push(nm(s)); return; } if(rep.approval==='ממתין') rep.approval='אושר'; });
+      return {ok:true,missing:missing}; },
+    setCutoff:function(t,cls,time){ cutoffs[cls]=time; return {ok:true}; },
+    branchOverview:function(t,d){ return overview(d); },
+    generateReport:function(t,d,force){
+      var ov=overview(d);
+      if(!ov.allComplete && !force) return {needConfirm:true,message:'היום לא כל המפקדים אישרו דיווח נוכחות. האם להפיק דוח עם הנתונים הנוכחיים?'};
+      var blocks=CLASSES.map(function(cls){
+        var r=roster(cls), m=r.length, absentList=[], lateList=[], ac=0;
+        r.forEach(function(s){ var rep=reports[key(d,s.id)], eff=rep?rep.status:'לא דיווח', reason=rep?rep.reason:'';
+          if(LATE.indexOf(eff)>=0) lateList.push({name:nm(s),reason:reason,days:weekDays(s.id,'late')});
+          else if(ABSENT.indexOf(eff)>=0){ ac++; absentList.push({name:nm(s),reason:reason,days:weekDays(s.id,'absent')}); }
+          else if(eff==='לא דיווח'){ ac++; absentList.push({name:nm(s),reason:'לא דיווח',days:weekDays(s.id,'absent')}); }
+        });
+        return {cls:cls,matzevet:m,presentCount:m-ac,absentCount:ac,lateCount:lateList.length,absentList:absentList,lateList:lateList};
+      });
+      return {ok:true,preview:{date:d,blocks:blocks},pdf:null,xlsx:null};
+    }
+  };
+})();
+</script>
+</body>
+</html>

@@ -258,7 +258,8 @@
 var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
 
 var LIVE   = !!(window.google && google.script && google.script.run);
-var REMOTE = !LIVE && !!WEB_APP_URL;
+var LOCALF = (location.protocol === 'file:');
+var REMOTE = !LIVE && !LOCALF && !!WEB_APP_URL;
 
 function callServer(action){
   var args = Array.prototype.slice.call(arguments, 1);
@@ -280,6 +281,9 @@ function callServer(action){
     }).then(function(r){ return r.json(); }).then(function(j){
       if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
       return j.data;
+    }).catch(function(e){
+      if(e instanceof TypeError) throw new Error('אין חיבור לסקריפט. יש להיכנס דרך כתובת האתר של הפריסה');
+      throw e;
     });
   }
 

@@ -466,15 +466,9 @@ function renderCommander(){
       bindCmdTop(); return;
     }
     if(cmdState.active>=d.classes.length) cmdState.active=0;
-    var tabs = d.classes.map(function(c,i){
-      return '<button class="tab'+(i===cmdState.active?' on':'')+'" data-i="'+i+'">'+esc(c.cls)
-        + (c.pending>0?'<span class="badge">('+c.pending+')</span>':'') + '</button>';
-    }).join('');
-    el('view').innerHTML='<div class="fade">'+bar+'<div class="classtabs">'+tabs+'</div><div id="classPane"></div></div>';
+    el('view').innerHTML='<div class="fade">'+bar+'<div class="classtabs"></div><div id="classPane"></div></div>';
     bindCmdTop();
-    document.querySelectorAll('.classtabs .tab').forEach(function(t){
-      t.addEventListener('click', function(){ cmdState.active=+t.getAttribute('data-i'); renderCommander(); });
-    });
+    renderTabs();
     renderClassPane();
   }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
 }
@@ -483,9 +477,30 @@ function bindCmdTop(){
   if(el('dashBtn')) el('dashBtn').addEventListener('click', renderDashboard);
 }
 
+var filterText = '';
+
+function classSummary(c){
+  var parts = [
+    ['מצבת', c.matzevet, ''],
+    ['נוכחים', c.present, ''],
+    ['מאחרים', c.late, ''],
+    ['נעדרים', c.absent, '']
+  ];
+  if(c.noReport > 0) parts.push(['לא דיווחו', c.noReport, 'color:var(--absent)']);
+  return '<span style="display:inline-flex;gap:20px;flex-wrap:wrap">'
+    + parts.map(function(p){
+        return '<span style="'+p[2]+'">'+p[0]+' <b>'+p[1]+'</b></span>';
+      }).join('') + '</span>';
+}
+
 function renderClassPane(){
-  var c=cmdState.data.classes[cmdState.active], statuses=cmdState.data.statuses, ok=c.canApprove;
-  var rows = c.students.map(function(s,i){
+  var c = cmdState.data.classes[cmdState.active], statuses = cmdState.data.statuses, ok = c.canApprove;
+
+  var visible = c.students.filter(function(s){
+    return !filterText || s.name.indexOf(filterText) >= 0;
+  });
+
+  var rows = visible.map(function(s){
     var candle = s.birthday ? '<span class="candle" title="יום הולדת">🕯️</span>' : '';
     var apCls = s.noReport ? 'ap-none'
       : (s.approval==='אושר' ? 'ap-ok' : (s.approval==='שונה' ? 'ap-changed' : 'ap-pending'));
@@ -494,43 +509,98 @@ function renderClassPane(){
     var reason = '<input class="reason-inp reason-cell" data-id="'+esc(s.id)+'" value="'+esc(s.reason)+'" placeholder="סיבה" '+(ok?'':'disabled')+'>';
     var actions = ok
       ? '<div class="rowactions">'+(s.noReport?'':'<button class="btn slim sm act-approve" data-id="'+esc(s.id)+'">אישור</button>')
-        + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">קביעה</button></div>'
+        + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">שמירה</button></div>'
       : '<span class="muted">צפייה בלבד</span>';
     return '<tr class="'+(s.noReport?'norep':'')+'">'
-      + '<td><span class="idx">'+(i+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
+      + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
       + '<td><span class="approval '+apCls+'">'+esc(s.noReport?'לא דיווח':s.approval)+'</span></td>'
       + '<td>'+actions+'</td></tr>';
   }).join('');
 
+  if(!rows) rows = '<tr><td colspan="5" class="muted center" style="padding:34px">לא נמצא שוחר בשם הזה</td></tr>';
+
   var cutoffCtl = ok
     ? '<div style="display:flex;align-items:center;gap:9px"><span class="sub">שעת נוכחות אחרונה</span>'
-      +'<input id="cutoffInp" type="time" value="'+esc(c.cutoff)+'" style="width:auto;padding:8px 10px;border-width:1.5px">'
+      +'<input id="cutoffInp" type="time" value="'+esc(c.cutoff)+'" style="width:auto;padding:7px 10px">'
       +'<button class="btn slim sm" id="cutoffBtn">שמירה</button></div>'
     : '<span class="sub">שעת נוכחות אחרונה <b>'+esc(c.cutoff)+'</b></span>';
 
   el('classPane').innerHTML =
-    '<div class="panel"><div class="head"><h2>כיתה '+esc(c.cls)+'</h2>'+cutoffCtl+'</div>'
+    '<div class="panel"><div class="head">'
+    + '<div><h2>כיתה '+esc(c.cls)+'</h2><div class="sub" style="margin-top:6px">'+classSummary(c)+'</div></div>'
+    + cutoffCtl + '</div>'
+    + '<div class="body" style="padding:16px 24px;border-bottom:1px solid var(--line-2)">'
+    + '<input id="searchInp" placeholder="חיפוש שוחר בשם" value="'+esc(filterText)+'" style="max-width:320px">'
+    + '</div>'
     + '<div class="body" style="padding:0;overflow-x:auto"><table class="roster"><thead><tr>'
     + '<th>שם החניך</th><th>סטטוס</th><th>סיבה</th><th>אישור</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
     + (ok ? '<div class="foot"><button class="btn" id="approveAll">אישור כל הדיווחים בכיתה</button></div>' : '')
     + '</div>';
 
+  var si = el('searchInp');
+  si.addEventListener('input', function(){
+    filterText = si.value.trim();
+    var pos = si.selectionStart;
+    renderClassPane();
+    var ns = el('searchInp'); ns.focus(); ns.setSelectionRange(pos, pos);
+  });
+
   if(ok){
-    document.querySelectorAll('.act-approve').forEach(function(b){ b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'),'approve'); }); });
-    document.querySelectorAll('.act-save').forEach(function(b){ b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'),'set'); }); });
+    document.querySelectorAll('.act-approve').forEach(function(b){
+      b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'), 'approve'); });
+    });
+    document.querySelectorAll('.act-save').forEach(function(b){
+      b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'), 'set'); });
+    });
     el('approveAll').addEventListener('click', function(){
+      var btn = el('approveAll'); btn.disabled = true; btn.textContent = 'מאשר';
       callServer('commanderApproveClass', App.token, App.date, c.cls).then(function(r){
+        c.students.forEach(function(s){ if(!s.noReport && s.approval==='ממתין') s.approval='אושר'; });
+        recount(c);
         if(r.missing && r.missing.length) toast('אושר. עדיין לא דיווחו: '+r.missing.join(', '), true);
         else toast('כל הדיווחים אושרו');
-        renderCommander();
-      }).catch(function(e){ toast(e.message,true); });
+        renderTabs(); renderClassPane();
+      }).catch(function(e){ btn.disabled=false; btn.textContent='אישור כל הדיווחים בכיתה'; toast(e.message, true); });
     });
     el('cutoffBtn').addEventListener('click', function(){
       callServer('setCutoff', App.token, c.cls, el('cutoffInp').value)
-        .then(function(){ toast('שעת הנוכחות עודכנה'); }).catch(function(e){ toast(e.message,true); });
+        .then(function(){ c.cutoff = el('cutoffInp').value; toast('שעת הנוכחות עודכנה'); })
+        .catch(function(e){ toast(e.message, true); });
     });
   }
+}
+
+/* מעדכן את המונים בלי לפנות לשרת מחדש */
+function recount(c){
+  var late=0, absent=0, noRep=0, pending=0;
+  var LATE=['איחור'];
+  var ABS=['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
+  c.students.forEach(function(s){
+    if(s.noReport){ noRep++; absent++; }
+    else if(LATE.indexOf(s.status)>=0) late++;
+    else if(ABS.indexOf(s.status)>=0) absent++;
+    if(s.noReport || s.approval==='ממתין') pending++;
+  });
+  c.late=late; c.absent=absent; c.noReport=noRep; c.pending=pending;
+  c.matzevet=c.students.length; c.present=c.students.length-absent;
+  c.complete = pending===0;
+}
+
+function renderTabs(){
+  var tabs = cmdState.data.classes.map(function(c,i){
+    return '<button class="tab'+(i===cmdState.active?' on':'')+'" data-i="'+i+'">'+esc(c.cls)
+      + (c.pending>0?'<span class="badge">('+c.pending+')</span>':'') + '</button>';
+  }).join('');
+  var host = document.querySelector('.classtabs');
+  if(!host) return;
+  host.innerHTML = tabs;
+  host.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      cmdState.active = +t.getAttribute('data-i'); filterText='';
+      renderTabs(); renderClassPane();
+    });
+  });
 }
 
 function cmdAction(id, mode){
@@ -538,8 +608,20 @@ function cmdAction(id, mode){
   var rin=document.querySelector('.reason-cell[data-id="'+id+'"]');
   var status=sel?sel.value:'נוכח', reason=rin?rin.value.trim():'';
   if(mode==='set' && status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+
+  var c = cmdState.data.classes[cmdState.active];
+  var st = c.students.filter(function(x){ return x.id===id; })[0];
+
   callServer('commanderSetStatus', App.token, App.date, id, status, reason, mode==='approve'?'approve':'set')
-    .then(function(){ toast(mode==='approve'?'הדיווח אושר':'הסטטוס נקבע'); renderCommander(); })
+    .then(function(){
+      if(st){
+        if(mode!=='approve'){ st.status=status; st.reason=reason; st.approval='שונה'; st.noReport=false; }
+        else { st.approval='אושר'; }
+        recount(c);
+      }
+      toast(mode==='approve'?'הדיווח אושר':'הסטטוס נשמר');
+      renderTabs(); renderClassPane();
+    })
     .catch(function(e){ toast(e.message,true); });
 }
 

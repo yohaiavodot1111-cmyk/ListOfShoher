@@ -90,6 +90,38 @@
   .login-card .form{padding:28px;}
   .login-card .btn{width:100%; margin-top:18px; padding:14px; font-size:16px;}
 
+  /* ============ מסך השוחר ============ */
+  .todaycard{background:#fff; border:1px solid var(--line); border-radius:3px; padding:26px 24px; margin-bottom:22px;}
+  .todaycard .day{font-family:var(--display); font-size:24px; color:var(--navy); line-height:1.25;}
+  .todaycard .sub{color:var(--muted); font-size:14px; margin-top:6px;}
+  .statusnow{display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:18px; border-top:1px solid var(--line-2);}
+  .statusnow .lbl{color:var(--muted); font-size:14px;}
+  .statusnow .val{font-family:var(--display); font-size:22px;}
+  .statusnow .state{font-size:13.5px; color:var(--muted); margin-inline-start:auto;}
+
+  .quick{display:block; width:100%; padding:22px; font-size:20px; font-weight:800;
+    background:var(--present); color:#fff; border:none; border-radius:3px; margin-bottom:14px;}
+  .quick:hover{background:#235B40;}
+  .quick .s{display:block; font-size:13.5px; font-weight:500; opacity:.85; margin-top:4px;}
+
+  .grouplbl{font-size:13px; color:var(--muted); font-weight:700; margin:22px 0 10px;}
+  .grouplbl:first-child{margin-top:0;}
+  .stgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .stopt{border:1px solid var(--line); border-radius:3px; padding:18px 16px; background:#fff;
+    font-size:17px; font-weight:600; text-align:right; display:flex; align-items:center; gap:11px; width:100%;}
+  .stopt:hover{border-color:var(--slate);}
+  .stopt.on{border-color:var(--navy); background:var(--navy); color:#fff;}
+  .stopt .dot{margin:0;}
+  @media(max-width:560px){ .stgrid{grid-template-columns:1fr;} .stopt{padding:20px 16px; font-size:18px;} }
+
+  .submitbar{position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line);
+    padding:16px 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .submitbar .btn{flex:1 1 220px; padding:16px; font-size:17px;}
+  .submitbar .note{color:var(--muted); font-size:13px;}
+
+  .saving{opacity:.55;}
+  .rowsaving td{background:#F4F7FB !important;}
+
   /* ============ סטטוסים ============ */
   .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   @media(max-width:600px){.statusgrid{grid-template-columns:1fr 1fr;}}
@@ -308,7 +340,7 @@ function callServer(action){
   return Promise.reject(new Error('אין חיבור לשרת'));
 }
 
-var App = { token:null, profile:null, date:null };
+var App = { token:null, profile:null, date:null, initial:null };
 function todayStr(){ var d=new Date(), p=function(n){return (n<10?'0':'')+n;}; return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate()); }
 App.date = todayStr();
 
@@ -373,7 +405,7 @@ function doLogin(){
   callServer('login', id).then(function(r){
     el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת';
     if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
-    App.token=r.token; App.profile=r.profile; enterPortal();
+    App.token=r.token; App.profile=r.profile; App.initial=r.initial||null; enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
 
@@ -385,76 +417,149 @@ function enterPortal(){
   el('stripDate').innerHTML = 'מסדר בוקר <b>'+niceDate(App.date)+'</b>';
   el('stripScope').innerHTML = p.kind==='student' ? 'דיווח אישי'
     : ('היקף אחריות <b>'+(p.canSeeAll ? 'כלל השלוחה' : ('כיתות '+p.classes.join(', ')))+'</b>');
-  route();
+  route(true);
 }
 el('logoutBtn').addEventListener('click', function(){
   App.token=null; App.profile=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden'); el('idInput').value='';
 });
 
-function route(){ return App.profile.kind==='student' ? renderStudent() : renderCommander(); }
+function route(fromCache){
+  return App.profile.kind==='student' ? renderStudent(fromCache) : renderCommander(fromCache);
+}
 
-/* ============ מסך תלמיד ============ */
-var draft={status:null, reason:''};
-function renderStudent(){
+/* ============ מסך השוחר ============ */
+var GROUPS = [
+  { label:'נוכחות', items:['נוכח','פעילות חוץ','טיול/סיור'] },
+  { label:'איחור',  items:['איחור'] },
+  { label:'היעדרות', items:['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'] }
+];
+
+var stu = { day:null, status:null, reason:'' };
+
+function renderStudent(fromCache){
+  if(fromCache && App.initial){ paintStudent(App.initial); App.initial = null; return; }
   el('view').innerHTML = spinner();
-  callServer('studentGetDay', App.token, App.date).then(function(d){
-    draft.status = d.report ? d.report.status : null;
-    draft.reason = d.report ? d.report.reason : '';
-    var locked = d.locked;
-    var bd = d.birthdays && d.birthdays.length
-      ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
-    var stateBanner='';
-    if(locked){
-      stateBanner = '<div class="banner lock">הדיווח שלך '+(d.report.approval==='שונה'?'עודכן על ידי המפקד':'אושר על ידי המפקד')+'. לא ניתן לשנות אותו.</div>';
-    } else if(d.report){
-      stateBanner = '<div class="banner warn">הדיווח נשלח וממתין לאישור המפקד. ניתן עדיין לעדכן אותו.</div>';
-    }
-    var cells = d.statuses.map(function(s){
-      return '<div class="statuscell'+(draft.status===s?' on':'')+'" data-s="'+esc(s)+'"><span class="dot '+statusClass(s)+'"></span>'+esc(s)+'</div>';
+  callServer('studentGetDay', App.token, App.date)
+    .then(paintStudent)
+    .catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+
+function paintStudent(d){
+  stu.day = d;
+  stu.status = d.report ? d.report.status : null;
+  stu.reason = d.report ? d.report.reason : '';
+  drawStudent();
+}
+
+function drawStudent(){
+  var d = stu.day;
+  var locked = d.locked;
+  var reported = !!d.report;
+
+  var stateTxt = !reported ? 'טרם דיווחת היום'
+    : (locked ? (d.report.approval==='שונה' ? 'עודכן על ידי המפקד' : 'אושר על ידי המפקד')
+              : 'נשלח וממתין לאישור');
+
+  var head = '<div class="todaycard">'
+    + '<div class="day">'+niceDate(App.date)+'</div>'
+    + '<div class="sub" style="display:flex;gap:18px;flex-wrap:wrap">'
+    +   '<span>כיתה <b>'+esc(d.cls)+'</b></span>'
+    +   '<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span></div>'
+    + '<div class="statusnow"><span class="lbl">הסטטוס שלי היום</span>'
+    +   '<span class="val">'+(stu.status ? esc(stu.status) : 'לא דווח')+'</span>'
+    +   '<span class="state">'+esc(stateTxt)+'</span></div></div>';
+
+  var bd = (d.birthdays && d.birthdays.length)
+    ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
+
+  if(locked){
+    el('view').innerHTML = '<div class="fade">'+bd+head
+      + '<div class="banner lock">הדיווח שלך '+esc(stateTxt)+'. לא ניתן לשנות אותו. לשינוי יש לפנות למפקד.</div></div>';
+    return;
+  }
+
+  // כפתור ראשי למקרה הנפוץ
+  var canQuick = !d.afterCutoff && stu.status !== 'נוכח';
+  var quick = canQuick
+    ? '<button class="quick" id="quickBtn">אני נוכח היום<span class="s">דיווח מהיר בלחיצה אחת</span></button>' : '';
+
+  var groups = GROUPS.map(function(g){
+    var opts = g.items.filter(function(x){ return d.statuses.indexOf(x) >= 0; }).map(function(x){
+      return '<button class="stopt'+(stu.status===x?' on':'')+'" data-s="'+esc(x)+'">'
+        + '<span class="dot '+statusClass(x)+'"></span>'+esc(x)+'</button>';
     }).join('');
+    return '<div class="grouplbl">'+g.label+'</div><div class="stgrid">'+opts+'</div>';
+  }).join('');
 
-    el('view').innerHTML = '<div class="fade">'+bd+stateBanner
-      + '<div class="panel"><div class="head"><h2>הדיווח היומי שלי</h2>'
-      +   '<span class="sub">שעת דיווח נוכחות אחרונה <b>'+esc(d.cutoff)+'</b></span></div>'
-      + '<div class="body">'
-      +   (d.afterCutoff && !d.report ? '<div class="banner warn">חלף מועד דיווח הנוכחות. לדיווח נוכחות יש לפנות למפקד. ניתן לדווח סטטוס אחר.</div>' : '')
-      +   '<div class="statusgrid" id="statusGrid">'+cells+'</div>'
-      +   '<div id="reasonWrap" class="'+(draft.status && draft.status!=='נוכח'?'':'hidden')+'" style="margin-top:20px">'
-      +     '<label for="reasonInp">פירוט הסיבה</label>'
-      +     '<textarea id="reasonInp" rows="2" placeholder="למשל: ביקור רופא, פעילות במסגרת אחרת">'+esc(draft.reason)+'</textarea>'
-      +   '</div>'
-      + '</div>'
-      + (locked ? '' : '<div class="foot"><button class="btn gold" id="submitBtn">שליחת הדיווח</button></div>')
-      + '</div></div>';
+  var needReason = stu.status && stu.status !== 'נוכח';
 
-    if(!locked){
-      document.querySelectorAll('#statusGrid .statuscell').forEach(function(c){
-        c.addEventListener('click', function(){
-          draft.status = c.getAttribute('data-s');
-          document.querySelectorAll('#statusGrid .statuscell').forEach(function(x){x.classList.remove('on');});
-          c.classList.add('on');
-          el('reasonWrap').classList.toggle('hidden', draft.status==='נוכח');
-        });
-      });
-      el('submitBtn').addEventListener('click', function(){
-        var reason = el('reasonInp') ? el('reasonInp').value.trim() : '';
-        if(!draft.status){ toast('יש לבחור סטטוס', true); return; }
-        if(draft.status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
-        el('submitBtn').disabled=true;
-        callServer('studentSubmit', App.token, App.date, draft.status, reason)
-          .then(function(){ toast('הדיווח נשלח'); renderStudent(); })
-          .catch(function(e){ el('submitBtn').disabled=false; toast(e.message,true); });
-      });
-    }
-  }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+  el('view').innerHTML = '<div class="fade">'+bd+head
+    + (d.afterCutoff && !reported
+        ? '<div class="banner warn">חלף מועד דיווח הנוכחות. אפשר לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')
+    + quick
+    + '<div class="panel"><div class="head"><h2>בחירת סטטוס</h2></div>'
+    + '<div class="body" id="stBody">'+groups
+    +   '<div id="reasonWrap" class="'+(needReason?'':'hidden')+'" style="margin-top:24px">'
+    +     '<label for="reasonInp">פירוט הסיבה</label>'
+    +     '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, פעילות במסגרת אחרת">'+esc(stu.reason)+'</textarea>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="submitbar"><button class="btn gold" id="submitBtn">'+(reported?'עדכון הדיווח':'שליחת הדיווח')+'</button>'
+    +   '<span class="note" id="saveNote"></span></div>'
+    + '</div></div>';
+
+  if(el('quickBtn')) el('quickBtn').addEventListener('click', function(){ send('נוכח',''); });
+
+  document.querySelectorAll('#stBody .stopt').forEach(function(bt){
+    bt.addEventListener('click', function(){
+      stu.status = bt.getAttribute('data-s');
+      document.querySelectorAll('#stBody .stopt').forEach(function(x){ x.classList.remove('on'); });
+      bt.classList.add('on');
+      el('reasonWrap').classList.toggle('hidden', stu.status === 'נוכח');
+      document.querySelector('.statusnow .val').textContent = stu.status;
+      if(stu.status !== 'נוכח' && el('reasonInp')) el('reasonInp').focus();
+    });
+  });
+
+  el('submitBtn').addEventListener('click', function(){
+    var reason = el('reasonInp') ? el('reasonInp').value.trim() : '';
+    if(!stu.status){ toast('יש לבחור סטטוס', true); return; }
+    if(stu.status !== 'נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+    send(stu.status, reason);
+  });
+}
+
+/* שולח את הדיווח ומראה את התוצאה מיד, בעוד השמירה רצה ברקע */
+function send(status, reason){
+  var before = { status: stu.status, reason: stu.reason, report: stu.day.report };
+
+  stu.status = status; stu.reason = reason;
+  stu.day.report = { status:status, reason:reason, approval:'ממתין' };
+  drawStudent();
+  if(el('saveNote')) el('saveNote').textContent = 'שומר';
+
+  callServer('studentSubmit', App.token, App.date, status, reason).then(function(){
+    if(el('saveNote')) el('saveNote').textContent = 'נשמר';
+    toast('הדיווח נשלח');
+  }).catch(function(e){
+    stu.status = before.status; stu.reason = before.reason; stu.day.report = before.report;
+    drawStudent();
+    toast(e.message, true);
+  });
 }
 
 /* ============ מסך מפקד ============ */
 var cmdState={data:null, active:0};
-function renderCommander(){
+function renderCommander(fromCache){
+  if(fromCache && App.initial){ var c0 = App.initial; App.initial = null; return paintCommander(c0); }
   el('view').innerHTML = spinner();
-  callServer('commanderGetClasses', App.token, App.date).then(function(d){
+  callServer('commanderGetClasses', App.token, App.date).then(paintCommander)
+    .catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+
+function paintCommander(d){
+  (function(){
     cmdState.data=d;
     var p=App.profile;
     var bar = p.canGenerate
@@ -470,7 +575,7 @@ function renderCommander(){
     bindCmdTop();
     renderTabs();
     renderClassPane();
-  }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+  })();
 }
 function bindCmdTop(){
   if(el('genBtn')) el('genBtn').addEventListener('click', openGenerate);
@@ -511,10 +616,10 @@ function renderClassPane(){
       ? '<div class="rowactions">'+(s.noReport?'':'<button class="btn slim sm act-approve" data-id="'+esc(s.id)+'">אישור</button>')
         + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">שמירה</button></div>'
       : '<span class="muted">צפייה בלבד</span>';
-    return '<tr class="'+(s.noReport?'norep':'')+'">'
+    return '<tr class="'+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'">'
       + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
-      + '<td><span class="approval '+apCls+'">'+esc(s.noReport?'לא דיווח':s.approval)+'</span></td>'
+      + '<td><span class="approval '+apCls+'">'+esc(s.saving ? 'שומר' : (s.noReport?'לא דיווח':s.approval))+'</span></td>'
       + '<td>'+actions+'</td></tr>';
   }).join('');
 
@@ -554,19 +659,24 @@ function renderClassPane(){
       b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'), 'set'); });
     });
     el('approveAll').addEventListener('click', function(){
-      var btn = el('approveAll'); btn.disabled = true; btn.textContent = 'מאשר';
+      var snapshot = c.students.map(function(s){ return s.approval; });
+      c.students.forEach(function(s){ if(!s.noReport && s.approval==='ממתין') s.approval='אושר'; });
+      recount(c); renderTabs(); renderClassPane();
+
       callServer('commanderApproveClass', App.token, App.date, c.cls).then(function(r){
-        c.students.forEach(function(s){ if(!s.noReport && s.approval==='ממתין') s.approval='אושר'; });
-        recount(c);
         if(r.missing && r.missing.length) toast('אושר. עדיין לא דיווחו: '+r.missing.join(', '), true);
         else toast('כל הדיווחים אושרו');
-        renderTabs(); renderClassPane();
-      }).catch(function(e){ btn.disabled=false; btn.textContent='אישור כל הדיווחים בכיתה'; toast(e.message, true); });
+      }).catch(function(e){
+        c.students.forEach(function(s,i){ s.approval = snapshot[i]; });
+        recount(c); renderTabs(); renderClassPane();
+        toast(e.message, true);
+      });
     });
     el('cutoffBtn').addEventListener('click', function(){
-      callServer('setCutoff', App.token, c.cls, el('cutoffInp').value)
-        .then(function(){ c.cutoff = el('cutoffInp').value; toast('שעת הנוכחות עודכנה'); })
-        .catch(function(e){ toast(e.message, true); });
+      var prev = c.cutoff, next = el('cutoffInp').value;
+      c.cutoff = next; toast('שעת הנוכחות עודכנה');
+      callServer('setCutoff', App.token, c.cls, next)
+        .catch(function(e){ c.cutoff = prev; renderClassPane(); toast(e.message, true); });
     });
   }
 }
@@ -603,6 +713,7 @@ function renderTabs(){
   });
 }
 
+/* מעדכן את המסך מיד, ומאמת מול השרת ברקע */
 function cmdAction(id, mode){
   var sel=document.querySelector('.stat-sel[data-id="'+id+'"]');
   var rin=document.querySelector('.reason-cell[data-id="'+id+'"]');
@@ -611,18 +722,22 @@ function cmdAction(id, mode){
 
   var c = cmdState.data.classes[cmdState.active];
   var st = c.students.filter(function(x){ return x.id===id; })[0];
+  if(!st) return;
+
+  var before = { status:st.status, reason:st.reason, approval:st.approval, noReport:st.noReport };
+
+  if(mode!=='approve'){ st.status=status; st.reason=reason; st.approval='שונה'; st.noReport=false; }
+  else { st.approval='אושר'; }
+  st.saving = true;
+  recount(c); renderTabs(); renderClassPane();
 
   callServer('commanderSetStatus', App.token, App.date, id, status, reason, mode==='approve'?'approve':'set')
-    .then(function(){
-      if(st){
-        if(mode!=='approve'){ st.status=status; st.reason=reason; st.approval='שונה'; st.noReport=false; }
-        else { st.approval='אושר'; }
-        recount(c);
-      }
-      toast(mode==='approve'?'הדיווח אושר':'הסטטוס נשמר');
-      renderTabs(); renderClassPane();
-    })
-    .catch(function(e){ toast(e.message,true); });
+    .then(function(){ st.saving=false; renderClassPane(); })
+    .catch(function(e){
+      st.status=before.status; st.reason=before.reason; st.approval=before.approval; st.noReport=before.noReport;
+      st.saving=false; recount(c); renderTabs(); renderClassPane();
+      toast(e.message, true);
+    });
 }
 
 /* ============ מבט שלוחה ============ */

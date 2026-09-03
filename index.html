@@ -252,10 +252,17 @@
 /* ============================================================
    שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
 ============================================================ */
-var LIVE = !!(window.google && google.script && google.script.run);
+/* כתובת אפליקציית האינטרנט של הסקריפט.
+   נחוצה רק אם מארחים את הקובץ הזה מחוץ לגוגל.
+   כשהקובץ מודבק בתוך אפס סקריפט הוא מתעלם ממנה ומדבר עם הסקריפט ישירות. */
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
+
+var LIVE   = !!(window.google && google.script && google.script.run);
+var REMOTE = !LIVE && !!WEB_APP_URL;
 
 function callServer(action){
   var args = Array.prototype.slice.call(arguments, 1);
+
   if(LIVE){
     return new Promise(function(res, rej){
       var runner = google.script.run
@@ -264,6 +271,18 @@ function callServer(action){
       runner[action].apply(runner, args);
     });
   }
+
+  if(REMOTE){
+    return fetch(WEB_APP_URL, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({action:action, args:args})
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
+      return j.data;
+    });
+  }
+
   return new Promise(function(res, rej){
     setTimeout(function(){ try{ res(DEMO[action].apply(null, args)); } catch(e){ rej(e); } }, 170);
   });
@@ -305,7 +324,7 @@ el('crestBar').innerHTML = crestSVG();
 /* ============ התחברות ============ */
 el('loginBtn').addEventListener('click', doLogin);
 el('idInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-if(LIVE) el('demoNote').classList.add('hidden');
+if(LIVE || REMOTE) el('demoNote').classList.add('hidden');
 document.querySelectorAll('[data-demo]').forEach(function(b){
   b.addEventListener('click', function(){ demoLogin(b.getAttribute('data-demo')); });
 });

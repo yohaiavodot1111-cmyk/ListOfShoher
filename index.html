@@ -6,16 +6,16 @@
 <title>דו"ח אחד</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;800;900&family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0A2340; --navy-deep:#061729; --slate:#33506F;
-    --gold:#B08D3F; --gold-lt:#D9C283;
-    --paper:#F7F8FA; --card:#FFFFFF; --ink:#1B2A3D; --muted:#6C7A8C;
-    --line:#DFE4EB; --line-2:#EDF0F4;
+    --navy:#0B2545; --navy-deep:#071829; --slate:#2E4A6B;
+    --gold:#A6863F; --gold-lt:#C9AC6B;
+    --paper:#F2F5F8; --card:#FFFFFF; --ink:#16283D; --muted:#63748A;
+    --line:#D8DEE6; --line-2:#EBEFF4;
     --present:#2A6B4C; --late:#94701F; --absent:#9E3232;
-    --display:'Suez One', serif;
-    --sans:'Heebo', sans-serif;
+    --display:'Frank Ruhl Libre', serif;
+    --sans:'Assistant', sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0; padding:0;}
@@ -24,28 +24,28 @@
 
   /* ============ כותרת ============ */
   header.masthead{background:var(--navy); color:#fff; border-bottom:2px solid var(--gold);}
-  .masthead .bar{max-width:1060px; margin:0 auto; padding:20px 28px; display:flex; align-items:center; gap:18px;}
+  .masthead .bar{max-width:1180px; margin:0 auto; padding:20px 28px; display:flex; align-items:center; gap:18px;}
   .crest{width:50px; height:50px; flex:0 0 auto;}
   .titles{flex:1 1 auto; min-width:0;}
   .titles .unit{font-size:12.5px; color:#9FB2C8; letter-spacing:.03em;}
-  .titles .sys{font-family:var(--display); font-size:27px; line-height:1.15; margin-top:3px;}
+  .titles .sys{font-family:var(--display); font-weight:900; font-size:29px; line-height:1.1; margin-top:2px; letter-spacing:-.01em;}
   .whoami{text-align:left; font-size:12.5px; color:#9FB2C8; flex:0 0 auto;}
   .whoami b{display:block; color:#fff; font-size:15px; font-weight:700;}
   .whoami button{margin-top:8px;}
 
   .docstrip{background:#fff; border-bottom:1px solid var(--line);}
-  .docstrip .in{max-width:1060px; margin:0 auto; padding:12px 28px; display:flex; align-items:center;
+  .docstrip .in{max-width:1180px; margin:0 auto; padding:12px 28px; display:flex; align-items:center;
     justify-content:space-between; gap:14px; flex-wrap:wrap; font-size:13.5px; color:var(--muted);}
   .docstrip b{color:var(--ink); font-weight:700;}
 
-  main{max-width:1060px; margin:0 auto; padding:34px 28px 90px;}
+  main{max-width:1180px; margin:0 auto; padding:32px 28px 90px;}
 
   /* ============ פאנלים ============ */
   .panel{background:var(--card); border:1px solid var(--line); border-radius:3px; overflow:hidden;}
   .panel + .panel{margin-top:26px;}
   .panel > .head{padding:20px 24px 18px; border-bottom:1px solid var(--line);
     display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-  .panel > .head h2{font-family:var(--display); font-size:21px; margin:0; line-height:1.2;}
+  .panel > .head h2{font-family:var(--display); font-weight:800; font-size:23px; margin:0; line-height:1.2;}
   .panel > .head .sub{color:var(--muted); font-size:13.5px;}
   .panel > .head .sub b{color:var(--ink);}
   .panel > .body{padding:24px;}
@@ -78,25 +78,49 @@
   input:focus,select:focus,textarea:focus{border-color:var(--slate);}
   input::placeholder{color:#A3AEBC;}
 
-  /* ============ התחברות ============ */
-  #login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--navy);}
-  .login-card{width:100%; max-width:420px; background:var(--card); border-radius:3px; overflow:hidden;
-    box-shadow:0 24px 60px rgba(6,23,41,.45);}
-  .login-card .top{text-align:center; padding:38px 28px 26px; border-bottom:1px solid var(--line);}
-  .login-card .top .crest{width:66px; height:66px; margin:0 auto 16px;}
-  .login-card .top .unit{color:var(--muted); font-size:13px;}
-  .login-card .top .sys{font-family:var(--display); font-size:34px; line-height:1.1; margin-top:4px; color:var(--navy);}
-  .login-card .top .tag{font-size:13px; color:var(--muted); margin-top:6px;}
-  .login-card .form{padding:28px;}
-  .login-card .btn{width:100%; margin-top:18px; padding:14px; font-size:16px;}
+  /* ============ התחברות, מסך מלא ============ */
+  #login{min-height:100vh; display:grid; grid-template-columns:1.15fr 1fr;}
+  .login-brand{
+    background:
+      linear-gradient(180deg, rgba(11,37,69,.0) 0%, rgba(7,24,41,.55) 100%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 10px),
+      var(--navy);
+    color:#fff; padding:70px 72px; display:flex; flex-direction:column;
+    border-inline-start:3px solid var(--gold);
+  }
+  .login-brand .top{margin-top:auto;}
+  .login-brand .foot{margin-top:auto;}
+  .login-brand .top .crest{width:92px; height:92px; margin-bottom:30px;}
+  .login-brand .unit{font-size:15px; color:var(--gold-lt); font-weight:600; letter-spacing:.03em;}
+  .login-brand .sys{font-family:var(--display); font-weight:900; font-size:70px; line-height:1; margin:10px 0 0; letter-spacing:-.02em;}
+  .login-brand .rule{width:82px; height:3px; background:var(--gold); margin:26px 0;}
+  .login-brand .tag{font-size:17px; color:#C2D2E4; max-width:34ch; line-height:1.65;}
+  .login-brand .foot{font-size:13px; color:#7D93AC; line-height:1.7;}
+
+  .login-side{background:var(--card); display:flex; align-items:center; justify-content:center; padding:60px 48px;}
+  .login-side .inner{width:100%; max-width:400px;}
+  .login-side h1{font-family:var(--display); font-weight:800; font-size:34px; margin:0 0 10px; color:var(--navy);}
+  .login-side .lead{color:var(--muted); font-size:15.5px; margin-bottom:34px; line-height:1.6;}
+  .login-side .btn{width:100%; margin-top:20px; padding:16px; font-size:17px;}
+
+  @media(max-width:900px){
+    #login{grid-template-columns:1fr; min-height:100vh;}
+    .login-brand{padding:44px 30px 38px; border-inline-start:none; border-bottom:3px solid var(--gold);}
+    .login-brand .top .crest{width:66px; height:66px; margin-bottom:20px;}
+    .login-brand .sys{font-size:46px;}
+    .login-brand .tag{font-size:15.5px;}
+    .login-brand .foot{display:none;}
+    .login-side{padding:38px 26px 60px; align-items:flex-start;}
+    .login-side h1{font-size:27px;}
+  }
 
   /* ============ מסך השוחר ============ */
   .todaycard{background:#fff; border:1px solid var(--line); border-radius:3px; padding:26px 24px; margin-bottom:22px;}
-  .todaycard .day{font-family:var(--display); font-size:24px; color:var(--navy); line-height:1.25;}
+  .todaycard .day{font-family:var(--display); font-weight:800; font-size:27px; color:var(--navy); line-height:1.2;}
   .todaycard .sub{color:var(--muted); font-size:14px; margin-top:6px;}
   .statusnow{display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:18px; border-top:1px solid var(--line-2);}
   .statusnow .lbl{color:var(--muted); font-size:14px;}
-  .statusnow .val{font-family:var(--display); font-size:22px;}
+  .statusnow .val{font-family:var(--display); font-weight:800; font-size:24px;}
   .statusnow .state{font-size:13.5px; color:var(--muted); margin-inline-start:auto;}
 
   .quick{display:block; width:100%; padding:22px; font-size:20px; font-weight:800;
@@ -168,7 +192,7 @@
     background:var(--line); border:1px solid var(--line);}
   @media(max-width:680px){.stat-strip{grid-template-columns:1fr 1fr;}}
   .stat{background:#fff; padding:20px 22px;}
-  .stat .n{font-family:var(--display); font-size:34px; line-height:1; color:var(--navy);}
+  .stat .n{font-family:var(--display); font-weight:900; font-size:38px; line-height:1; color:var(--navy);}
   .stat .l{color:var(--muted); font-size:13px; margin-top:8px;}
   .stat.red .n{color:var(--absent);} .stat.late .n{color:var(--late);} .stat.gold .n{color:var(--gold);}
 
@@ -180,7 +204,7 @@
   .fh-right{border-inline-end:1px solid var(--line); flex-direction:row; align-items:center; gap:12px;}
   .fh-right .crest{width:38px; height:38px;}
   .fh-mid{flex:1 1 auto; text-align:center; padding:18px 12px;}
-  .fh-mid .t{font-family:var(--display); font-size:23px; color:var(--navy);}
+  .fh-mid .t{font-family:var(--display); font-weight:800; font-size:25px; color:var(--navy);}
   .fh-mid .d{font-size:13px; color:var(--muted); margin-top:5px;}
   .fh-left{border-inline-start:1px solid var(--line); text-align:center;}
   .rep{width:100%; border-collapse:collapse; font-size:14px;}
@@ -188,7 +212,7 @@
   .rep th{background:#F2F4F7; color:var(--navy); font-weight:700; font-size:12.5px; border-color:var(--navy);}
   .rep td.names{text-align:right; width:23%;}
   .rep td.reason{text-align:right; width:29%; color:var(--muted);}
-  .rep .cls{font-family:var(--display); font-size:19px; color:var(--navy);}
+  .rep .cls{font-family:var(--display); font-weight:800; font-size:20px; color:var(--navy);}
   .rep .num{font-weight:700; font-size:16px;}
   .signrow{display:flex; gap:30px; padding:22px 20px; border-top:1px solid var(--navy);
     font-size:12.5px; color:var(--muted); flex-wrap:wrap;}
@@ -200,7 +224,7 @@
   .modal{background:#fff; border-radius:3px; max-width:440px; width:100%;
     box-shadow:0 24px 60px rgba(6,23,41,.45); border-top:3px solid var(--gold);}
   .modal .m-body{padding:26px;}
-  .modal h3{font-family:var(--display); font-size:21px; margin:0 0 12px;}
+  .modal h3{font-family:var(--display); font-weight:800; font-size:22px; margin:0 0 12px;}
   .modal .m-actions{display:flex; gap:10px; margin-top:24px;}
   .modal .m-actions .btn{flex:1;}
 
@@ -226,22 +250,29 @@
 
 <!-- ============ התחברות ============ -->
 <section id="login">
-  <div class="login-card fade">
+  <div class="login-brand">
     <div class="top">
       <div class="crest" id="crestLogin"></div>
       <div class="unit">בית הספר הטכני לחניכי חיל האוויר</div>
       <div class="sys">דו"ח אחד</div>
-      <div class="tag">מערכת דיווח נוכחות יומי</div>
+      <div class="rule"></div>
+      <div class="tag">מערכת דיווח הנוכחות היומי של השלוחה. השוחרים מדווחים, המפקדים מאשרים, והדוח היומי מופק במקום אחד.</div>
     </div>
-    <div class="form">
-      <label for="idInput">מספר אישי או תעודת זהות</label>
+    <div class="foot">השימוש במערכת מיועד לסגל ולשוחרי השלוחה בלבד.<br>אין להעביר את הקישור לגורם שאינו מורשה.</div>
+  </div>
+
+  <div class="login-side">
+    <div class="inner">
+      <h1>כניסה למערכת</h1>
+      <div class="lead">השוחרים מזדהים במספר האישי או בתעודת הזהות. המפקדים מזדהים במספר האישי.</div>
+
+      <label for="idInput">מספר מזהה</label>
       <input id="idInput" inputmode="numeric" autocomplete="off" placeholder="הזינו את המספר המזהה שלכם">
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
-      <div class="hint">התלמידים מתחברים במספר האישי או בתעודת הזהות. המפקדים מתחברים במספר האישי.</div>
-      <div class="banner warn hidden" id="offlineNote" style="margin:18px 0 0">
+
+      <div class="banner warn hidden" id="offlineNote" style="margin:22px 0 0">
         האתר אינו מצליח לפנות לסקריפט. יש לוודא שלושה דברים: שהכתובת בראש הקובץ היא זו שמסתיימת ב exec, שהפריסה עודכנה לגרסה חדשה, ושבפריסה נבחר Who has access עם הערך Anyone.
         <div id="offlineDetail" style="font-weight:500;font-size:13px;margin-top:8px;opacity:.85"></div>
-      </div>
       </div>
     </div>
   </div>

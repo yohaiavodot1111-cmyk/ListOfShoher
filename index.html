@@ -207,7 +207,7 @@
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
       <div class="hint">התלמידים מתחברים במספר האישי או בתעודת הזהות. המפקדים מתחברים במספר האישי.</div>
       <div class="banner warn hidden" id="offlineNote" style="margin:18px 0 0">
-        הדף אינו מחובר לשרת. יש לפתוח את המערכת דרך כתובת האתר שהתקבלה בפריסה, ולוודא שהפריסה עודכנה לגרסה חדשה.
+        האתר אינו מצליח לפנות לסקריפט. יש לוודא שלושה דברים: שהכתובת בראש הקובץ היא זו שמסתיימת ב exec, שהפריסה עודכנה לגרסה חדשה, ושבפריסה נבחר Who has access עם הערך Anyone.
         <div id="offlineDetail" style="font-weight:500;font-size:13px;margin-top:8px;opacity:.85"></div>
       </div>
       </div>
@@ -244,15 +244,22 @@
 /* ============================================================
    שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
 ============================================================ */
-/* הערכים האלה מוזרקים על ידי הסקריפט ברגע ההגשה. */
+/* =================================================================
+   הגדרה יחידה שצריך לגעת בה.
+   הדביקו כאן את כתובת אפליקציית האינטרנט של הסקריפט,
+   זו שמסתיימת ב exec, מתוך Deploy ואז Manage deployments.
+   אחרי כל פריסה מחדש ודאו שהכתובת עדיין נכונה.
+================================================================= */
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
+
+/* מוזרק על ידי הסקריפט כשהוא עצמו מגיש את הדף */
 var SERVED   = ('__SERVED__' === 'true');
 var EXEC_URL = '__EXEC_URL__';
 
-var MODE = 'pending';
+var MODE = 'pending';   // pending, live, remote, none
 
 function apiReady(){ return !!(window.google && google.script && google.script.run); }
 
-/* הגשר של גוגל מוזרק מעט אחרי הטעינה, ולכן ממתינים לו במקום להכריע מיד. */
 function waitForApi(ms){
   return new Promise(function(res){
     var t0 = Date.now();
@@ -264,15 +271,41 @@ function waitForApi(ms){
   });
 }
 
-function callServer(action){
-  var args = Array.prototype.slice.call(arguments, 1);
-  if(MODE !== 'live') return Promise.reject(new Error('אין חיבור לשרת'));
+function callLive(action, args){
   return new Promise(function(res, rej){
     var runner = google.script.run
       .withSuccessHandler(res)
       .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
     runner[action].apply(runner, args);
   });
+}
+
+function unwrap_(r){
+  return r.json().then(function(j){
+    if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
+    return j.data;
+  });
+}
+
+/* פנייה מאתר חיצוני. מנסה POST, ואם הדפדפן חוסם עובר ל GET. */
+function callRemote(action, args){
+  var body = JSON.stringify({ action:action, args:args });
+  return fetch(WEB_APP_URL, {
+    method:'POST', redirect:'follow',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: body
+  }).then(unwrap_).catch(function(){
+    var url = WEB_APP_URL + '?action=' + encodeURIComponent(action) +
+              '&args=' + encodeURIComponent(JSON.stringify(args));
+    return fetch(url, { method:'GET', redirect:'follow' }).then(unwrap_);
+  });
+}
+
+function callServer(action){
+  var args = Array.prototype.slice.call(arguments, 1);
+  if(MODE === 'live')   return callLive(action, args);
+  if(MODE === 'remote') return callRemote(action, args);
+  return Promise.reject(new Error('אין חיבור לשרת'));
 }
 
 var App = { token:null, profile:null, date:null };
@@ -311,9 +344,11 @@ el('crestLogin').innerHTML = crestSVG();
 el('loginBtn').disabled = true;
 el('loginBtn').textContent = 'בודק חיבור';
 
-waitForApi(SERVED ? 20000 : 4000).then(function(ok){
-  if(!ok) throw new Error(SERVED ? 'הגשר של גוגל לא נטען' : 'הדף אינו מוגש על ידי הסקריפט');
-  MODE = 'live';
+(SERVED ? waitForApi(20000) : Promise.resolve(false)).then(function(bridge){
+  if(bridge){ MODE = 'live'; return; }
+  if(!WEB_APP_URL || WEB_APP_URL.indexOf('http') !== 0) throw new Error('לא הוגדרה כתובת של אפליקציית האינטרנט בקובץ');
+  MODE = 'remote';
+}).then(function(){
   return callServer('ping');
 }).then(function(){
   el('loginBtn').disabled = false;
@@ -324,11 +359,7 @@ waitForApi(SERVED ? 20000 : 4000).then(function(ok){
   el('loginBtn').textContent = 'כניסה למערכת';
   el('idInput').disabled = true;
   el('offlineNote').classList.remove('hidden');
-  var link = (EXEC_URL && EXEC_URL.indexOf('http') === 0)
-    ? '<div style="margin-top:10px"><a href="' + EXEC_URL + '" style="color:inherit">פתיחת הכתובת הנכונה של המערכת</a></div>' : '';
-  el('offlineDetail').innerHTML =
-    'הדף שנפתח: ' + esc(location.href.split('?')[0]) +
-    '<br>פרטים: ' + esc(e && e.message ? e.message : 'לא ידוע') + link;
+  el('offlineDetail').innerHTML = 'פרטים: ' + esc(e && e.message ? e.message : 'לא ידוע');
 });
 
 /* ============ התחברות ============ */

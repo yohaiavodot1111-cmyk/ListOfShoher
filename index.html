@@ -342,7 +342,9 @@ waitForApi(5000).then(function(ok){
   el('loginBtn').textContent = 'כניסה למערכת';
   el('idInput').disabled = true;
   el('offlineNote').classList.remove('hidden');
-  el('offlineDetail').textContent = 'פרטי התקלה: ' + (e && e.message ? e.message : 'לא ידוע');
+  el('offlineDetail').textContent =
+    'כתובת הדף שנפתח: ' + location.href.split('?')[0] +
+    ' | פרטי התקלה: ' + (e && e.message ? e.message : 'לא ידוע');
 });
 el('crestBar').innerHTML = crestSVG();
 

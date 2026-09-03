@@ -209,7 +209,10 @@
       <input id="idInput" inputmode="numeric" autocomplete="off" placeholder="הזינו את המספר המזהה שלכם">
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
       <div class="hint">התלמידים מתחברים במספר האישי או בתעודת הזהות. המפקדים מתחברים במספר האישי.</div>
-      <div class="banner warn hidden" id="offlineNote" style="margin:18px 0 0">הדף אינו מחובר לשרת. יש לפתוח את המערכת דרך כתובת האתר שהתקבלה בפריסה.</div>
+      <div class="banner warn hidden" id="offlineNote" style="margin:18px 0 0">
+        הדף אינו מחובר לשרת. יש לפתוח את המערכת דרך כתובת האתר שהתקבלה בפריסה, ולוודא שהפריסה עודכנה לגרסה חדשה.
+        <div id="offlineDetail" style="font-weight:500;font-size:13px;margin-top:8px;opacity:.85"></div>
+      </div>
       </div>
     </div>
   </div>
@@ -245,19 +248,50 @@
 /* ============================================================
    שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
 ============================================================ */
-var LIVE = !!(window.google && google.script && google.script.run);
+/* כתובת אפליקציית האינטרנט. משמשת רק כגיבוי אם הגשר הפנימי של גוגל אינו זמין. */
+var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
 
-function callServer(action){
-  var args = Array.prototype.slice.call(arguments, 1);
-  if(!LIVE){
-    return Promise.reject(new Error('המערכת אינה מחוברת לשרת. יש להיכנס דרך כתובת האתר של הפריסה'));
-  }
+var MODE = 'pending';   // pending, live, remote, none
+
+function apiReady(){ return !!(window.google && google.script && google.script.run); }
+
+/* הגשר של גוגל מוזרק לדף מעט אחרי הטעינה, ולכן ממתינים לו במקום להכריע מיד. */
+function waitForApi(ms){
+  return new Promise(function(res){
+    var t0 = Date.now();
+    (function tick(){
+      if(apiReady()) return res(true);
+      if(Date.now() - t0 > ms) return res(false);
+      setTimeout(tick, 120);
+    })();
+  });
+}
+
+function callLive(action, args){
   return new Promise(function(res, rej){
     var runner = google.script.run
       .withSuccessHandler(res)
       .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
     runner[action].apply(runner, args);
   });
+}
+
+function callRemote(action, args){
+  return fetch(WEB_APP_URL, {
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action:action, args:args})
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
+    return j.data;
+  });
+}
+
+function callServer(action){
+  var args = Array.prototype.slice.call(arguments, 1);
+  if(MODE === 'live')   return callLive(action, args);
+  if(MODE === 'remote') return callRemote(action, args);
+  return Promise.reject(new Error('אין חיבור לשרת'));
 }
 
 var App = { token:null, profile:null, date:null };
@@ -291,11 +325,25 @@ function crestSVG(){
     +'</svg>';
 }
 el('crestLogin').innerHTML = crestSVG();
-if(!LIVE){
-  el('loginBtn').disabled = true;
+
+/* בדיקת חיבור אמיתית בטעינה. עד שהיא מסתיימת הכניסה נעולה. */
+el('loginBtn').disabled = true;
+el('loginBtn').textContent = 'בודק חיבור';
+
+waitForApi(5000).then(function(ok){
+  MODE = ok ? 'live' : (WEB_APP_URL ? 'remote' : 'none');
+  if(MODE === 'none') return Promise.reject(new Error('הדף אינו מוגש על ידי הסקריפט'));
+  return callServer('ping');
+}).then(function(){
+  el('loginBtn').disabled = false;
+  el('loginBtn').textContent = 'כניסה למערכת';
+  el('offlineNote').classList.add('hidden');
+}).catch(function(e){
+  el('loginBtn').textContent = 'כניסה למערכת';
   el('idInput').disabled = true;
   el('offlineNote').classList.remove('hidden');
-}
+  el('offlineDetail').textContent = 'פרטי התקלה: ' + (e && e.message ? e.message : 'לא ידוע');
+});
 el('crestBar').innerHTML = crestSVG();
 
 /* ============ התחברות ============ */

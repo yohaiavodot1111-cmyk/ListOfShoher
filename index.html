@@ -9,186 +9,183 @@
 <link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#08213F; --navy-deep:#04142A;
-    --steel:#153A63; --slate:#1E4470;
-    --gold:#C8A24B; --gold-lt:#EBD79B; --gold-dp:#9C7A2E;
-    --paper:#EDF1F6; --card:#FFFFFF; --ink:#0F2039; --muted:#5A6B80; --line:#C7D2DF;
-    --present:#1F6B46; --late:#A8721C; --absent:#A32B2B; --danger:#B3261E;
+    --navy:#0A2340; --navy-deep:#061729; --slate:#33506F;
+    --gold:#B08D3F; --gold-lt:#D9C283;
+    --paper:#F7F8FA; --card:#FFFFFF; --ink:#1B2A3D; --muted:#6C7A8C;
+    --line:#DFE4EB; --line-2:#EDF0F4;
+    --present:#2A6B4C; --late:#94701F; --absent:#9E3232;
     --display:'Suez One', serif;
     --sans:'Heebo', sans-serif;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{font-family:var(--sans); color:var(--ink); background:var(--paper); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased;}
-  @media (prefers-reduced-motion: no-preference){ .fade{animation:fade .35s ease both;} }
-  @keyframes fade{from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:none;}}
+  html,body{margin:0; padding:0;}
+  body{font-family:var(--sans); color:var(--ink); background:var(--paper);
+       font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
 
-  /* ============ כותרת מסמך ============ */
-  header.masthead{background:var(--navy); color:#fff; position:sticky; top:0; z-index:40;
-    box-shadow:0 2px 0 var(--gold), 0 3px 0 var(--navy-deep), 0 10px 24px rgba(4,20,42,.22);}
-  .masthead .bar{max-width:1180px; margin:0 auto; padding:15px 24px; display:flex; align-items:center; gap:18px;}
-  .crest{width:58px; height:58px; flex:0 0 auto;}
+  /* ============ כותרת ============ */
+  header.masthead{background:var(--navy); color:#fff; border-bottom:2px solid var(--gold);}
+  .masthead .bar{max-width:1060px; margin:0 auto; padding:20px 28px; display:flex; align-items:center; gap:18px;}
+  .crest{width:50px; height:50px; flex:0 0 auto;}
   .titles{flex:1 1 auto; min-width:0;}
-  .titles .unit{font-size:13px; font-weight:700; color:var(--gold-lt); letter-spacing:.04em;}
-  .titles .sys{font-family:var(--display); font-size:34px; line-height:1.05; margin-top:2px; letter-spacing:-.01em;}
-  .whoami{text-align:left; font-size:13px; color:#B9C8DA; flex:0 0 auto;}
-  .whoami b{display:block; color:#fff; font-size:16px; font-weight:800; font-family:var(--sans);}
-  .whoami .rl{color:var(--gold-lt); font-weight:700;}
-  .whoami button{margin-top:7px;}
+  .titles .unit{font-size:12.5px; color:#9FB2C8; letter-spacing:.03em;}
+  .titles .sys{font-family:var(--display); font-size:27px; line-height:1.15; margin-top:3px;}
+  .whoami{text-align:left; font-size:12.5px; color:#9FB2C8; flex:0 0 auto;}
+  .whoami b{display:block; color:#fff; font-size:15px; font-weight:700;}
+  .whoami button{margin-top:8px;}
 
-  .docstrip{background:var(--navy-deep); border-top:1px solid rgba(235,215,155,.22);}
-  .docstrip .in{max-width:1180px; margin:0 auto; padding:9px 24px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-    font-size:13.5px; color:#9FB3C9; font-weight:600;}
-  .docstrip b{color:#fff; font-weight:800;}
-  .stamp{border:1.5px solid var(--gold); color:var(--gold-lt); padding:2px 10px; border-radius:3px; font-size:12px; font-weight:800; letter-spacing:.06em;}
+  .docstrip{background:#fff; border-bottom:1px solid var(--line);}
+  .docstrip .in{max-width:1060px; margin:0 auto; padding:12px 28px; display:flex; align-items:center;
+    justify-content:space-between; gap:14px; flex-wrap:wrap; font-size:13.5px; color:var(--muted);}
+  .docstrip b{color:var(--ink); font-weight:700;}
 
-  main{max-width:1180px; margin:0 auto; padding:26px 24px 90px;}
+  main{max-width:1060px; margin:0 auto; padding:34px 28px 90px;}
 
   /* ============ פאנלים ============ */
-  .panel{background:var(--card); border:1px solid var(--line); border-radius:5px; overflow:hidden; box-shadow:0 1px 2px rgba(8,33,63,.07);}
-  .panel + .panel{margin-top:22px;}
-  .panel > .head{background:var(--navy); color:#fff; border-bottom:3px solid var(--gold);
-    padding:15px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-  .panel > .head h2{font-family:var(--display); font-size:24px; margin:0; line-height:1.1;}
-  .panel > .head .sub{color:var(--gold-lt); font-size:14px; font-weight:700;}
-  .panel > .head .sub b{color:#fff;}
-  .panel > .body{padding:22px;}
-  .panel > .foot{padding:16px 22px; border-top:1px solid var(--line); background:#F7F9FC;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:3px; overflow:hidden;}
+  .panel + .panel{margin-top:26px;}
+  .panel > .head{padding:20px 24px 18px; border-bottom:1px solid var(--line);
+    display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .panel > .head h2{font-family:var(--display); font-size:21px; margin:0; line-height:1.2;}
+  .panel > .head .sub{color:var(--muted); font-size:13.5px;}
+  .panel > .head .sub b{color:var(--ink);}
+  .panel > .body{padding:24px;}
+  .panel > .foot{padding:18px 24px; border-top:1px solid var(--line);}
 
   /* ============ כפתורים ============ */
-  button{font-family:var(--sans); cursor:pointer; border:none; border-radius:4px; font-size:15.5px; font-weight:800;}
-  .btn{padding:12px 22px; background:var(--navy); color:#fff; border:2px solid var(--navy); transition:.14s;}
+  button{font-family:var(--sans); cursor:pointer; border-radius:3px; font-size:15px; font-weight:700;
+    border:1px solid transparent; transition:.14s;}
+  .btn{padding:11px 22px; background:var(--navy); color:#fff; border-color:var(--navy);}
   .btn:hover{background:var(--slate); border-color:var(--slate);}
-  .btn.gold{background:var(--gold); border-color:var(--gold-dp); color:var(--navy-deep);}
-  .btn.gold:hover{background:var(--gold-lt); border-color:var(--gold);}
-  .btn.ghost{background:#fff; color:var(--navy); border:2px solid var(--line);}
+  .btn.gold{background:var(--gold); border-color:var(--gold); color:#fff;}
+  .btn.gold:hover{background:#9C7C34; border-color:#9C7C34;}
+  .btn.ghost{background:#fff; color:var(--navy); border-color:var(--line);}
   .btn.ghost:hover{border-color:var(--navy);}
-  .btn.sm{padding:8px 14px; font-size:13.5px; border-width:1.5px;}
-  .btn.slim{background:#E7EDF5; color:var(--navy); border-color:#D2DDEA;}
-  .btn.slim:hover{background:#D8E3F0;}
-  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  .btn.sm{padding:7px 14px; font-size:13px;}
+  .btn.slim{background:#fff; color:var(--slate); border-color:var(--line);}
+  .btn.slim:hover{border-color:var(--slate);}
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px;}
   button[disabled]{opacity:.45; cursor:not-allowed;}
-  .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px;}
+  .whoami .btn.slim{background:transparent; color:#9FB2C8; border-color:#33506F;}
+  .whoami .btn.slim:hover{color:#fff; border-color:#9FB2C8;}
+
+  /* ============ טפסים ============ */
+  label{display:block; font-weight:700; font-size:14px; margin-bottom:8px;}
+  .hint{color:var(--muted); font-size:13px; margin-top:12px; line-height:1.55;}
+  input,select,textarea{width:100%; font-family:var(--sans); font-size:16px; color:var(--ink);
+    padding:12px 14px; border:1px solid var(--line); border-radius:3px; background:#fff;}
+  input:focus,select:focus,textarea:focus{border-color:var(--slate);}
+  input::placeholder{color:#A3AEBC;}
 
   /* ============ התחברות ============ */
-  #login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
-    background:
-      repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 9px),
-      radial-gradient(900px 480px at 78% -12%, rgba(200,162,75,.16), transparent 62%),
-      var(--navy);}
-  .login-card{width:100%; max-width:452px; background:var(--card); border-radius:6px; overflow:hidden;
-    box-shadow:0 28px 70px rgba(4,20,42,.5); border-top:6px solid var(--gold);}
-  .login-card .top{background:var(--navy); color:#fff; text-align:center; padding:34px 26px 26px; border-bottom:3px solid var(--gold);}
-  .login-card .top .crest{width:88px; height:88px; margin:0 auto 14px;}
-  .login-card .top .unit{color:var(--gold-lt); font-size:14px; font-weight:700;}
-  .login-card .top .sys{font-family:var(--display); font-size:42px; line-height:1.02; margin-top:4px;}
-  .login-card .top .tag{font-size:13.5px; color:#A8BCD2; margin-top:8px; font-weight:600;}
+  #login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--navy);}
+  .login-card{width:100%; max-width:420px; background:var(--card); border-radius:3px; overflow:hidden;
+    box-shadow:0 24px 60px rgba(6,23,41,.45);}
+  .login-card .top{text-align:center; padding:38px 28px 26px; border-bottom:1px solid var(--line);}
+  .login-card .top .crest{width:66px; height:66px; margin:0 auto 16px;}
+  .login-card .top .unit{color:var(--muted); font-size:13px;}
+  .login-card .top .sys{font-family:var(--display); font-size:34px; line-height:1.1; margin-top:4px; color:var(--navy);}
+  .login-card .top .tag{font-size:13px; color:var(--muted); margin-top:6px;}
   .login-card .form{padding:28px;}
-  label{display:block; font-weight:800; font-size:15px; margin-bottom:9px;}
-  .hint{color:var(--muted); font-size:13.5px; margin-top:10px; line-height:1.5;}
-  input,select,textarea{width:100%; font-family:var(--sans); font-size:16.5px; font-weight:600; color:var(--ink);
-    padding:14px; border:2px solid var(--line); border-radius:4px; background:#fff;}
-  input::placeholder{color:#93A3B6; font-weight:500;}
-  .login-card .btn{width:100%; margin-top:18px; padding:15px; font-size:18px;}
-  .demo-note{margin-top:22px; padding-top:18px; border-top:2px solid var(--line);}
-  .demo-note .lbl{font-size:12.5px; color:var(--muted); margin-bottom:11px; text-align:center; font-weight:700;}
-  .demo-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .login-card .btn{width:100%; margin-top:18px; padding:14px; font-size:16px;}
 
   /* ============ סטטוסים ============ */
-  .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:11px;}
+  .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   @media(max-width:600px){.statusgrid{grid-template-columns:1fr 1fr;}}
-  .statuscell{border:2px solid var(--line); border-radius:4px; padding:16px 12px; text-align:center; background:#fff;
-    font-weight:800; font-size:16.5px; transition:.12s; user-select:none;}
+  .statuscell{border:1px solid var(--line); border-radius:3px; padding:15px 12px; text-align:center;
+    background:#fff; font-weight:600; font-size:15.5px; user-select:none; transition:.12s;}
   .statuscell:hover{border-color:var(--slate);}
-  .statuscell.on{border-color:var(--gold); background:var(--navy); color:#fff; box-shadow:inset 0 0 0 3px rgba(200,162,75,.35);}
-  .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-start:8px; vertical-align:middle;}
+  .statuscell.on{border-color:var(--navy); background:var(--navy); color:#fff;}
+  .dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-inline-start:8px; vertical-align:middle;}
   .d-present{background:var(--present);} .d-late{background:var(--late);} .d-absent{background:var(--absent);}
 
-  .approval{font-size:13px; font-weight:800; padding:5px 11px; border-radius:3px; white-space:nowrap; border:1.5px solid;}
-  .ap-pending{background:#FFF6E4; color:#8A5D10; border-color:#E7CF97;}
-  .ap-ok{background:#E7F3EC; color:var(--present); border-color:#B4D9C4;}
-  .ap-changed{background:#EAEFFA; color:#2C3F84; border-color:#BCC9EC;}
-  .ap-none{background:#FBE6E6; color:var(--danger); border-color:#EDBDBD;}
+  .approval{font-size:13px; font-weight:600; white-space:nowrap;}
+  .ap-pending{color:var(--late);} .ap-ok{color:var(--present);}
+  .ap-changed{color:var(--slate);} .ap-none{color:var(--absent); font-weight:700;}
 
-  .banner{border-radius:4px; padding:15px 18px; font-weight:700; margin-bottom:20px; border:2px solid; border-inline-start-width:6px;}
-  .banner.ok{background:#E7F3EC; border-color:#9FCDB3; color:var(--present);}
-  .banner.warn{background:#FFF6E4; border-color:#E1C384; color:#8A5D10;}
-  .banner.lock{background:#E9EEF5; border-color:#B6C6D8; color:var(--navy);}
+  .banner{border-radius:3px; padding:14px 18px; font-weight:600; margin-bottom:22px; font-size:14.5px;
+    border:1px solid var(--line); border-inline-start:3px solid var(--slate); background:#fff;}
+  .banner.ok{border-inline-start-color:var(--present);}
+  .banner.warn{border-inline-start-color:var(--late);}
+  .banner.lock{border-inline-start-color:var(--slate);}
 
   /* ============ מסדרה ============ */
-  .roster{width:100%; border-collapse:collapse; font-size:15.5px;}
-  .roster th{text-align:right; font-weight:800; color:#fff; background:var(--steel); padding:13px 14px; font-size:14px; white-space:nowrap;
-    border-inline-start:1px solid rgba(255,255,255,.14);}
-  .roster th:first-child{border-inline-start:none;}
-  .roster td{padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:middle;}
-  .roster tbody tr:nth-child(even) td{background:#F7F9FC;}
-  .roster tbody tr.norep td{background:#FCEDED;}
+  .roster{width:100%; border-collapse:collapse; font-size:15px;}
+  .roster th{text-align:right; font-weight:700; color:var(--muted); background:#fff;
+    padding:12px 16px; font-size:12.5px; white-space:nowrap; border-bottom:1px solid var(--navy);}
+  .roster td{padding:13px 16px; border-bottom:1px solid var(--line-2); vertical-align:middle;}
   .roster tr:last-child td{border-bottom:none;}
-  .name{font-weight:800; font-size:16px;}
-  .idx{display:inline-block; min-width:24px; color:var(--muted); font-weight:700; font-size:13.5px;}
-  .candle{margin-inline-start:8px; font-size:16px;}
-  .reason-inp{padding:9px 11px; font-size:14.5px; border-width:1.5px;}
+  .roster tbody tr.norep td{background:#FCF6F6;}
+  .name{font-weight:700;}
+  .idx{display:inline-block; min-width:22px; color:#A3AEBC; font-size:13px;}
+  .candle{margin-inline-start:8px;}
+  .reason-inp{padding:8px 11px; font-size:14px;}
+  .sel-sm{padding:8px 11px; font-size:14px;}
   .rowactions{display:flex; gap:8px; flex-wrap:wrap;}
-  .sel-sm{padding:9px 11px; font-size:14.5px; border-width:1.5px; font-weight:700;}
 
-  .classtabs{display:flex; gap:0; flex-wrap:wrap; margin-bottom:22px; border-bottom:3px solid var(--navy);}
-  .tab{padding:11px 20px; border:2px solid var(--line); border-bottom:none; background:#DEE6EF; font-weight:800; color:var(--navy);
-    border-radius:4px 4px 0 0; margin-inline-end:4px; font-size:15.5px;}
-  .tab.on{background:var(--navy); color:#fff; border-color:var(--navy);}
-  .tab .badge{display:inline-block; margin-inline-start:8px; background:var(--danger); color:#fff; border-radius:2px; font-size:12px; padding:1px 7px; font-weight:800;}
-  .tab.on .badge{background:var(--gold); color:var(--navy-deep);}
+  .classtabs{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:26px; border-bottom:1px solid var(--line);}
+  .tab{padding:0 0 12px; border:none; background:none; font-weight:700; color:var(--muted); font-size:15.5px;
+    border-bottom:2px solid transparent; border-radius:0;}
+  .tab:hover{color:var(--ink);}
+  .tab.on{color:var(--navy); border-bottom-color:var(--gold);}
+  .tab .badge{margin-inline-start:6px; color:var(--absent); font-size:13px;}
 
-  /* ============ דשבורד ============ */
-  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+  /* ============ מבט שלוחה ============ */
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; margin-bottom:26px;
+    background:var(--line); border:1px solid var(--line);}
   @media(max-width:680px){.stat-strip{grid-template-columns:1fr 1fr;}}
-  .stat{background:#fff; border:1px solid var(--line); border-top:5px solid var(--navy); border-radius:4px; padding:16px 18px;}
-  .stat .n{font-family:var(--display); font-size:46px; line-height:.95; color:var(--navy);}
-  .stat .l{color:var(--muted); font-size:14px; margin-top:7px; font-weight:700;}
-  .stat.gold{border-top-color:var(--gold);} .stat.gold .n{color:var(--gold-dp);}
-  .stat.red{border-top-color:var(--absent);} .stat.red .n{color:var(--absent);}
-  .stat.late{border-top-color:var(--late);} .stat.late .n{color:var(--late);}
+  .stat{background:#fff; padding:20px 22px;}
+  .stat .n{font-family:var(--display); font-size:34px; line-height:1; color:var(--navy);}
+  .stat .l{color:var(--muted); font-size:13px; margin-top:8px;}
+  .stat.red .n{color:var(--absent);} .stat.late .n{color:var(--late);} .stat.gold .n{color:var(--gold);}
 
   /* ============ טופס הדוח ============ */
-  .formdoc{background:#fff; border:2.5px solid var(--navy); padding:0; margin-bottom:30px;}
-  .formhead{display:flex; align-items:stretch; border-bottom:2.5px solid var(--navy);}
-  .fh-side{padding:12px 16px; font-size:13px; font-weight:700; line-height:1.45; display:flex; flex-direction:column; justify-content:center; min-width:170px;}
-  .fh-right{border-inline-end:2px solid var(--navy); display:flex; flex-direction:row; align-items:center; gap:11px;}
-  .fh-right .crest{width:42px; height:42px;}
-  .fh-mid{flex:1 1 auto; text-align:center; padding:14px 10px; display:flex; flex-direction:column; justify-content:center;}
-  .fh-mid .t{font-family:var(--display); font-size:27px; line-height:1.1;}
-  .fh-mid .d{font-size:14px; font-weight:700; color:var(--muted); margin-top:5px;}
-  .fh-left{border-inline-start:2px solid var(--navy); text-align:center; gap:6px;}
-  .fh-left .stamp{display:inline-block; border-color:var(--navy); color:var(--navy);}
-  .rep{width:100%; border-collapse:collapse; font-size:14.5px;}
-  .rep th,.rep td{border:1.5px solid var(--navy); padding:8px 9px; text-align:center;}
-  .rep th{background:var(--navy); color:#fff; font-weight:800; font-size:14px;}
-  .rep td.names{text-align:right; width:23%; font-weight:700;}
-  .rep td.reason{text-align:right; width:29%;}
-  .rep .cls{font-family:var(--display); font-size:21px; background:#EDF1F6;}
-  .rep .num{font-weight:800; font-size:17px;}
-  .signrow{display:flex; gap:26px; padding:16px 18px; border-top:2.5px solid var(--navy); font-size:14px; font-weight:700; flex-wrap:wrap; color:var(--muted);}
-  .signrow span{flex:1 1 auto; min-width:170px;}
-  .signrow i{display:block; border-bottom:1.5px solid var(--navy); height:22px; margin-top:4px;}
+  .formdoc{background:#fff; border:1px solid var(--navy); margin-bottom:34px;}
+  .formhead{display:flex; align-items:stretch; border-bottom:1px solid var(--navy);}
+  .fh-side{padding:16px 18px; font-size:12.5px; color:var(--muted); line-height:1.5;
+    display:flex; flex-direction:column; justify-content:center; min-width:160px;}
+  .fh-right{border-inline-end:1px solid var(--line); flex-direction:row; align-items:center; gap:12px;}
+  .fh-right .crest{width:38px; height:38px;}
+  .fh-mid{flex:1 1 auto; text-align:center; padding:18px 12px;}
+  .fh-mid .t{font-family:var(--display); font-size:23px; color:var(--navy);}
+  .fh-mid .d{font-size:13px; color:var(--muted); margin-top:5px;}
+  .fh-left{border-inline-start:1px solid var(--line); text-align:center;}
+  .rep{width:100%; border-collapse:collapse; font-size:14px;}
+  .rep th,.rep td{border:1px solid var(--line); padding:9px 10px; text-align:center;}
+  .rep th{background:#F2F4F7; color:var(--navy); font-weight:700; font-size:12.5px; border-color:var(--navy);}
+  .rep td.names{text-align:right; width:23%;}
+  .rep td.reason{text-align:right; width:29%; color:var(--muted);}
+  .rep .cls{font-family:var(--display); font-size:19px; color:var(--navy);}
+  .rep .num{font-weight:700; font-size:16px;}
+  .signrow{display:flex; gap:30px; padding:22px 20px; border-top:1px solid var(--navy);
+    font-size:12.5px; color:var(--muted); flex-wrap:wrap;}
+  .signrow span{flex:1 1 auto; min-width:160px;}
+  .signrow i{display:block; border-bottom:1px solid var(--line); height:26px; margin-top:6px;}
 
-  .modal-bg{position:fixed; inset:0; background:rgba(4,20,42,.62); display:flex; align-items:center; justify-content:center; z-index:60; padding:22px;}
-  .modal{background:#fff; border-radius:5px; max-width:470px; width:100%; border-top:6px solid var(--gold); box-shadow:0 26px 60px rgba(4,20,42,.5);}
+  .modal-bg{position:fixed; inset:0; background:rgba(6,23,41,.6); display:flex; align-items:center;
+    justify-content:center; z-index:60; padding:22px;}
+  .modal{background:#fff; border-radius:3px; max-width:440px; width:100%;
+    box-shadow:0 24px 60px rgba(6,23,41,.45); border-top:3px solid var(--gold);}
   .modal .m-body{padding:26px;}
-  .modal h3{font-family:var(--display); font-size:24px; margin:0 0 12px;}
-  .modal .m-actions{display:flex; gap:10px; margin-top:22px;}
+  .modal h3{font-family:var(--display); font-size:21px; margin:0 0 12px;}
+  .modal .m-actions{display:flex; gap:10px; margin-top:24px;}
   .modal .m-actions .btn{flex:1;}
 
-  .toast{position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:14px 20px; border-radius:4px;
-    box-shadow:0 14px 34px rgba(4,20,42,.42); z-index:80; font-weight:700; border-inline-start:5px solid var(--gold); max-width:340px;}
-  .toast.err{border-inline-start-color:var(--absent);}
+  .toast{position:fixed; bottom:24px; right:24px; background:var(--navy); color:#fff; padding:14px 20px;
+    border-radius:3px; z-index:80; font-weight:600; font-size:14.5px; max-width:340px;
+    box-shadow:0 14px 34px rgba(6,23,41,.35);}
+  .toast.err{background:var(--absent);}
+
   .hidden{display:none !important;}
-  .center{text-align:center;} .muted{color:var(--muted); font-weight:600;}
-  .spinner{width:30px; height:30px; border:4px solid var(--line); border-top-color:var(--navy); border-radius:50%; animation:spin .8s linear infinite; margin:34px auto;}
+  .center{text-align:center;} .muted{color:var(--muted);}
+  .spinner{width:26px; height:26px; border:2px solid var(--line); border-top-color:var(--navy);
+    border-radius:50%; animation:spin .8s linear infinite; margin:40px auto;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
   @media print{
     header.masthead, .docstrip, .toolbar, .no-print{display:none !important;}
     body{background:#fff;} main{padding:0; max-width:none;}
-    .panel{border:none; box-shadow:none;} .panel > .body{padding:0;}
     .formdoc{page-break-after:always; margin-bottom:0;}
   }
 </style>
@@ -237,7 +234,6 @@
   <div class="docstrip"><div class="in">
     <div id="stripDate"></div>
     <div id="stripScope"></div>
-    <div class="stamp">בלמ"ס</div>
   </div></div>
   <main id="view"></main>
 </div>
@@ -248,50 +244,35 @@
 /* ============================================================
    שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
 ============================================================ */
-/* כתובת אפליקציית האינטרנט. משמשת רק כגיבוי אם הגשר הפנימי של גוגל אינו זמין. */
-var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
+/* הערכים האלה מוזרקים על ידי הסקריפט ברגע ההגשה. */
+var SERVED   = ('__SERVED__' === 'true');
+var EXEC_URL = '__EXEC_URL__';
 
-var MODE = 'pending';   // pending, live, remote, none
+var MODE = 'pending';
 
 function apiReady(){ return !!(window.google && google.script && google.script.run); }
 
-/* הגשר של גוגל מוזרק לדף מעט אחרי הטעינה, ולכן ממתינים לו במקום להכריע מיד. */
+/* הגשר של גוגל מוזרק מעט אחרי הטעינה, ולכן ממתינים לו במקום להכריע מיד. */
 function waitForApi(ms){
   return new Promise(function(res){
     var t0 = Date.now();
     (function tick(){
       if(apiReady()) return res(true);
       if(Date.now() - t0 > ms) return res(false);
-      setTimeout(tick, 120);
+      setTimeout(tick, 100);
     })();
   });
 }
 
-function callLive(action, args){
+function callServer(action){
+  var args = Array.prototype.slice.call(arguments, 1);
+  if(MODE !== 'live') return Promise.reject(new Error('אין חיבור לשרת'));
   return new Promise(function(res, rej){
     var runner = google.script.run
       .withSuccessHandler(res)
       .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
     runner[action].apply(runner, args);
   });
-}
-
-function callRemote(action, args){
-  return fetch(WEB_APP_URL, {
-    method:'POST', redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({action:action, args:args})
-  }).then(function(r){ return r.json(); }).then(function(j){
-    if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
-    return j.data;
-  });
-}
-
-function callServer(action){
-  var args = Array.prototype.slice.call(arguments, 1);
-  if(MODE === 'live')   return callLive(action, args);
-  if(MODE === 'remote') return callRemote(action, args);
-  return Promise.reject(new Error('אין חיבור לשרת'));
 }
 
 var App = { token:null, profile:null, date:null };
@@ -326,27 +307,29 @@ function crestSVG(){
 }
 el('crestLogin').innerHTML = crestSVG();
 
-/* בדיקת חיבור אמיתית בטעינה. עד שהיא מסתיימת הכניסה נעולה. */
+/* בדיקת חיבור בטעינה. עד שהיא מסתיימת הכניסה נעולה. */
 el('loginBtn').disabled = true;
 el('loginBtn').textContent = 'בודק חיבור';
 
-waitForApi(5000).then(function(ok){
-  MODE = ok ? 'live' : (WEB_APP_URL ? 'remote' : 'none');
-  if(MODE === 'none') return Promise.reject(new Error('הדף אינו מוגש על ידי הסקריפט'));
+waitForApi(SERVED ? 20000 : 4000).then(function(ok){
+  if(!ok) throw new Error(SERVED ? 'הגשר של גוגל לא נטען' : 'הדף אינו מוגש על ידי הסקריפט');
+  MODE = 'live';
   return callServer('ping');
 }).then(function(){
   el('loginBtn').disabled = false;
   el('loginBtn').textContent = 'כניסה למערכת';
   el('offlineNote').classList.add('hidden');
 }).catch(function(e){
+  MODE = 'none';
   el('loginBtn').textContent = 'כניסה למערכת';
   el('idInput').disabled = true;
   el('offlineNote').classList.remove('hidden');
-  el('offlineDetail').textContent =
-    'כתובת הדף שנפתח: ' + location.href.split('?')[0] +
-    ' | פרטי התקלה: ' + (e && e.message ? e.message : 'לא ידוע');
+  var link = (EXEC_URL && EXEC_URL.indexOf('http') === 0)
+    ? '<div style="margin-top:10px"><a href="' + EXEC_URL + '" style="color:inherit">פתיחת הכתובת הנכונה של המערכת</a></div>' : '';
+  el('offlineDetail').innerHTML =
+    'הדף שנפתח: ' + esc(location.href.split('?')[0]) +
+    '<br>פרטים: ' + esc(e && e.message ? e.message : 'לא ידוע') + link;
 });
-el('crestBar').innerHTML = crestSVG();
 
 /* ============ התחברות ============ */
 el('loginBtn').addEventListener('click', doLogin);
@@ -454,7 +437,7 @@ function renderCommander(){
     if(cmdState.active>=d.classes.length) cmdState.active=0;
     var tabs = d.classes.map(function(c,i){
       return '<button class="tab'+(i===cmdState.active?' on':'')+'" data-i="'+i+'">'+esc(c.cls)
-        + (c.pending>0?'<span class="badge">'+c.pending+'</span>':'') + '</button>';
+        + (c.pending>0?'<span class="badge">('+c.pending+')</span>':'') + '</button>';
     }).join('');
     el('view').innerHTML='<div class="fade">'+bar+'<div class="classtabs">'+tabs+'</div><div id="classPane"></div></div>';
     bindCmdTop();
@@ -473,7 +456,8 @@ function renderClassPane(){
   var c=cmdState.data.classes[cmdState.active], statuses=cmdState.data.statuses, ok=c.canApprove;
   var rows = c.students.map(function(s,i){
     var candle = s.birthday ? '<span class="candle" title="יום הולדת">🕯️</span>' : '';
-    var apCls = s.approval==='אושר'?'ap-ok':(s.approval==='שונה'?'ap-changed':(s.approval==='ממתין'?'ap-pending':'ap-none'));
+    var apCls = s.noReport ? 'ap-none'
+      : (s.approval==='אושר' ? 'ap-ok' : (s.approval==='שונה' ? 'ap-changed' : 'ap-pending'));
     var sel = '<select class="sel-sm stat-sel" data-id="'+esc(s.id)+'" '+(ok?'':'disabled')+'>'
       + statuses.map(function(o){ return '<option '+(o===s.status?'selected':'')+'>'+esc(o)+'</option>'; }).join('') + '</select>';
     var reason = '<input class="reason-inp reason-cell" data-id="'+esc(s.id)+'" value="'+esc(s.reason)+'" placeholder="סיבה" '+(ok?'':'disabled')+'>';
@@ -535,8 +519,9 @@ function renderDashboard(){ el('view').innerHTML=spinner();
     d.classes.forEach(function(c){ totM+=c.matzevet; totP+=c.present; totA+=c.absent; totL+=c.late; });
     var rows = d.classes.map(function(c){
       var st = c.complete ? '<span class="approval ap-ok">הושלם</span>' : '<span class="approval ap-pending">'+c.pending+' ממתינים</span>';
-      var nr = c.noReport>0 ? ' <span class="approval ap-none">'+c.noReport+' לא דיווחו</span>' : '';
-      return '<tr><td class="name">'+esc(c.cls)+'</td><td>'+c.matzevet+'</td><td>'+c.present+'</td><td>'+c.late+'</td><td>'+c.absent+'</td><td>'+st+nr+'</td></tr>';
+      var nr = c.noReport>0 ? '<span class="approval ap-none">'+c.noReport+' לא דיווחו</span>' : '';
+      var cell = '<div style="display:flex;gap:16px;justify-content:flex-start">'+st+nr+'</div>';
+      return '<tr><td class="name">'+esc(c.cls)+'</td><td>'+c.matzevet+'</td><td>'+c.present+'</td><td>'+c.late+'</td><td>'+c.absent+'</td><td>'+cell+'</td></tr>';
     }).join('');
     el('view').innerHTML='<div class="fade">'
       + '<div class="toolbar"><button class="btn ghost" id="backCmd">חזרה לכיתות</button>'
@@ -614,11 +599,9 @@ function reportDoc(data, kind){
   });
   return '<div class="formdoc">'
     + '<div class="formhead">'
-    +   '<div class="fh-side fh-right"><div class="crest">'+crestSVG()+'</div>'
-    +     '<div>בית הספר הטכני<br>לחניכי חיל האוויר<br>שלוחת אשקלון</div></div>'
+    +   '<div class="fh-side fh-right"><div>בית הספר הטכני לחניכי חיל האוויר<br>שלוחת אשקלון</div></div>'
     +   '<div class="fh-mid"><div class="t">'+title+'</div><div class="d">'+niceDate(data.date)+'</div></div>'
-    +   '<div class="fh-side fh-left"><div class="stamp">בלמ"ס</div>'
-    +     '<div style="margin-top:7px;color:var(--muted)">תאריך '+shortDate(data.date)+'</div></div>'
+    +   '<div class="fh-side fh-left"><div>תאריך '+shortDate(data.date)+'<br>בלמ"ס</div></div>'
     + '</div>'
     + '<div style="overflow-x:auto"><table class="rep"><thead><tr>'
     +   '<th>כיתה</th><th>מצבת חניכים</th><th>חניכים נוכחים</th><th>'+cntH+'</th>'

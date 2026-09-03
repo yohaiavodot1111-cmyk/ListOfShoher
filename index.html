@@ -36,6 +36,11 @@
   .docstrip .in{max-width:1180px; margin:0 auto; padding:12px 28px; display:flex; align-items:center;
     justify-content:space-between; gap:14px; flex-wrap:wrap; font-size:13.5px; color:var(--muted);}
   .docstrip b{color:var(--ink); font-weight:700;}
+  .syncnote{font-size:13px; color:var(--present); font-weight:600;}
+  .syncnote.busy{color:var(--blue);}
+  .syncnote.busy::before{content:''; display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:var(--blue); margin-inline-end:7px; vertical-align:middle; animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
 
   main{max-width:1180px; margin:0 auto; padding:32px 28px 90px;}
 
@@ -318,6 +323,7 @@
   <div class="docstrip"><div class="in">
     <div id="stripDate"></div>
     <div id="stripScope"></div>
+    <div class="syncnote" id="syncNote"></div>
   </div></div>
   <main id="view"></main>
 </div>
@@ -461,6 +467,10 @@ function enterPortal(){
 el('logoutBtn').addEventListener('click', function(){
   App.token=null; App.profile=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden'); el('idInput').value='';
+});
+
+window.addEventListener('beforeunload', function(e){
+  if(pendingCount() > 0){ e.preventDefault(); e.returnValue = ''; }
 });
 
 function route(fromCache){
@@ -727,7 +737,7 @@ function renderClassPane(){
     return '<tr class="'+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'">'
       + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
-      + '<td><span class="approval '+apCls+'">'+esc(s.saving ? 'שומר' : (s.noReport?'לא דיווח':s.approval))+'</span></td>'
+      + '<td><span class="approval '+apCls+'">'+esc(s.noReport?'לא דיווח':s.approval)+'</span></td>'
       + '<td>'+actions+'</td></tr>';
   }).join('');
 
@@ -767,18 +777,14 @@ function renderClassPane(){
       b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'), 'set'); });
     });
     el('approveAll').addEventListener('click', function(){
-      var snapshot = c.students.map(function(s){ return s.approval; });
-      c.students.forEach(function(s){ if(!s.noReport && s.approval==='ממתין') s.approval='אושר'; });
-      recount(c); renderTabs(); renderClassPane();
-
-      callServer('commanderApproveClass', App.token, App.date, c.cls).then(function(r){
-        if(r.missing && r.missing.length) toast('אושר. עדיין לא דיווחו: '+r.missing.join(', '), true);
-        else toast('כל הדיווחים אושרו');
-      }).catch(function(e){
-        c.students.forEach(function(s,i){ s.approval = snapshot[i]; });
-        recount(c); renderTabs(); renderClassPane();
-        toast(e.message, true);
+      var pending = c.students.filter(function(s){ return !s.noReport && s.approval==='ממתין'; });
+      if(!pending.length){ toast('אין דיווחים שממתינים לאישור'); return; }
+      pending.forEach(function(s){
+        s._before = { status:s.status, reason:s.reason, approval:s.approval, noReport:s.noReport };
+        s.approval = 'אושר';
+        queueChange({ id:s.id, status:s.status, reason:s.reason, mode:'approve' }, s);
       });
+      recount(c); renderTabs(); renderClassPane();
     });
     el('cutoffBtn').addEventListener('click', function(){
       var prev = c.cutoff, next = el('cutoffInp').value;
@@ -821,7 +827,83 @@ function renderTabs(){
   });
 }
 
-/* מעדכן את המסך מיד, ומאמת מול השרת ברקע */
+/* ============================================================
+   תור שמירה. כל לחיצה נכנסת לתור ונשמרת, גם אם לוחצים ברצף מהיר.
+   השינויים נשלחים יחד בבקשה אחת, כך שאף אישור לא הולך לאיבוד.
+============================================================ */
+var OUTBOX = [];       // שינויים שממתינים לשליחה
+var INFLIGHT = null;   // מה שנשלח כרגע
+var flushTimer = null;
+
+function queueChange(item, student){
+  // שינוי חדש לאותו שוחר מחליף שינוי קודם שטרם נשלח
+  OUTBOX = OUTBOX.filter(function(x){ return x.id !== item.id; });
+  OUTBOX.push(item);
+  if(student) student.saving = true;
+  setSyncNote();
+  clearTimeout(flushTimer);
+  flushTimer = setTimeout(flushOutbox, 300);
+}
+
+function pendingCount(){ return OUTBOX.length + (INFLIGHT ? INFLIGHT.batch.length : 0); }
+
+function setSyncNote(){
+  var n = el('syncNote');
+  if(!n) return;
+  var p = pendingCount();
+  n.textContent = p ? ('שומר ' + p) : 'הכל נשמר';
+  n.className = 'syncnote' + (p ? ' busy' : '');
+}
+
+function flushOutbox(){
+  if(INFLIGHT || !OUTBOX.length) return;
+  var batch = OUTBOX;
+  OUTBOX = [];
+  INFLIGHT = { batch: batch };
+  setSyncNote();
+
+  callServer('commanderSetMany', App.token, App.date, batch).then(function(r){
+    var failed = [];
+    (r.results||[]).forEach(function(res){
+      var st = findStudentById(res.id);
+      if(!st) return;
+      if(res.ok){ st.saving = false; st.approvedAt = r.at; }
+      else { failed.push(res); revertStudent(st); }
+    });
+    INFLIGHT = null;
+    setSyncNote();
+    recountAll(); renderTabs(); renderClassPane();
+    if(failed.length) toast('לא נשמרו ' + failed.length + ' שינויים: ' + failed[0].error, true);
+    if(OUTBOX.length) flushOutbox();
+  }).catch(function(e){
+    // כשל רשת. מחזירים את השינויים לתור ומנסים שוב, כדי שלא ייעלמו
+    OUTBOX = INFLIGHT.batch.concat(OUTBOX);
+    INFLIGHT = null;
+    setSyncNote();
+    toast('השמירה נכשלה, מנסה שוב', true);
+    setTimeout(flushOutbox, 2500);
+  });
+}
+
+function findStudentById(id){
+  var found = null;
+  cmdState.data.classes.forEach(function(c){
+    c.students.forEach(function(s){ if(s.id===id) found = s; });
+  });
+  return found;
+}
+
+function revertStudent(st){
+  if(st._before){
+    st.status = st._before.status; st.reason = st._before.reason;
+    st.approval = st._before.approval; st.noReport = st._before.noReport;
+  }
+  st.saving = false;
+}
+
+function recountAll(){ cmdState.data.classes.forEach(recount); }
+
+/* מעדכן את המסך מיד, והשמירה נכנסת לתור */
 function cmdAction(id, mode){
   var sel=document.querySelector('.stat-sel[data-id="'+id+'"]');
   var rin=document.querySelector('.reason-cell[data-id="'+id+'"]');
@@ -832,20 +914,46 @@ function cmdAction(id, mode){
   var st = c.students.filter(function(x){ return x.id===id; })[0];
   if(!st) return;
 
-  var before = { status:st.status, reason:st.reason, approval:st.approval, noReport:st.noReport };
-
+  if(!st.saving){
+    st._before = { status:st.status, reason:st.reason, approval:st.approval, noReport:st.noReport };
+  }
   if(mode!=='approve'){ st.status=status; st.reason=reason; st.approval='שונה'; st.noReport=false; }
   else { st.approval='אושר'; }
-  st.saving = true;
-  recount(c); renderTabs(); renderClassPane();
 
-  callServer('commanderSetStatus', App.token, App.date, id, status, reason, mode==='approve'?'approve':'set')
-    .then(function(){ st.saving=false; renderClassPane(); })
-    .catch(function(e){
-      st.status=before.status; st.reason=before.reason; st.approval=before.approval; st.noReport=before.noReport;
-      st.saving=false; recount(c); renderTabs(); renderClassPane();
-      toast(e.message, true);
+  recount(c); renderTabs(); renderClassPane();
+  queueChange({ id:id, status:status, reason:reason, mode:(mode==='approve'?'approve':'set') }, st);
+}
+
+/* מעדכן את המונים בלי לפנות לשרת מחדש */
+function recount(c){
+  var late=0, absent=0, noRep=0, pending=0;
+  var LATE=['איחור'];
+  var ABS=['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
+  c.students.forEach(function(s){
+    if(s.noReport){ noRep++; absent++; }
+    else if(LATE.indexOf(s.status)>=0) late++;
+    else if(ABS.indexOf(s.status)>=0) absent++;
+    if(s.noReport || s.approval==='ממתין') pending++;
+  });
+  c.late=late; c.absent=absent; c.noReport=noRep; c.pending=pending;
+  c.matzevet=c.students.length; c.present=c.students.length-absent;
+  c.complete = pending===0;
+}
+
+function renderTabs(){
+  var tabs = cmdState.data.classes.map(function(c,i){
+    return '<button class="tab'+(i===cmdState.active?' on':'')+'" data-i="'+i+'">'+esc(c.cls)
+      + (c.pending>0?'<span class="badge">('+c.pending+')</span>':'') + '</button>';
+  }).join('');
+  var host = document.querySelector('.classtabs');
+  if(!host) return;
+  host.innerHTML = tabs;
+  host.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      cmdState.active = +t.getAttribute('data-i'); filterText='';
+      renderTabs(); renderClassPane();
     });
+  });
 }
 
 /* ============ מבט שלוחה ============ */
@@ -879,7 +987,15 @@ function renderDashboard(){ el('view').innerHTML=spinner();
 }
 
 /* ============ הפקת דוח ============ */
-function openGenerate(){ runGenerate(false); }
+function openGenerate(){
+  if(pendingCount() > 0){
+    flushOutbox();
+    toast('ממתין לסיום השמירה');
+    setTimeout(openGenerate, 700);
+    return;
+  }
+  runGenerate(false);
+}
 function runGenerate(force){
   var host=el('modalHost');
   host.innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body center">'+spinner()+'<div class="muted">מכין את הדוח</div></div></div></div>';

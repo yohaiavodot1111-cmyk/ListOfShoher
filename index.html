@@ -6,16 +6,16 @@
 <title>דו"ח אחד</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;800;900&family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@400;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0B2545; --navy-deep:#071829; --slate:#2E4A6B;
-    --gold:#A6863F; --gold-lt:#C9AC6B;
-    --paper:#F2F5F8; --card:#FFFFFF; --ink:#16283D; --muted:#63748A;
-    --line:#D8DEE6; --line-2:#EBEFF4;
-    --present:#2A6B4C; --late:#94701F; --absent:#9E3232;
-    --display:'Frank Ruhl Libre', serif;
-    --sans:'Assistant', sans-serif;
+    --navy:#0E3A66; --navy-deep:#092643; --slate:#2C6197;
+    --blue:#1D6FB8; --sky:#7FBCE4; --sky-soft:#E3F1FA;
+    --paper:#F3F7FB; --card:#FFFFFF; --ink:#12263C; --muted:#5C7288;
+    --line:#D5E1EC; --line-2:#E9F0F6;
+    --present:#1E6B57; --late:#9A6A15; --absent:#A33333;
+    --display:'Miriam Libre', sans-serif;
+    --sans:'Rubik', sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{margin:0; padding:0;}
@@ -23,12 +23,11 @@
        font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
 
   /* ============ כותרת ============ */
-  header.masthead{background:var(--navy); color:#fff; border-bottom:2px solid var(--gold);}
+  header.masthead{background:var(--navy); color:#fff; border-bottom:2px solid var(--blue);}
   .masthead .bar{max-width:1180px; margin:0 auto; padding:20px 28px; display:flex; align-items:center; gap:18px;}
-  .crest{width:50px; height:50px; flex:0 0 auto;}
   .titles{flex:1 1 auto; min-width:0;}
   .titles .unit{font-size:12.5px; color:#9FB2C8; letter-spacing:.03em;}
-  .titles .sys{font-family:var(--display); font-weight:900; font-size:29px; line-height:1.1; margin-top:2px; letter-spacing:-.01em;}
+  .titles .sys{font-family:var(--display); font-weight:700; font-size:29px; line-height:1.1; margin-top:2px; letter-spacing:-.01em;}
   .whoami{text-align:left; font-size:12.5px; color:#9FB2C8; flex:0 0 auto;}
   .whoami b{display:block; color:#fff; font-size:15px; font-weight:700;}
   .whoami button{margin-top:8px;}
@@ -45,7 +44,7 @@
   .panel + .panel{margin-top:26px;}
   .panel > .head{padding:20px 24px 18px; border-bottom:1px solid var(--line);
     display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-  .panel > .head h2{font-family:var(--display); font-weight:800; font-size:23px; margin:0; line-height:1.2;}
+  .panel > .head h2{font-family:var(--display); font-weight:700; font-size:23px; margin:0; line-height:1.2;}
   .panel > .head .sub{color:var(--muted); font-size:13.5px;}
   .panel > .head .sub b{color:var(--ink);}
   .panel > .body{padding:24px;}
@@ -56,15 +55,15 @@
     border:1px solid transparent; transition:.14s;}
   .btn{padding:11px 22px; background:var(--navy); color:#fff; border-color:var(--navy);}
   .btn:hover{background:var(--slate); border-color:var(--slate);}
-  .btn.gold{background:var(--gold); border-color:var(--gold); color:#fff;}
-  .btn.gold:hover{background:#9C7C34; border-color:#9C7C34;}
+  .btn.gold{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .btn.gold:hover{background:#17578F; border-color:#17578F;}
   .btn.ghost{background:#fff; color:var(--navy); border-color:var(--line);}
   .btn.ghost:hover{border-color:var(--navy);}
   .btn.sm{padding:7px 14px; font-size:13px;}
   .btn.slim{background:#fff; color:var(--slate); border-color:var(--line);}
   .btn.slim:hover{border-color:var(--slate);}
   button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
-    outline:2px solid var(--gold); outline-offset:2px;}
+    outline:2px solid var(--blue); outline-offset:2px;}
   button[disabled]{opacity:.45; cursor:not-allowed;}
   .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px;}
   .whoami .btn.slim{background:transparent; color:#9FB2C8; border-color:#33506F;}
@@ -86,27 +85,25 @@
       repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 10px),
       var(--navy);
     color:#fff; padding:70px 72px; display:flex; flex-direction:column;
-    border-inline-start:3px solid var(--gold);
+    border-inline-start:3px solid var(--blue);
   }
   .login-brand .top{margin-top:auto;}
   .login-brand .foot{margin-top:auto;}
-  .login-brand .top .crest{width:92px; height:92px; margin-bottom:30px;}
-  .login-brand .unit{font-size:15px; color:var(--gold-lt); font-weight:600; letter-spacing:.03em;}
-  .login-brand .sys{font-family:var(--display); font-weight:900; font-size:70px; line-height:1; margin:10px 0 0; letter-spacing:-.02em;}
-  .login-brand .rule{width:82px; height:3px; background:var(--gold); margin:26px 0;}
+  .login-brand .unit{font-size:15px; color:var(--sky); font-weight:600; letter-spacing:.03em;}
+  .login-brand .sys{font-family:var(--display); font-weight:700; font-size:70px; line-height:1; margin:10px 0 0; letter-spacing:-.02em;}
+  .login-brand .rule{width:82px; height:3px; background:var(--blue); margin:26px 0;}
   .login-brand .tag{font-size:17px; color:#C2D2E4; max-width:34ch; line-height:1.65;}
   .login-brand .foot{font-size:13px; color:#7D93AC; line-height:1.7;}
 
   .login-side{background:var(--card); display:flex; align-items:center; justify-content:center; padding:60px 48px;}
   .login-side .inner{width:100%; max-width:400px;}
-  .login-side h1{font-family:var(--display); font-weight:800; font-size:34px; margin:0 0 10px; color:var(--navy);}
+  .login-side h1{font-family:var(--display); font-weight:700; font-size:34px; margin:0 0 10px; color:var(--navy);}
   .login-side .lead{color:var(--muted); font-size:15.5px; margin-bottom:34px; line-height:1.6;}
   .login-side .btn{width:100%; margin-top:20px; padding:16px; font-size:17px;}
 
   @media(max-width:900px){
     #login{grid-template-columns:1fr; min-height:100vh;}
-    .login-brand{padding:44px 30px 38px; border-inline-start:none; border-bottom:3px solid var(--gold);}
-    .login-brand .top .crest{width:66px; height:66px; margin-bottom:20px;}
+    .login-brand{padding:44px 30px 38px; border-inline-start:none; border-bottom:3px solid var(--blue);}
     .login-brand .sys{font-size:46px;}
     .login-brand .tag{font-size:15.5px;}
     .login-brand .foot{display:none;}
@@ -115,36 +112,63 @@
   }
 
   /* ============ מסך השוחר ============ */
-  .todaycard{background:#fff; border:1px solid var(--line); border-radius:3px; padding:26px 24px; margin-bottom:22px;}
-  .todaycard .day{font-family:var(--display); font-weight:800; font-size:27px; color:var(--navy); line-height:1.2;}
-  .todaycard .sub{color:var(--muted); font-size:14px; margin-top:6px;}
-  .statusnow{display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:18px; border-top:1px solid var(--line-2);}
+  .todaycard{background:#fff; border:1px solid var(--line); border-radius:3px;
+    border-top:3px solid var(--navy); padding:26px 24px; margin-bottom:20px;}
+  .todaycard .day{font-family:var(--display); font-weight:700; font-size:26px; color:var(--navy); line-height:1.2;}
+  .todaycard .sub{color:var(--muted); font-size:14px; margin-top:8px;}
+  .statusnow{display:flex; align-items:center; gap:14px; margin-top:18px; padding-top:18px;
+    border-top:1px solid var(--line-2); flex-wrap:wrap;}
   .statusnow .lbl{color:var(--muted); font-size:14px;}
-  .statusnow .val{font-family:var(--display); font-weight:800; font-size:24px;}
-  .statusnow .state{font-size:13.5px; color:var(--muted); margin-inline-start:auto;}
+  .statusnow .val{font-family:var(--display); font-weight:700; font-size:23px;}
 
-  .quick{display:block; width:100%; padding:22px; font-size:20px; font-weight:800;
-    background:var(--present); color:#fff; border:none; border-radius:3px; margin-bottom:14px;}
-  .quick:hover{background:#235B40;}
-  .quick .s{display:block; font-size:13.5px; font-weight:500; opacity:.85; margin-top:4px;}
+  .verdict{border:1px solid var(--line); border-inline-start:4px solid var(--slate);
+    background:#fff; border-radius:3px; padding:18px 20px; margin-bottom:20px;}
+  .verdict.ok{border-inline-start-color:var(--present); background:#F1F8F5;}
+  .verdict.changed{border-inline-start-color:var(--blue); background:var(--sky-soft);}
+  .verdict.wait{border-inline-start-color:var(--late); background:#FDF7EC;}
+  .verdict .t{display:flex; align-items:center; gap:10px; font-weight:700; font-size:17px;}
+  .verdict .t svg{width:22px; height:22px; flex:0 0 auto;}
+  .verdict .d{color:var(--muted); font-size:14px; margin-top:8px; line-height:1.7;}
+  .verdict .d b{color:var(--ink); font-weight:600;}
 
-  .grouplbl{font-size:13px; color:var(--muted); font-weight:700; margin:22px 0 10px;}
-  .grouplbl:first-child{margin-top:0;}
-  .stgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .stopt{border:1px solid var(--line); border-radius:3px; padding:18px 16px; background:#fff;
-    font-size:17px; font-weight:600; text-align:right; display:flex; align-items:center; gap:11px; width:100%;}
-  .stopt:hover{border-color:var(--slate);}
-  .stopt.on{border-color:var(--navy); background:var(--navy); color:#fff;}
-  .stopt .dot{margin:0;}
-  @media(max-width:560px){ .stgrid{grid-template-columns:1fr;} .stopt{padding:20px 16px; font-size:18px;} }
+  .picker{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:620px){ .picker{grid-template-columns:1fr;} }
+  .opt{display:flex; align-items:center; gap:14px; width:100%; text-align:right;
+    border:1px solid var(--line); border-radius:3px; background:#fff; padding:18px;
+    font-size:17px; font-weight:600; color:var(--ink); transition:.12s;}
+  .opt:hover{border-color:var(--slate); background:#FAFCFE;}
+  .opt.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
+  .opt[disabled]{opacity:.45;}
+  .opt .ic{width:42px; height:42px; flex:0 0 auto; border-radius:3px; display:flex;
+    align-items:center; justify-content:center; background:var(--sky-soft); color:var(--navy);}
+  .opt.on .ic{background:var(--blue); color:#fff;}
+  .opt .ic svg{width:22px; height:22px;}
+  .opt .tx{flex:1 1 auto;}
+  .opt .tx small{display:block; font-weight:400; font-size:13px; color:var(--muted); margin-top:2px;}
+  .opt .chev{color:var(--muted); flex:0 0 auto; display:flex;}
+  .opt .chev svg{width:18px; height:18px;}
+
+  .subpanel{border:1px solid var(--line); border-radius:3px; background:#FAFCFE; padding:18px;}
+  .subpanel .hdr{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px;}
+  .subpanel .hdr .t{font-weight:700; font-size:15.5px;}
+  .subpanel .hdr .btn{display:inline-flex; align-items:center; gap:6px;}
+  .subpanel .hdr .btn svg{width:16px; height:16px;}
+  .sublist{display:grid; gap:10px;}
+  .subopt{display:flex; align-items:center; gap:12px; width:100%; text-align:right;
+    border:1px solid var(--line); border-radius:3px; background:#fff; padding:15px 16px;
+    font-size:16px; font-weight:600; color:var(--ink);}
+  .subopt:hover{border-color:var(--slate);}
+  .subopt.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
+  .subopt .ic{width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+    background:var(--sky-soft); border-radius:3px; color:var(--navy); flex:0 0 auto;}
+  .subopt.on .ic{background:var(--blue); color:#fff;}
+  .subopt .ic svg{width:19px; height:19px;}
 
   .submitbar{position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line);
     padding:16px 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
   .submitbar .btn{flex:1 1 220px; padding:16px; font-size:17px;}
   .submitbar .note{color:var(--muted); font-size:13px;}
-
-  .saving{opacity:.55;}
-  .rowsaving td{background:#F4F7FB !important;}
+  .rowsaving td{background:var(--sky-soft) !important;}
 
   /* ============ סטטוסים ============ */
   .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
@@ -184,7 +208,7 @@
   .tab{padding:0 0 12px; border:none; background:none; font-weight:700; color:var(--muted); font-size:15.5px;
     border-bottom:2px solid transparent; border-radius:0;}
   .tab:hover{color:var(--ink);}
-  .tab.on{color:var(--navy); border-bottom-color:var(--gold);}
+  .tab.on{color:var(--navy); border-bottom-color:var(--blue);}
   .tab .badge{margin-inline-start:6px; color:var(--absent); font-size:13px;}
 
   /* ============ מבט שלוחה ============ */
@@ -192,9 +216,9 @@
     background:var(--line); border:1px solid var(--line);}
   @media(max-width:680px){.stat-strip{grid-template-columns:1fr 1fr;}}
   .stat{background:#fff; padding:20px 22px;}
-  .stat .n{font-family:var(--display); font-weight:900; font-size:38px; line-height:1; color:var(--navy);}
+  .stat .n{font-family:var(--display); font-weight:700; font-size:38px; line-height:1; color:var(--navy);}
   .stat .l{color:var(--muted); font-size:13px; margin-top:8px;}
-  .stat.red .n{color:var(--absent);} .stat.late .n{color:var(--late);} .stat.gold .n{color:var(--gold);}
+  .stat.red .n{color:var(--absent);} .stat.late .n{color:var(--late);} .stat.gold .n{color:var(--blue);}
 
   /* ============ טופס הדוח ============ */
   .formdoc{background:#fff; border:1px solid var(--navy); margin-bottom:34px;}
@@ -202,9 +226,8 @@
   .fh-side{padding:16px 18px; font-size:12.5px; color:var(--muted); line-height:1.5;
     display:flex; flex-direction:column; justify-content:center; min-width:160px;}
   .fh-right{border-inline-end:1px solid var(--line); flex-direction:row; align-items:center; gap:12px;}
-  .fh-right .crest{width:38px; height:38px;}
   .fh-mid{flex:1 1 auto; text-align:center; padding:18px 12px;}
-  .fh-mid .t{font-family:var(--display); font-weight:800; font-size:25px; color:var(--navy);}
+  .fh-mid .t{font-family:var(--display); font-weight:700; font-size:25px; color:var(--navy);}
   .fh-mid .d{font-size:13px; color:var(--muted); margin-top:5px;}
   .fh-left{border-inline-start:1px solid var(--line); text-align:center;}
   .rep{width:100%; border-collapse:collapse; font-size:14px;}
@@ -212,7 +235,7 @@
   .rep th{background:#F2F4F7; color:var(--navy); font-weight:700; font-size:12.5px; border-color:var(--navy);}
   .rep td.names{text-align:right; width:23%;}
   .rep td.reason{text-align:right; width:29%; color:var(--muted);}
-  .rep .cls{font-family:var(--display); font-weight:800; font-size:20px; color:var(--navy);}
+  .rep .cls{font-family:var(--display); font-weight:700; font-size:20px; color:var(--navy);}
   .rep .num{font-weight:700; font-size:16px;}
   .signrow{display:flex; gap:30px; padding:22px 20px; border-top:1px solid var(--navy);
     font-size:12.5px; color:var(--muted); flex-wrap:wrap;}
@@ -222,9 +245,9 @@
   .modal-bg{position:fixed; inset:0; background:rgba(6,23,41,.6); display:flex; align-items:center;
     justify-content:center; z-index:60; padding:22px;}
   .modal{background:#fff; border-radius:3px; max-width:440px; width:100%;
-    box-shadow:0 24px 60px rgba(6,23,41,.45); border-top:3px solid var(--gold);}
+    box-shadow:0 24px 60px rgba(6,23,41,.45); border-top:3px solid var(--blue);}
   .modal .m-body{padding:26px;}
-  .modal h3{font-family:var(--display); font-weight:800; font-size:22px; margin:0 0 12px;}
+  .modal h3{font-family:var(--display); font-weight:700; font-size:22px; margin:0 0 12px;}
   .modal .m-actions{display:flex; gap:10px; margin-top:24px;}
   .modal .m-actions .btn{flex:1;}
 
@@ -252,11 +275,10 @@
 <section id="login">
   <div class="login-brand">
     <div class="top">
-      <div class="crest" id="crestLogin"></div>
-      <div class="unit">בית הספר הטכני לחניכי חיל האוויר</div>
+      <div class="unit">מסלול השוחרות שלוחת אשקלון</div>
       <div class="sys">דו"ח אחד</div>
       <div class="rule"></div>
-      <div class="tag">מערכת דיווח הנוכחות היומי של השלוחה. השוחרים מדווחים, המפקדים מאשרים, והדוח היומי מופק במקום אחד.</div>
+      <div class="tag">מערכת דיווח נוכחות יומי</div>
     </div>
     <div class="foot">השימוש במערכת מיועד לסגל ולשוחרי השלוחה בלבד.<br>אין להעביר את הקישור לגורם שאינו מורשה.</div>
   </div>
@@ -282,9 +304,8 @@
 <div id="portal" class="hidden">
   <header class="masthead">
     <div class="bar">
-      <div class="crest" id="crestBar"></div>
       <div class="titles">
-        <div class="unit">בית הספר הטכני לחניכי חיל האוויר</div>
+        <div class="unit">מסלול השוחרות שלוחת אשקלון</div>
         <div class="sys">דו"ח אחד</div>
       </div>
       <div class="whoami">
@@ -390,19 +411,6 @@ function spinner(){ return '<div class="spinner"></div>'; }
 function statusClass(s){ if(['נוכח','פעילות חוץ','טיול/סיור'].indexOf(s)>=0) return 'd-present';
   if(s==='איחור') return 'd-late'; return 'd-absent'; }
 
-/* ============ סמל ============ */
-function crestSVG(){
-  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="סמל היחידה">'
-    +'<circle cx="50" cy="50" r="48" fill="#08213F"/>'
-    +'<circle cx="50" cy="50" r="45.5" fill="none" stroke="#C8A24B" stroke-width="3.2"/>'
-    +'<circle cx="50" cy="50" r="39" fill="none" stroke="#C8A24B" stroke-width="1" opacity=".55"/>'
-    +'<path d="M50 27 L12 51 Q29 48.5 34.5 55 Q42 49.5 50 51.5 Q58 49.5 65.5 55 Q71 48.5 88 51 Z" fill="#C8A24B"/>'
-    +'<path d="M50 55 L50 62" stroke="#C8A24B" stroke-width="3" stroke-linecap="round"/>'
-    +'<polygon points="50,58 53.1,66.4 62,66.4 54.8,71.6 57.5,80 50,74.8 42.5,80 45.2,71.6 38,66.4 46.9,66.4" fill="#EBD79B"/>'
-    +'</svg>';
-}
-el('crestLogin').innerHTML = crestSVG();
-
 /* בדיקת חיבור בטעינה. עד שהיא מסתיימת הכניסה נעולה. */
 el('loginBtn').disabled = true;
 el('loginBtn').textContent = 'בודק חיבור';
@@ -460,13 +468,45 @@ function route(fromCache){
 }
 
 /* ============ מסך השוחר ============ */
-var GROUPS = [
-  { label:'נוכחות', items:['נוכח','פעילות חוץ','טיול/סיור'] },
-  { label:'איחור',  items:['איחור'] },
-  { label:'היעדרות', items:['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'] }
-];
+/* אייקוני קו רשמיים, ללא אימוג'י */
+var ICONS = {
+  present:'<path d="M20 6L9 17l-5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  absent:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  bus:'<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M4 11h16M8 20v-2M16 20v-2"/>',
+  health:'<path d="M12 4v6M9 7h6"/><rect x="4" y="10" width="16" height="10" rx="2"/>',
+  home:'<path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/>',
+  userx:'<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c0-3.6 2.9-6 6.5-6 1 0 2 .2 2.8.6M17 15l4 4M21 15l-4 4"/>',
+  chev:'<path d="M14 6l-6 6 6 6"/>',
+  back:'<path d="M10 6l6 6-6 6"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8.5 12.3l2.4 2.4 4.6-4.9"/>',
+  edit:'<path d="M4 20h4l10-10-4-4L4 16z"/>',
+  hourglass:'<path d="M7 4h10M7 20h10M8 4c0 4 8 4 8 12M16 4c0 4-8 4-8 12"/>'
+};
+function ic(name){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name]||'') + '</svg>';
+}
 
-var stu = { day:null, status:null, reason:'' };
+/* בחירה בשתי רמות. סיבות ההיעדרות נפתחות רק אחרי בחירה בהיעדרות. */
+var PRIMARY = [
+  { key:'נוכח',       icon:'present', note:'הגעתי כרגיל' },
+  { key:'איחור',      icon:'clock',   note:'הגעתי באיחור' },
+  { key:'פעילות חוץ', icon:'pin',     note:'פעילות מחוץ לשלוחה' },
+  { key:'טיול/סיור',  icon:'bus',     note:'טיול או סיור מאורגן' }
+];
+var ABSENCE = [
+  { key:'מחלה',              icon:'health' },
+  { key:'חופשה משפחתית',     icon:'home' },
+  { key:'נעדר',              icon:'userx' },
+  { key:'היעדרות ללא אישור', icon:'ban' },
+  { key:'השעיה',             icon:'ban' }
+];
+function isAbsence(x){ return ABSENCE.some(function(a){ return a.key===x; }); }
+
+var stu = { day:null, status:null, reason:'', showAbsence:false, saving:false };
 
 function renderStudent(fromCache){
   if(fromCache && App.initial){ paintStudent(App.initial); App.initial = null; return; }
@@ -480,75 +520,102 @@ function paintStudent(d){
   stu.day = d;
   stu.status = d.report ? d.report.status : null;
   stu.reason = d.report ? d.report.reason : '';
+  stu.showAbsence = isAbsence(stu.status);
   drawStudent();
+}
+
+/* מה השוחר רואה על הטיפול של המפקד בדיווח שלו */
+function verdictBlock(d){
+  if(!d.report) return '';
+  var r = d.report;
+  var who = r.approver ? esc(r.approver) : '';
+  var role = r.approverRole ? esc(r.approverRole) : '';
+  var whoLine = who ? ('<b>' + who + (role ? ', ' + role : '') + '</b>') : '';
+
+  if(r.approval === 'אושר'){
+    return '<div class="verdict ok"><div class="t">'+ic('check')+'הדיווח אושר</div>'
+      + '<div class="d">אושר בשעה <b>'+esc(r.approvedAt||'')+'</b>'
+      + (whoLine ? ' על ידי ' + whoLine : '') + '</div></div>';
+  }
+  if(r.approval === 'שונה'){
+    return '<div class="verdict changed"><div class="t">'+ic('edit')+'הדיווח שונה על ידי המפקד</div>'
+      + '<div class="d">הסטטוס שנקבע הוא <b>'+esc(r.status)+'</b>'
+      + (r.reason ? ', סיבה <b>'+esc(r.reason)+'</b>' : '') + '<br>'
+      + 'שונה בשעה <b>'+esc(r.approvedAt||'')+'</b>'
+      + (whoLine ? ' על ידי ' + whoLine : '') + '</div></div>';
+  }
+  return '<div class="verdict wait"><div class="t">'+ic('hourglass')+'ממתין לאישור המפקד</div>'
+    + '<div class="d">נשלח בשעה <b>'+esc(r.reportedAt||'')+'</b>. עד לאישור אפשר לעדכן את הדיווח.</div></div>';
 }
 
 function drawStudent(){
   var d = stu.day;
-  var locked = d.locked;
-  var reported = !!d.report;
-
-  var stateTxt = !reported ? 'טרם דיווחת היום'
-    : (locked ? (d.report.approval==='שונה' ? 'עודכן על ידי המפקד' : 'אושר על ידי המפקד')
-              : 'נשלח וממתין לאישור');
 
   var head = '<div class="todaycard">'
     + '<div class="day">'+niceDate(App.date)+'</div>'
-    + '<div class="sub" style="display:flex;gap:18px;flex-wrap:wrap">'
+    + '<div class="sub" style="display:flex;gap:20px;flex-wrap:wrap">'
     +   '<span>כיתה <b>'+esc(d.cls)+'</b></span>'
     +   '<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span></div>'
     + '<div class="statusnow"><span class="lbl">הסטטוס שלי היום</span>'
-    +   '<span class="val">'+(stu.status ? esc(stu.status) : 'לא דווח')+'</span>'
-    +   '<span class="state">'+esc(stateTxt)+'</span></div></div>';
+    +   '<span class="val">'+(stu.status ? esc(stu.status) : 'טרם דווח')+'</span></div></div>';
 
   var bd = (d.birthdays && d.birthdays.length)
     ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
 
-  if(locked){
-    el('view').innerHTML = '<div class="fade">'+bd+head
-      + '<div class="banner lock">הדיווח שלך '+esc(stateTxt)+'. לא ניתן לשנות אותו. לשינוי יש לפנות למפקד.</div></div>';
+  if(d.locked){
+    el('view').innerHTML = '<div class="fade">'+bd+head+verdictBlock(d)
+      + '<div class="banner lock">הדיווח נעול לשינוי. לעדכון יש לפנות למפקד הכיתה.</div></div>';
     return;
   }
 
-  // כפתור ראשי למקרה הנפוץ
-  var canQuick = !d.afterCutoff && stu.status !== 'נוכח';
-  var quick = canQuick
-    ? '<button class="quick" id="quickBtn">אני נוכח היום<span class="s">דיווח מהיר בלחיצה אחת</span></button>' : '';
-
-  var groups = GROUPS.map(function(g){
-    var opts = g.items.filter(function(x){ return d.statuses.indexOf(x) >= 0; }).map(function(x){
-      return '<button class="stopt'+(stu.status===x?' on':'')+'" data-s="'+esc(x)+'">'
-        + '<span class="dot '+statusClass(x)+'"></span>'+esc(x)+'</button>';
+  var body;
+  if(!stu.showAbsence){
+    var opts = PRIMARY.filter(function(o){ return d.statuses.indexOf(o.key) >= 0; }).map(function(o){
+      var blocked = (o.key==='נוכח' && d.afterCutoff);
+      return '<button class="opt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'"'
+        + (blocked?' disabled':'') + '>'
+        + '<span class="ic">'+ic(o.icon)+'</span>'
+        + '<span class="tx">'+esc(o.key)+'<small>'+esc(o.note)+'</small></span></button>';
     }).join('');
-    return '<div class="grouplbl">'+g.label+'</div><div class="stgrid">'+opts+'</div>';
-  }).join('');
+    opts += '<button class="opt'+(isAbsence(stu.status)?' on':'')+'" id="absBtn">'
+      + '<span class="ic">'+ic('absent')+'</span>'
+      + '<span class="tx">היעדרות<small>'+(isAbsence(stu.status)?esc(stu.status):'בחירת סיבת ההיעדרות')+'</small></span>'
+      + '<span class="chev">'+ic('chev')+'</span></button>';
+    body = '<div class="picker">'+opts+'</div>';
+  } else {
+    var subs = ABSENCE.filter(function(o){ return d.statuses.indexOf(o.key) >= 0; }).map(function(o){
+      return '<button class="subopt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'">'
+        + '<span class="ic">'+ic(o.icon)+'</span><span>'+esc(o.key)+'</span></button>';
+    }).join('');
+    body = '<div class="subpanel"><div class="hdr"><span class="t">סיבת ההיעדרות</span>'
+      + '<button class="btn ghost sm" id="backBtn">'+ic('back')+'חזרה</button></div>'
+      + '<div class="sublist">'+subs+'</div></div>';
+  }
 
   var needReason = stu.status && stu.status !== 'נוכח';
 
-  el('view').innerHTML = '<div class="fade">'+bd+head
-    + (d.afterCutoff && !reported
-        ? '<div class="banner warn">חלף מועד דיווח הנוכחות. אפשר לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')
-    + quick
-    + '<div class="panel"><div class="head"><h2>בחירת סטטוס</h2></div>'
-    + '<div class="body" id="stBody">'+groups
-    +   '<div id="reasonWrap" class="'+(needReason?'':'hidden')+'" style="margin-top:24px">'
+  el('view').innerHTML = '<div class="fade">'+bd+head+verdictBlock(d)
+    + (d.afterCutoff && !d.report
+        ? '<div class="banner warn">חלף מועד דיווח הנוכחות. ניתן לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')
+    + '<div class="panel"><div class="head"><h2>הדיווח היומי שלי</h2></div>'
+    + '<div class="body" id="stBody">'+body
+    +   '<div id="reasonWrap" class="'+(needReason?'':'hidden')+'" style="margin-top:20px">'
     +     '<label for="reasonInp">פירוט הסיבה</label>'
-    +     '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, פעילות במסגרת אחרת">'+esc(stu.reason)+'</textarea>'
+    +     '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, אישור הורים">'+esc(stu.reason)+'</textarea>'
     +   '</div>'
     + '</div>'
-    + '<div class="submitbar"><button class="btn gold" id="submitBtn">'+(reported?'עדכון הדיווח':'שליחת הדיווח')+'</button>'
-    +   '<span class="note" id="saveNote"></span></div>'
+    + '<div class="submitbar"><button class="btn gold" id="submitBtn">'
+    +   (d.report ? 'עדכון הדיווח' : 'שליחת הדיווח')+'</button>'
+    +   '<span class="note" id="saveNote">'+(stu.saving?'שומר':'')+'</span></div>'
     + '</div></div>';
 
-  if(el('quickBtn')) el('quickBtn').addEventListener('click', function(){ send('נוכח',''); });
+  if(el('absBtn')) el('absBtn').addEventListener('click', function(){ stu.showAbsence = true; drawStudent(); });
+  if(el('backBtn')) el('backBtn').addEventListener('click', function(){ stu.showAbsence = false; drawStudent(); });
 
-  document.querySelectorAll('#stBody .stopt').forEach(function(bt){
+  document.querySelectorAll('#stBody [data-s]').forEach(function(bt){
     bt.addEventListener('click', function(){
       stu.status = bt.getAttribute('data-s');
-      document.querySelectorAll('#stBody .stopt').forEach(function(x){ x.classList.remove('on'); });
-      bt.classList.add('on');
-      el('reasonWrap').classList.toggle('hidden', stu.status === 'נוכח');
-      document.querySelector('.statusnow .val').textContent = stu.status;
+      drawStudent();
       if(stu.status !== 'נוכח' && el('reasonInp')) el('reasonInp').focus();
     });
   });
@@ -561,23 +628,29 @@ function drawStudent(){
   });
 }
 
-/* שולח את הדיווח ומראה את התוצאה מיד, בעוד השמירה רצה ברקע */
+/* מציג את התוצאה מיד, ומאמת מול השרת ברקע */
 function send(status, reason){
   var before = { status: stu.status, reason: stu.reason, report: stu.day.report };
 
-  stu.status = status; stu.reason = reason;
-  stu.day.report = { status:status, reason:reason, approval:'ממתין' };
+  stu.status = status; stu.reason = reason; stu.saving = true;
+  stu.day.report = { status:status, reason:reason, approval:'ממתין', reportedAt:nowHM() };
   drawStudent();
-  if(el('saveNote')) el('saveNote').textContent = 'שומר';
+  toast('הדיווח נשלח');
 
   callServer('studentSubmit', App.token, App.date, status, reason).then(function(){
+    stu.saving = false;
     if(el('saveNote')) el('saveNote').textContent = 'נשמר';
-    toast('הדיווח נשלח');
   }).catch(function(e){
-    stu.status = before.status; stu.reason = before.reason; stu.day.report = before.report;
+    stu.status = before.status; stu.reason = before.reason;
+    stu.day.report = before.report; stu.saving = false;
     drawStudent();
     toast(e.message, true);
   });
+}
+
+function nowHM(){
+  var d = new Date(), p = function(n){ return (n<10?'0':'')+n; };
+  return p(d.getHours())+':'+p(d.getMinutes());
 }
 
 /* ============ מסך מפקד ============ */
@@ -637,7 +710,11 @@ function renderClassPane(){
   });
 
   var rows = visible.map(function(s){
-    var candle = s.birthday ? '<span class="candle" title="יום הולדת">🕯️</span>' : '';
+    var candle = s.birthday
+      ? '<span class="candle" title="יום הולדת" style="color:var(--blue);display:inline-flex;vertical-align:middle">'
+        + '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" '
+        + 'stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.2 1.6 1.2 2.8 0 3.6C10.8 5.8 10.8 4.6 12 3z"/>'
+        + '<rect x="9" y="8" width="6" height="6" rx="1"/><path d="M4 17h16v3H4z"/></svg></span>' : '';
     var apCls = s.noReport ? 'ap-none'
       : (s.approval==='אושר' ? 'ap-ok' : (s.approval==='שונה' ? 'ap-changed' : 'ap-pending'));
     var sel = '<select class="sel-sm stat-sel" data-id="'+esc(s.id)+'" '+(ok?'':'disabled')+'>'
@@ -823,14 +900,27 @@ function showReport(r){
   closeModal();
   el('view').innerHTML='<div class="fade">'
     + '<div class="toolbar no-print"><button class="btn ghost" id="backFromRep">חזרה</button>'
-    + (r.pdf?'<button class="btn gold" id="dlPdf">הורדת PDF</button>':'')
-    + (r.xlsx?'<button class="btn" id="dlXlsx">הורדת Excel</button>':'')
+    + '<button class="btn gold" id="dlPdf">הורדת PDF</button>'
+    + '<button class="btn" id="dlXlsx">הורדת Excel</button>'
     + '<button class="btn ghost" id="printRep">הדפסה</button></div>'
     + reportDoc(r.preview,'absent') + reportDoc(r.preview,'late') + '</div>';
   el('backFromRep').addEventListener('click', route);
   el('printRep').addEventListener('click', function(){ window.print(); });
-  if(el('dlPdf')) el('dlPdf').addEventListener('click', function(){ download(r.pdf); });
-  if(el('dlXlsx')) el('dlXlsx').addEventListener('click', function(){ download(r.xlsx); });
+  el('dlPdf').addEventListener('click', function(){ grabFile('pdf', this); });
+  el('dlXlsx').addEventListener('click', function(){ grabFile('xlsx', this); });
+}
+
+/* הקובץ נוצר רק בלחיצה, כדי שהדוח עצמו ייפתח מיד */
+function grabFile(fmt, btn){
+  var label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'מכין את הקובץ';
+  callServer('exportReport', App.token, App.date, fmt).then(function(f){
+    btn.disabled = false; btn.textContent = label;
+    download(f);
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = label;
+    toast(e.message, true);
+  });
 }
 
 function reportDoc(data, kind){
@@ -858,7 +948,7 @@ function reportDoc(data, kind){
   });
   return '<div class="formdoc">'
     + '<div class="formhead">'
-    +   '<div class="fh-side fh-right"><div>בית הספר הטכני לחניכי חיל האוויר<br>שלוחת אשקלון</div></div>'
+    +   '<div class="fh-side fh-right"><div>מסלול השוחרות שלוחת אשקלון<br>שלוחת אשקלון</div></div>'
     +   '<div class="fh-mid"><div class="t">'+title+'</div><div class="d">'+niceDate(data.date)+'</div></div>'
     +   '<div class="fh-side fh-left"><div>תאריך '+shortDate(data.date)+'<br>בלמ"ס</div></div>'
     + '</div>'

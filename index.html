@@ -209,14 +209,7 @@
       <input id="idInput" inputmode="numeric" autocomplete="off" placeholder="הזינו את המספר המזהה שלכם">
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
       <div class="hint">התלמידים מתחברים במספר האישי או בתעודת הזהות. המפקדים מתחברים במספר האישי.</div>
-      <div class="demo-note" id="demoNote">
-        <div class="lbl">תצוגת הדגמה. בחרו תפקיד כדי לסייר במערכת</div>
-        <div class="demo-grid">
-          <button class="btn ghost sm" data-demo="student">כניסה כתלמיד</button>
-          <button class="btn ghost sm" data-demo="makas">כניסה כמק"ס</button>
-          <button class="btn ghost sm" data-demo="head">כניסה כראש צוות</button>
-          <button class="btn ghost sm" data-demo="branch">כניסה כמפקדת שלוחה</button>
-        </div>
+      <div class="banner warn hidden" id="offlineNote" style="margin:18px 0 0">הדף אינו מחובר לשרת. יש לפתוח את המערכת דרך כתובת האתר שהתקבלה בפריסה.</div>
       </div>
     </div>
   </div>
@@ -252,43 +245,18 @@
 /* ============================================================
    שכבת תקשורת. מול Apps Script כשיש שרת, אחרת תצוגת הדגמה.
 ============================================================ */
-/* כתובת אפליקציית האינטרנט של הסקריפט.
-   נחוצה רק אם מארחים את הקובץ הזה מחוץ לגוגל.
-   כשהקובץ מודבק בתוך אפס סקריפט הוא מתעלם ממנה ומדבר עם הסקריפט ישירות. */
-var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWkoX1ozxKF18H6nod2l0JV6H4fYO7sd_3TNWtShaq62YLwkaYog/exec';
-
-var LIVE   = !!(window.google && google.script && google.script.run);
-var LOCALF = (location.protocol === 'file:');
-var REMOTE = !LIVE && !LOCALF && !!WEB_APP_URL;
+var LIVE = !!(window.google && google.script && google.script.run);
 
 function callServer(action){
   var args = Array.prototype.slice.call(arguments, 1);
-
-  if(LIVE){
-    return new Promise(function(res, rej){
-      var runner = google.script.run
-        .withSuccessHandler(res)
-        .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
-      runner[action].apply(runner, args);
-    });
+  if(!LIVE){
+    return Promise.reject(new Error('המערכת אינה מחוברת לשרת. יש להיכנס דרך כתובת האתר של הפריסה'));
   }
-
-  if(REMOTE){
-    return fetch(WEB_APP_URL, {
-      method:'POST', redirect:'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:action, args:args})
-    }).then(function(r){ return r.json(); }).then(function(j){
-      if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
-      return j.data;
-    }).catch(function(e){
-      if(e instanceof TypeError) throw new Error('אין חיבור לסקריפט. יש להיכנס דרך כתובת האתר של הפריסה');
-      throw e;
-    });
-  }
-
   return new Promise(function(res, rej){
-    setTimeout(function(){ try{ res(DEMO[action].apply(null, args)); } catch(e){ rej(e); } }, 170);
+    var runner = google.script.run
+      .withSuccessHandler(res)
+      .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : 'שגיאת מערכת')); });
+    runner[action].apply(runner, args);
   });
 }
 
@@ -323,15 +291,16 @@ function crestSVG(){
     +'</svg>';
 }
 el('crestLogin').innerHTML = crestSVG();
+if(!LIVE){
+  el('loginBtn').disabled = true;
+  el('idInput').disabled = true;
+  el('offlineNote').classList.remove('hidden');
+}
 el('crestBar').innerHTML = crestSVG();
 
 /* ============ התחברות ============ */
 el('loginBtn').addEventListener('click', doLogin);
 el('idInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-if(LIVE || REMOTE) el('demoNote').classList.add('hidden');
-document.querySelectorAll('[data-demo]').forEach(function(b){
-  b.addEventListener('click', function(){ demoLogin(b.getAttribute('data-demo')); });
-});
 
 function doLogin(){
   var id = el('idInput').value.trim();
@@ -343,7 +312,6 @@ function doLogin(){
     App.token=r.token; App.profile=r.profile; enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
-function demoLogin(kind){ callServer('login','demo:'+kind).then(function(r){ App.token=r.token; App.profile=r.profile; enterPortal(); }); }
 
 function enterPortal(){
   el('login').classList.add('hidden'); el('portal').classList.remove('hidden');
@@ -617,111 +585,6 @@ function download(file){
 }
 function closeModal(){ el('modalHost').innerHTML=''; }
 
-/* ============================================================
-   נתוני הדגמה. פועלים רק כשאין שרת.
-============================================================ */
-var DEMO = (function(){
-  var CLASSES=['ט3','ט5','י2','י5','יא2','יב2','יג','יד'];
-  var STATUSES=['נוכח','איחור','נעדר','פעילות חוץ','טיול/סיור','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
-  var PRESENT=['נוכח','פעילות חוץ','טיול/סיור'], LATE=['איחור'];
-  var ABSENT=['נעדר','מחלה','חופשה משפחתית','היעדרות ללא אישור','השעיה'];
-  function tdy(){ return App.date; }
-  var first=['איתי','נועה','דניאל','שירה','יונתן','מאיה','עומר','תמר','אריאל','רון','ליאור','גל','אורי','הדס','אלון','נטע'];
-  var last=['כהן','לוי','מזרחי','פרץ','ביטון','אברהם','דהן','אזולאי','חדד','גבאי'];
-  var students=[], sid=1000;
-  function birthdayToday(){ var p=tdy().split('/'); return '2008/'+p[1]+'/'+p[2]; }
-  CLASSES.forEach(function(cls){
-    var count=8+(cls.length%3);
-    for(var i=0;i<count;i++){ sid++;
-      students.push({id:String(sid), first:first[sid%first.length], lastn:last[sid%last.length], cls:cls,
-        birth:(i===1?birthdayToday():'2008/05/14')});
-    }
-  });
-  function nm(s){ return s.first+' '+s.lastn; }
-  var reports={}; function key(d,id){ return d+'|'+id; }
-  (function seed(){
-    var d=tdy();
-    students.forEach(function(s,idx){
-      var r=idx%7, st='נוכח', reason='', ap='ממתין';
-      if(r===0){ st='איחור'; reason='פקק בכביש הגישה'; ap='אושר'; }
-      else if(r===1){ st='מחלה'; reason='מחלה עם אישור הורים'; ap='אושר'; }
-      else if(r===2){ st='נעדר'; reason='היעדרות מתואמת'; ap='שונה'; }
-      else if(r===3){ st='פעילות חוץ'; reason='נציג בטקס חטיבתי'; ap='אושר'; }
-      else if(r===4){ return; }
-      else { ap='אושר'; }
-      reports[key(d,s.id)]={date:d,id:s.id,cls:s.cls,status:st,reason:reason,reportedAt:'07:'+(10+idx%40),approval:ap};
-    });
-  })();
-  var cutoffs={}; CLASSES.forEach(function(c){ cutoffs[c]='08:00'; });
-  function roster(cls){ return students.filter(function(s){return s.cls===cls;}); }
-  function isBd(s){ var b=s.birth.split('/'), t=tdy().split('/'); return b[1]===t[1]&&b[2]===t[2]; }
-  var current=null;
-  var PROFILES={
-    student:function(){ var s=students[0]; return {kind:'student',id:s.id,name:nm(s),cls:s.cls}; },
-    makas:function(){ return {kind:'commander',id:'d1',name:'שילב חן',rank:'סמל',role:'מק"ס',classes:['יא2'],canGenerate:false,canSeeAll:false,canEditAny:false}; },
-    head:function(){ return {kind:'commander',id:'d2',name:'יוחאי אליהו',rank:'סמל',role:'ראש צוות',classes:['י2','י5'],canGenerate:true,canSeeAll:true,canEditAny:false}; },
-    branch:function(){ return {kind:'commander',id:'d3',name:'יסמין',rank:'סרן',role:'מפקד שלוחה',classes:[],canGenerate:true,canSeeAll:true,canEditAny:true}; }
-  };
-  function scope(p){ return p.canSeeAll?CLASSES.slice():p.classes.slice(); }
-  function approveScope(p){ return p.role==='מפקד שלוחה'?CLASSES.slice():p.classes.slice(); }
-  function overview(d){
-    var rows=CLASSES.map(function(cls){
-      var r=roster(cls), m=r.length, present=0,late=0,absent=0,noRep=0,pending=0;
-      r.forEach(function(s){ var rep=reports[key(d,s.id)], eff=rep?rep.status:'לא דיווח';
-        if(eff==='לא דיווח'){noRep++;absent++;} else if(LATE.indexOf(eff)>=0){late++;present++;}
-        else if(ABSENT.indexOf(eff)>=0){absent++;} else {present++;}
-        if(!rep||rep.approval==='ממתין') pending++;
-      });
-      return {cls:cls,matzevet:m,present:present,late:late,absent:absent,noReport:noRep,pending:pending,complete:pending===0};
-    });
-    return {date:d,classes:rows,allComplete:rows.every(function(x){return x.complete;})};
-  }
-  function weekDays(id,cat){ var base=(parseInt(id,10)||0)%3; return cat==='late'?(base?base:1):(base+1); }
-  return {
-    login:function(arg){ var kind=String(arg).indexOf('demo:')===0?String(arg).slice(5):'student';
-      current=(PROFILES[kind]||PROFILES.student)(); return {ok:true,token:'demo',profile:current}; },
-    studentGetDay:function(t,d){ var s=students[0], rep=reports[key(d,s.id)]||null;
-      var mates=roster(s.cls).filter(function(m){return isBd(m)&&m.id!==s.id;}).map(nm);
-      return {date:d,cls:s.cls,statuses:STATUSES,presentStatuses:PRESENT,cutoff:cutoffs[s.cls],now:'07:45',
-        afterCutoff:false,report:rep,locked:!!(rep&&(rep.approval==='אושר'||rep.approval==='שונה')),birthdays:mates}; },
-    studentSubmit:function(t,d,st,reason){ var s=students[0];
-      reports[key(d,s.id)]={date:d,id:s.id,cls:s.cls,status:st,reason:reason,reportedAt:'07:50',approval:'ממתין'}; return {ok:true}; },
-    commanderGetClasses:function(t,d){ var p=current, view=scope(p), app=approveScope(p);
-      return {date:d,statuses:STATUSES,profile:p,classes:view.map(function(cls){
-        var st=roster(cls).map(function(s){ var rep=reports[key(d,s.id)]||null;
-          return {id:s.id,name:nm(s),status:rep?rep.status:'לא דיווח',reason:rep?rep.reason:'',
-            approval:rep?rep.approval:'לא דיווח',reportedAt:rep?rep.reportedAt:'',birthday:isBd(s),noReport:!rep}; });
-        var pending=st.filter(function(x){return x.approval==='ממתין'||x.noReport;}).length;
-        return {cls:cls,canApprove:app.indexOf(cls)>=0,cutoff:cutoffs[cls],students:st,pending:pending,complete:pending===0};
-      })}; },
-    commanderSetStatus:function(t,d,id,st,reason,mode){
-      var s=students.filter(function(x){return x.id===id;})[0]; if(!s) throw new Error('לא נמצא');
-      var rep=reports[key(d,id)];
-      if(mode==='approve'){ if(!rep) throw new Error('אין דיווח לאשר'); rep.approval='אושר'; rep.approver=current.name; }
-      else { reports[key(d,id)]={date:d,id:id,cls:s.cls,status:st,reason:reason,reportedAt:rep?rep.reportedAt:'',approval:'שונה',approver:current.name}; }
-      return {ok:true}; },
-    commanderApproveClass:function(t,d,cls){ var missing=[];
-      roster(cls).forEach(function(s){ var rep=reports[key(d,s.id)];
-        if(!rep){ missing.push(nm(s)); return; } if(rep.approval==='ממתין') rep.approval='אושר'; });
-      return {ok:true,missing:missing}; },
-    setCutoff:function(t,cls,time){ cutoffs[cls]=time; return {ok:true}; },
-    branchOverview:function(t,d){ return overview(d); },
-    generateReport:function(t,d,force){
-      var ov=overview(d);
-      if(!ov.allComplete && !force) return {needConfirm:true,message:'היום לא כל המפקדים אישרו דיווח נוכחות. האם להפיק דוח עם הנתונים הנוכחיים?'};
-      var blocks=CLASSES.map(function(cls){
-        var r=roster(cls), m=r.length, absentList=[], lateList=[], ac=0;
-        r.forEach(function(s){ var rep=reports[key(d,s.id)], eff=rep?rep.status:'לא דיווח', reason=rep?rep.reason:'';
-          if(LATE.indexOf(eff)>=0) lateList.push({name:nm(s),reason:reason,days:weekDays(s.id,'late')});
-          else if(ABSENT.indexOf(eff)>=0){ ac++; absentList.push({name:nm(s),reason:reason,days:weekDays(s.id,'absent')}); }
-          else if(eff==='לא דיווח'){ ac++; absentList.push({name:nm(s),reason:'לא דיווח',days:weekDays(s.id,'absent')}); }
-        });
-        return {cls:cls,matzevet:m,presentCount:m-ac,absentCount:ac,lateCount:lateList.length,absentList:absentList,lateList:lateList};
-      });
-      return {ok:true,preview:{date:d,blocks:blocks},pdf:null,xlsx:null};
-    }
-  };
-})();
 </script>
 </body>
 </html>

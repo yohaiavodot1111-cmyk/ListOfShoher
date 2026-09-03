@@ -744,9 +744,10 @@ function renderClassPane(){
   if(!rows) rows = '<tr><td colspan="5" class="muted center" style="padding:34px">לא נמצא שוחר בשם הזה</td></tr>';
 
   var cutoffCtl = ok
-    ? '<div style="display:flex;align-items:center;gap:9px"><span class="sub">שעת נוכחות אחרונה</span>'
+    ? '<div><div style="display:flex;align-items:center;gap:9px"><span class="sub">שעת נוכחות אחרונה</span>'
       +'<input id="cutoffInp" type="time" value="'+esc(c.cutoff)+'" style="width:auto;padding:7px 10px">'
       +'<button class="btn slim sm" id="cutoffBtn">שמירה</button></div>'
+      +'<div class="sub" style="margin-top:6px;font-size:12.5px">תקף להיום בלבד. מחר בבוקר חוזר ל 08:00</div></div>'
     : '<span class="sub">שעת נוכחות אחרונה <b>'+esc(c.cutoff)+'</b></span>';
 
   el('classPane').innerHTML =
@@ -788,7 +789,9 @@ function renderClassPane(){
     });
     el('cutoffBtn').addEventListener('click', function(){
       var prev = c.cutoff, next = el('cutoffInp').value;
-      c.cutoff = next; toast('שעת הנוכחות עודכנה');
+      c.cutoff = next;
+      renderClassPane();
+      toast('שעת הנוכחות עודכנה להיום');
       callServer('setCutoff', App.token, c.cls, next)
         .catch(function(e){ c.cutoff = prev; renderClassPane(); toast(e.message, true); });
     });

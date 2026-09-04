@@ -332,10 +332,11 @@
   <div class="login-side">
     <div class="inner">
       <h1>כניסה למערכת</h1>
-      <div class="lead">השוחרים מזדהים במספר האישי או בתעודת הזהות. המפקדים מזדהים במספר האישי.</div>
+      <div class="lead">כניסה באמצעות מספר תעודת זהות או מספר אישי.</div>
 
       <label for="idInput">מספר מזהה</label>
-      <input id="idInput" inputmode="numeric" autocomplete="off" placeholder="הזינו את המספר המזהה שלכם">
+      <input id="idInput" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off"
+        spellcheck="false" name="dohehad-id-field" placeholder="הזינו את המספר המזהה שלכם">
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
 
       <div class="banner warn hidden" id="offlineNote" style="margin:22px 0 0">
@@ -471,10 +472,10 @@ if(MODE === 'none'){
   el('offlineNote').classList.remove('hidden');
   el('offlineDetail').innerHTML = 'פרטים: לא הוגדרה כתובת של אפליקציית האינטרנט בקובץ';
 } else {
-  try {
-    var savedId = localStorage.getItem('dohehad_id');
-    if(savedId){ el('idInput').value = savedId; }
-  } catch(e){}
+  // לא שומרים ולא ממלאים מספר מזהה. השדה תמיד ריק כדי שלא ייחשף לאדם הבא.
+  try { localStorage.removeItem('dohehad_id'); } catch(e){}
+  el('idInput').value = '';
+  el('idInput').setAttribute('autocomplete', 'off');
   el('idInput').focus();
 
   // חימום החיבור ברקע, כדי שההתחברות הראשונה תהיה מהירה יותר
@@ -498,7 +499,7 @@ function doLogin(){
     if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
     App.token=r.token; App.profile=r.profile; App.initial=r.initial||null;
     if(r.version) App.serverVersion=r.version;
-    try { localStorage.setItem('dohehad_id', id); } catch(e){}
+    el('idInput').value = '';   // מנקים את השדה מיד אחרי כניסה מוצלחת
     enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
@@ -520,8 +521,9 @@ function enterPortal(){
   route(true);
 }
 el('logoutBtn').addEventListener('click', function(){
-  App.token=null; App.profile=null;
-  el('portal').classList.add('hidden'); el('login').classList.remove('hidden'); el('idInput').value='';
+  App.token=null; App.profile=null; App.initial=null;
+  el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
+  el('idInput').value=''; el('idInput').focus();
 });
 
 window.addEventListener('beforeunload', function(e){

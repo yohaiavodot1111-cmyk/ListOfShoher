@@ -477,23 +477,37 @@ function callLive(action, args){
 }
 
 function unwrap_(r){
-  return r.json().then(function(j){
+  return r.text().then(function(txt){
+    var j;
+    try { j = JSON.parse(txt); }
+    catch(e){ throw new Error('השרת החזיר תשובה לא צפויה. ייתכן שהפריסה אינה מעודכנת, יש לפרוס מחדש עם New version'); }
     if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
     return j.data;
   });
 }
 
-/* פנייה מאתר חיצוני. מנסה POST, ואם הדפדפן חוסם עובר ל GET. */
-function callRemote(action, args){
+/* פנייה מאתר חיצוני עם ניסיון חוזר, כי בקשה בודדת לאפס סקריפט לפעמים נכשלת זמנית. */
+function fetchOnce_(action, args){
   var body = JSON.stringify({ action:action, args:args });
   return fetch(WEB_APP_URL, {
     method:'POST', redirect:'follow',
     headers:{ 'Content-Type':'text/plain;charset=utf-8' },
     body: body
-  }).then(unwrap_).catch(function(){
+  }).then(unwrap_).catch(function(err){
+    // נפילת רשת. ניסיון שני דרך GET
     var url = WEB_APP_URL + '?action=' + encodeURIComponent(action) +
               '&args=' + encodeURIComponent(JSON.stringify(args));
     return fetch(url, { method:'GET', redirect:'follow' }).then(unwrap_);
+  });
+}
+function callRemote(action, args){
+  return fetchOnce_(action, args).catch(function(err){
+    // ניסיון שלישי אחרי המתנה קצרה, מטפל בכשל רשת חולף
+    return new Promise(function(res){ setTimeout(res, 800); })
+      .then(function(){ return fetchOnce_(action, args); })
+      .catch(function(){
+        throw new Error('אין חיבור לשרת כרגע. אם זה חוזר, ודאו שהפריסה עודכנה עם New version');
+      });
   });
 }
 
@@ -632,7 +646,7 @@ function isAuthError_(m){ return /התחברות|פג תוקף|הרשאה/.test(
    רענון ברקע. מושך נתונים בשקט כל כמה שניות, ומעדכן את המסך
    רק אם משהו באמת השתנה, בלי לרענן ובלי להפריע לעריכה פעילה.
 ============================================================ */
-var POLL_MS = 4000;       // רענון מהיר ברקע
+var POLL_MS = 6000;       // רענון רקע, מאוזן מול עומס
 var pollTimer = null;
 var lastSnapshot = null;
 
@@ -660,6 +674,7 @@ function stopPolling(){
 /* לא נוגעים במסך כשהמשתמש באמצע פעולה, כדי לא לדרוס אותו */
 function busyNow(){
   if(document.hidden) return true;                 // הכרטיסייה ברקע
+  if(typeof INFLIGHT !== 'undefined' && INFLIGHT) return true;  // שמירה נשלחת כרגע
   if(pendingCount() > 0) return true;              // יש שמירה בתור
   if(typeof anyEditing === 'function' && anyEditing()) return true;
   if(el('modalHost') && el('modalHost').innerHTML.trim()) return true;  // חלון פתוח
@@ -670,8 +685,10 @@ function busyNow(){
   return false;
 }
 
+var pollInFlight = false;
 function pollTick(){
-  if(!App.token || busyNow()) return;
+  if(!App.token || busyNow() || pollInFlight) return;
+  pollInFlight = true;
   var isStu = (App.profile.kind === 'student');
   var pollDate = isStu ? (stuDate || App.date) : App.date;
   var action = isStu ? 'studentGetDay' : 'commanderGetClasses';
@@ -691,7 +708,8 @@ function pollTick(){
       if(cmdState.data && keep < cmdState.data.classes.length){ cmdState.active = keep; renderTabs(); renderClassPane(); }
     }
     showUpdatedFlash();
-  }).catch(function(){ /* שקט, ננסה שוב בסבב הבא */ });
+  }).catch(function(){ /* שקט, ננסה שוב בסבב הבא */ })
+    .then(function(){ pollInFlight = false; });
 }
 
 /* חיווי עדין שהמידע התעדכן */

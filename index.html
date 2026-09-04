@@ -122,24 +122,52 @@
   }
 
   /* ============ מסך השוחר ============ */
-  .todaycard{background:#fff; border:1px solid var(--line); border-radius:3px;
-    border-top:3px solid var(--navy); padding:26px 24px; margin-bottom:20px;}
-  .todaycard .day{font-family:var(--display); font-weight:700; font-size:26px; color:var(--navy); line-height:1.2;}
-  .todaycard .sub{color:var(--muted); font-size:14px; margin-top:8px;}
-  .statusnow{display:flex; align-items:center; gap:14px; margin-top:18px; padding-top:18px;
-    border-top:1px solid var(--line-2); flex-wrap:wrap;}
-  .statusnow .lbl{color:var(--muted); font-size:14px;}
-  .statusnow .val{font-family:var(--display); font-weight:700; font-size:23px;}
+  .hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%); color:#fff;
+    border-radius:16px; padding:24px 24px 22px; margin-bottom:16px; position:relative; overflow:hidden;}
+  .hero::after{content:''; position:absolute; inset:0;
+    background:repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 2px, transparent 2px 12px); pointer-events:none;}
+  .hero .h-date{font-family:var(--display); font-weight:700; font-size:22px; line-height:1.2;}
+  .hero .h-meta{display:flex; gap:18px; flex-wrap:wrap; margin-top:8px; font-size:13.5px; color:var(--sky);}
+  .hero .h-meta b{color:#fff;}
+  .hero .h-status{display:flex; align-items:center; gap:12px; margin-top:18px; padding-top:18px;
+    border-top:1px solid rgba(143,203,238,.25);}
+  .hero .h-badge{width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.12); flex:0 0 auto;}
+  .hero .h-badge svg{width:24px; height:24px;}
+  .hero .h-lbl{font-size:12.5px; color:var(--sky);}
+  .hero .h-val{font-family:var(--display); font-weight:700; font-size:21px; line-height:1.1; margin-top:2px;}
 
-  .verdict{border:1px solid var(--line); border-inline-start:4px solid var(--slate);
-    background:#fff; border-radius:3px; padding:18px 20px; margin-bottom:20px;}
-  .verdict.ok{border-inline-start-color:var(--present); background:#F1F8F5;}
-  .verdict.changed{border-inline-start-color:var(--blue); background:var(--sky-soft);}
-  .verdict.wait{border-inline-start-color:var(--late); background:#FDF7EC;}
-  .verdict .t{display:flex; align-items:center; gap:10px; font-weight:700; font-size:17px;}
-  .verdict .t svg{width:22px; height:22px; flex:0 0 auto;}
-  .verdict .d{color:var(--muted); font-size:14px; margin-top:8px; line-height:1.7;}
-  .verdict .d b{color:var(--ink); font-weight:600;}
+  /* מצב האישור, כרטיס אחד ברור */
+  .verdict{border:1px solid var(--line); border-radius:14px; background:#fff; padding:20px; margin-bottom:16px;
+    border-top:3px solid var(--slate);}
+  .verdict.ok{border-top-color:var(--present);}
+  .verdict.changed{border-top-color:var(--blue);}
+  .verdict.wait{border-top-color:var(--late);}
+  .verdict .v-head{display:flex; align-items:center; gap:12px;}
+  .verdict .v-ic{width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .verdict.ok .v-ic{background:#E7F3EC; color:var(--present);}
+  .verdict.changed .v-ic{background:var(--sky-soft); color:var(--blue);}
+  .verdict.wait .v-ic{background:#FBF1DC; color:var(--late);}
+  .verdict .v-ic svg{width:22px; height:22px;}
+  .verdict .v-ttl{font-weight:700; font-size:17px;}
+  .verdict .v-sub{font-size:13px; color:var(--muted); margin-top:2px;}
+  .verdict .v-rows{margin-top:16px; border-top:1px solid var(--line-2); padding-top:14px; display:grid; gap:10px;}
+  .verdict .v-row{display:flex; justify-content:space-between; gap:12px; font-size:14.5px;}
+  .verdict .v-row .k{color:var(--muted);} .verdict .v-row .val{font-weight:600; text-align:left;}
+  .verdict .v-note{margin-top:14px; font-size:13px; color:var(--muted); background:var(--paper);
+    border-radius:9px; padding:11px 13px;}
+
+  /* בורר סטטוס מכווץ, נפתח בלחיצה */
+  .picksummary{display:flex; align-items:center; gap:14px; padding:16px 18px; border:1px solid var(--line);
+    border-radius:12px; background:#fff; cursor:pointer; transition:.12s;}
+  .picksummary:hover{border-color:var(--slate); background:#FAFCFE;}
+  .picksummary .ps-ic{width:44px; height:44px; border-radius:11px; background:var(--sky-soft); color:var(--navy);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .picksummary .ps-ic svg{width:23px; height:23px;}
+  .picksummary .ps-tx{flex:1 1 auto;}
+  .picksummary .ps-tx .ps-lbl{font-size:12.5px; color:var(--muted);}
+  .picksummary .ps-tx .ps-val{font-weight:700; font-size:17px; margin-top:1px;}
+  .picksummary .ps-act{color:var(--blue); font-weight:600; font-size:14px; flex:0 0 auto;}
 
   .picker{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media(max-width:620px){ .picker{grid-template-columns:1fr;} }
@@ -158,7 +186,7 @@
   .opt .chev{color:var(--muted); flex:0 0 auto; display:flex;}
   .opt .chev svg{width:18px; height:18px;}
 
-  .subpanel{border:1px solid var(--line); border-radius:3px; background:#FAFCFE; padding:18px;}
+  .subpanel{border:1px solid var(--line); border-radius:12px; background:#FAFCFE; padding:18px;}
   .subpanel .hdr{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px;}
   .subpanel .hdr .t{font-weight:700; font-size:15.5px;}
   .subpanel .hdr .btn{display:inline-flex; align-items:center; gap:6px;}
@@ -170,17 +198,25 @@
   .subopt:hover{border-color:var(--slate);}
   .subopt.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
   .subopt .ic{width:34px; height:34px; display:flex; align-items:center; justify-content:center;
-    background:var(--sky-soft); border-radius:3px; color:var(--navy); flex:0 0 auto;}
+    background:var(--sky-soft); border-radius:9px; color:var(--navy); flex:0 0 auto;}
   .subopt.on .ic{background:var(--blue); color:#fff;}
   .subopt .ic svg{width:19px; height:19px;}
 
   .submitbar{position:sticky; bottom:0; background:#fff; border-top:1px solid var(--line);
-    padding:16px 24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+    padding:16px 20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-radius:0 0 12px 12px;}
   .submitbar .btn{flex:1 1 220px; padding:16px; font-size:17px;}
   .submitbar .note{color:var(--muted); font-size:13px;}
   .rowsaving td{background:var(--sky-soft) !important;}
 
-  /* ============ סטטוסים ============ */
+  .tips{display:grid; gap:10px; margin-top:16px;}
+  .tip{display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line-2);
+    border-radius:12px; padding:14px 16px; font-size:14px; color:var(--muted);}
+  .tip .t-ic{width:34px; height:34px; border-radius:9px; background:var(--sky-soft); color:var(--navy);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .tip .t-ic svg{width:18px; height:18px;}
+  .tip b{color:var(--ink); font-weight:600;}
+
+  /* ============ סטטוסים ============ */  /* ============ סטטוסים ============ */
   .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   @media(max-width:600px){.statusgrid{grid-template-columns:1fr 1fr;}}
   .statuscell{border:1px solid var(--line); border-radius:10px; padding:15px 12px; text-align:center;
@@ -573,7 +609,7 @@ var ABSENCE = [
 ];
 function isAbsence(x){ return ABSENCE.some(function(a){ return a.key===x; }); }
 
-var stu = { day:null, status:null, reason:'', showAbsence:false, saving:false };
+var stu = { day:null, status:null, reason:'', showAbsence:false, saving:false, picking:false };
 
 function renderStudent(fromCache){
   if(fromCache && App.initial){ paintStudent(App.initial); App.initial = null; return; }
@@ -588,59 +624,114 @@ function paintStudent(d){
   stu.status = d.report ? d.report.status : null;
   stu.reason = d.report ? d.report.reason : '';
   stu.showAbsence = isAbsence(stu.status);
+  stu.picking = !d.report && !d.locked;   // אם עוד לא דיווח, הבורר פתוח מראש
   drawStudent();
 }
 
-/* מה השוחר רואה על הטיפול של המפקד בדיווח שלו */
+function statusIcon(st){
+  if(st==='נוכח') return 'present';
+  if(st==='איחור') return 'clock';
+  if(st==='פעילות חוץ') return 'pin';
+  if(st==='טיול/סיור') return 'bus';
+  if(st==='מחלה') return 'health';
+  if(st==='חופשה משפחתית') return 'home';
+  return isAbsence(st) ? 'userx' : 'absent';
+}
+
+function heroBlock(d){
+  var st = stu.status;
+  var badge = st ? ic(statusIcon(st)) : ic('hourglass');
+  return '<div class="hero">'
+    + '<div class="h-date">'+niceDate(App.date)+'</div>'
+    + '<div class="h-meta"><span>כיתה <b>'+esc(d.cls)+'</b></span>'
+    +   '<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span></div>'
+    + '<div class="h-status"><div class="h-badge">'+badge+'</div>'
+    +   '<div><div class="h-lbl">הסטטוס שלי היום</div>'
+    +   '<div class="h-val">'+(st ? esc(st) : 'טרם דווח')+'</div></div></div>'
+    + '</div>';
+}
+
+/* כרטיס אישור אחד, ברור ומלא */
 function verdictBlock(d){
   if(!d.report) return '';
   var r = d.report;
-  var who = r.approver ? esc(r.approver) : '';
-  var role = r.approverRole ? esc(r.approverRole) : '';
-  var whoLine = who ? ('<b>' + who + (role ? ', ' + role : '') + '</b>') : '';
+  var who = r.approver ? (esc(r.approver)+(r.approverRole?(', '+esc(r.approverRole)):'')) : '';
 
   if(r.approval === 'אושר'){
-    return '<div class="verdict ok"><div class="t">'+ic('check')+'הדיווח אושר</div>'
-      + '<div class="d">אושר בשעה <b>'+esc(r.approvedAt||'')+'</b>'
-      + (whoLine ? ' על ידי ' + whoLine : '') + '</div></div>';
+    return '<div class="verdict ok">'
+      + '<div class="v-head"><div class="v-ic">'+ic('check')+'</div>'
+      +   '<div><div class="v-ttl">הדיווח אושר</div>'
+      +   '<div class="v-sub">הדיווח שלך נקלט ואושר על ידי המפקד</div></div></div>'
+      + '<div class="v-rows">'
+      +   '<div class="v-row"><span class="k">סטטוס</span><span class="val">'+esc(r.status)+'</span></div>'
+      +   (r.reason?'<div class="v-row"><span class="k">סיבה</span><span class="val">'+esc(r.reason)+'</span></div>':'')
+      +   '<div class="v-row"><span class="k">שעת אישור</span><span class="val">'+esc(r.approvedAt||'')+'</span></div>'
+      +   (who?'<div class="v-row"><span class="k">אישר</span><span class="val">'+who+'</span></div>':'')
+      + '</div></div>';
   }
   if(r.approval === 'שונה'){
-    return '<div class="verdict changed"><div class="t">'+ic('edit')+'הדיווח שונה על ידי המפקד</div>'
-      + '<div class="d">הסטטוס שנקבע הוא <b>'+esc(r.status)+'</b>'
-      + (r.reason ? ', סיבה <b>'+esc(r.reason)+'</b>' : '') + '<br>'
-      + 'שונה בשעה <b>'+esc(r.approvedAt||'')+'</b>'
-      + (whoLine ? ' על ידי ' + whoLine : '') + '</div></div>';
+    return '<div class="verdict changed">'
+      + '<div class="v-head"><div class="v-ic">'+ic('edit')+'</div>'
+      +   '<div><div class="v-ttl">הדיווח עודכן על ידי המפקד</div>'
+      +   '<div class="v-sub">המפקד שינה את הדיווח שהגשת</div></div></div>'
+      + '<div class="v-rows">'
+      +   '<div class="v-row"><span class="k">הסטטוס שנקבע</span><span class="val">'+esc(r.status)+'</span></div>'
+      +   (r.reason?'<div class="v-row"><span class="k">סיבה</span><span class="val">'+esc(r.reason)+'</span></div>':'')
+      +   '<div class="v-row"><span class="k">שעת עדכון</span><span class="val">'+esc(r.approvedAt||'')+'</span></div>'
+      +   (who?'<div class="v-row"><span class="k">עודכן על ידי</span><span class="val">'+who+'</span></div>':'')
+      + '</div></div>';
   }
-  return '<div class="verdict wait"><div class="t">'+ic('hourglass')+'ממתין לאישור המפקד</div>'
-    + '<div class="d">נשלח בשעה <b>'+esc(r.reportedAt||'')+'</b>. עד לאישור אפשר לעדכן את הדיווח.</div></div>';
+  return '<div class="verdict wait">'
+    + '<div class="v-head"><div class="v-ic">'+ic('hourglass')+'</div>'
+    +   '<div><div class="v-ttl">ממתין לאישור המפקד</div>'
+    +   '<div class="v-sub">הדיווח נשלח בהצלחה</div></div></div>'
+    + '<div class="v-rows">'
+    +   '<div class="v-row"><span class="k">סטטוס</span><span class="val">'+esc(r.status)+'</span></div>'
+    +   (r.reason?'<div class="v-row"><span class="k">סיבה</span><span class="val">'+esc(r.reason)+'</span></div>':'')
+    +   '<div class="v-row"><span class="k">שעת שליחה</span><span class="val">'+esc(r.reportedAt||'')+'</span></div>'
+    + '</div>'
+    + '<div class="v-note">עד לאישור המפקד ניתן עדיין לעדכן את הדיווח.</div></div>';
+}
+
+function tipsBlock(){
+  return '<div class="tips">'
+    + '<div class="tip"><div class="t-ic">'+ic('clock')+'</div><div>דיווח נוכחות אפשרי עד השעה שנקבעה לכיתה. לאחר מכן יש לפנות למפקד.</div></div>'
+    + '<div class="tip"><div class="t-ic">'+ic('check')+'</div><div>לאחר אישור המפקד הדיווח <b>ננעל</b> ולא ניתן לשנותו.</div></div>'
+    + '</div>';
 }
 
 function drawStudent(){
   var d = stu.day;
 
-  var head = '<div class="todaycard">'
-    + '<div class="day">'+niceDate(App.date)+'</div>'
-    + '<div class="sub" style="display:flex;gap:20px;flex-wrap:wrap">'
-    +   '<span>כיתה <b>'+esc(d.cls)+'</b></span>'
-    +   '<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span></div>'
-    + '<div class="statusnow"><span class="lbl">הסטטוס שלי היום</span>'
-    +   '<span class="val">'+(stu.status ? esc(stu.status) : 'טרם דווח')+'</span></div></div>';
-
   var bd = (d.birthdays && d.birthdays.length)
     ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
 
+  // מצב נעול: תקציר עשיר בלבד
   if(d.locked){
-    el('view').innerHTML = '<div class="fade">'+bd+head+verdictBlock(d)
-      + '<div class="banner lock">הדיווח נעול לשינוי. לעדכון יש לפנות למפקד הכיתה.</div></div>';
+    el('view').innerHTML = '<div class="fade">'+bd+heroBlock(d)+verdictBlock(d)+tipsBlock()+'</div>';
     return;
   }
 
+  // גוף הבחירה
   var body;
-  if(!stu.showAbsence){
-    var opts = PRIMARY.filter(function(o){ return d.statuses.indexOf(o.key) >= 0; }).map(function(o){
+  if(!stu.picking && stu.status){
+    // בחירה קיימת, מוצגת מכווצת
+    body = '<div class="picksummary" id="openPicker">'
+      + '<div class="ps-ic">'+ic(statusIcon(stu.status))+'</div>'
+      + '<div class="ps-tx"><div class="ps-lbl">הסטטוס שבחרת</div><div class="ps-val">'+esc(stu.status)+'</div></div>'
+      + '<div class="ps-act">שינוי</div></div>';
+  } else if(stu.showAbsence){
+    var subs = ABSENCE.filter(function(o){ return d.statuses.indexOf(o.key)>=0; }).map(function(o){
+      return '<button class="subopt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'">'
+        + '<span class="ic">'+ic(o.icon)+'</span><span>'+esc(o.key)+'</span></button>';
+    }).join('');
+    body = '<div class="subpanel"><div class="hdr"><span class="t">בחירת סיבת ההיעדרות</span>'
+      + '<button class="btn ghost sm" id="backBtn">'+ic('back')+'חזרה</button></div>'
+      + '<div class="sublist">'+subs+'</div></div>';
+  } else {
+    var opts = PRIMARY.filter(function(o){ return d.statuses.indexOf(o.key)>=0; }).map(function(o){
       var blocked = (o.key==='נוכח' && d.afterCutoff);
-      return '<button class="opt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'"'
-        + (blocked?' disabled':'') + '>'
+      return '<button class="opt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'"'+(blocked?' disabled':'')+'>'
         + '<span class="ic">'+ic(o.icon)+'</span>'
         + '<span class="tx">'+esc(o.key)+'<small>'+esc(o.note)+'</small></span></button>';
     }).join('');
@@ -649,39 +740,37 @@ function drawStudent(){
       + '<span class="tx">היעדרות<small>'+(isAbsence(stu.status)?esc(stu.status):'בחירת סיבת ההיעדרות')+'</small></span>'
       + '<span class="chev">'+ic('chev')+'</span></button>';
     body = '<div class="picker">'+opts+'</div>';
-  } else {
-    var subs = ABSENCE.filter(function(o){ return d.statuses.indexOf(o.key) >= 0; }).map(function(o){
-      return '<button class="subopt'+(stu.status===o.key?' on':'')+'" data-s="'+esc(o.key)+'">'
-        + '<span class="ic">'+ic(o.icon)+'</span><span>'+esc(o.key)+'</span></button>';
-    }).join('');
-    body = '<div class="subpanel"><div class="hdr"><span class="t">סיבת ההיעדרות</span>'
-      + '<button class="btn ghost sm" id="backBtn">'+ic('back')+'חזרה</button></div>'
-      + '<div class="sublist">'+subs+'</div></div>';
   }
 
   var needReason = stu.status && stu.status !== 'נוכח';
+  var reasonHtml = needReason
+    ? '<div id="reasonWrap" style="margin-top:18px"><label for="reasonInp">פירוט הסיבה</label>'
+      + '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, אישור הורים">'+esc(stu.reason)+'</textarea></div>'
+    : '';
 
-  el('view').innerHTML = '<div class="fade">'+bd+head+verdictBlock(d)
+  var panelTitle = (!stu.picking && stu.status) ? 'הדיווח שלי להיום' : 'בחירת סטטוס';
+
+  el('view').innerHTML = '<div class="fade">'+bd+heroBlock(d)+verdictBlock(d)
     + (d.afterCutoff && !d.report
         ? '<div class="banner warn">חלף מועד דיווח הנוכחות. ניתן לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')
-    + '<div class="panel"><div class="head"><h2>הדיווח היומי שלי</h2></div>'
-    + '<div class="body" id="stBody">'+body
-    +   '<div id="reasonWrap" class="'+(needReason?'':'hidden')+'" style="margin-top:20px">'
-    +     '<label for="reasonInp">פירוט הסיבה</label>'
-    +     '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, אישור הורים">'+esc(stu.reason)+'</textarea>'
-    +   '</div>'
-    + '</div>'
+    + '<div class="panel"><div class="head"><h2>'+panelTitle+'</h2></div>'
+    + '<div class="body" id="stBody">'+body+reasonHtml+'</div>'
     + '<div class="submitbar"><button class="btn gold" id="submitBtn">'
     +   (d.report ? 'עדכון הדיווח' : 'שליחת הדיווח')+'</button>'
     +   '<span class="note" id="saveNote">'+(stu.saving?'שומר':'')+'</span></div>'
-    + '</div></div>';
+    + '</div>'
+    + tipsBlock()
+    + '</div>';
 
+  if(el('openPicker')) el('openPicker').addEventListener('click', function(){ stu.picking = true; stu.showAbsence = isAbsence(stu.status); drawStudent(); });
   if(el('absBtn')) el('absBtn').addEventListener('click', function(){ stu.showAbsence = true; drawStudent(); });
   if(el('backBtn')) el('backBtn').addEventListener('click', function(){ stu.showAbsence = false; drawStudent(); });
 
   document.querySelectorAll('#stBody [data-s]').forEach(function(bt){
     bt.addEventListener('click', function(){
       stu.status = bt.getAttribute('data-s');
+      stu.showAbsence = isAbsence(stu.status);
+      stu.picking = false;           // אחרי בחירה, מכווצים
       drawStudent();
       if(stu.status !== 'נוכח' && el('reasonInp')) el('reasonInp').focus();
     });
@@ -699,7 +788,7 @@ function drawStudent(){
 function send(status, reason){
   var before = { status: stu.status, reason: stu.reason, report: stu.day.report };
 
-  stu.status = status; stu.reason = reason; stu.saving = true;
+  stu.status = status; stu.reason = reason; stu.saving = true; stu.picking = false;
   stu.day.report = { status:status, reason:reason, approval:'ממתין', reportedAt:nowHM() };
   drawStudent();
   toast('הדיווח נשלח');

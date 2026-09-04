@@ -9,11 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@400;700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#0E3A66; --navy-deep:#092643; --slate:#2C6197;
-    --blue:#1D6FB8; --sky:#7FBCE4; --sky-soft:#E3F1FA;
-    --paper:#F3F7FB; --card:#FFFFFF; --ink:#12263C; --muted:#5C7288;
-    --line:#D5E1EC; --line-2:#E9F0F6;
-    --present:#1E6B57; --late:#9A6A15; --absent:#A33333;
+    --navy:#0B3D66;         /* כחול חיל האוויר עמוק */
+    --navy-deep:#07293F;
+    --slate:#2F6EA8;        /* כחול תפעולי */
+    --blue:#2E7DBE;         /* כחול פעולה */
+    --sky:#8FCBEE;          /* תכלת */
+    --sky-soft:#EAF4FB;     /* תכלת בהיר לרקעים */
+    --paper:#F5F8FB; --card:#FFFFFF; --ink:#15293D; --muted:#5B7086;
+    --line:#DCE6EF; --line-2:#EDF3F8;
+    --present:#1C6A54; --late:#8C6412; --absent:#A22F2F;
+    --ring:rgba(46,125,190,.35);
     --display:'Miriam Libre', sans-serif;
     --sans:'Rubik', sans-serif;
   }
@@ -45,7 +50,7 @@
   main{max-width:1180px; margin:0 auto; padding:32px 28px 90px;}
 
   /* ============ פאנלים ============ */
-  .panel{background:var(--card); border:1px solid var(--line); border-radius:3px; overflow:hidden;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(11,61,102,.05);}
   .panel + .panel{margin-top:26px;}
   .panel > .head{padding:20px 24px 18px; border-bottom:1px solid var(--line);
     display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
@@ -61,7 +66,7 @@
   .btn{padding:11px 22px; background:var(--navy); color:#fff; border-color:var(--navy);}
   .btn:hover{background:var(--slate); border-color:var(--slate);}
   .btn.gold{background:var(--blue); border-color:var(--blue); color:#fff;}
-  .btn.gold:hover{background:#17578F; border-color:#17578F;}
+  .btn.gold:hover{background:var(--slate); border-color:var(--slate);}
   .btn.ghost{background:#fff; color:var(--navy); border-color:var(--line);}
   .btn.ghost:hover{border-color:var(--navy);}
   .btn.sm{padding:7px 14px; font-size:13px;}
@@ -78,8 +83,8 @@
   label{display:block; font-weight:700; font-size:14px; margin-bottom:8px;}
   .hint{color:var(--muted); font-size:13px; margin-top:12px; line-height:1.55;}
   input,select,textarea{width:100%; font-family:var(--sans); font-size:16px; color:var(--ink);
-    padding:12px 14px; border:1px solid var(--line); border-radius:3px; background:#fff;}
-  input:focus,select:focus,textarea:focus{border-color:var(--slate);}
+    padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:#fff;}
+  input:focus,select:focus,textarea:focus{border-color:var(--slate); box-shadow:0 0 0 3px var(--ring);}
   input::placeholder{color:#A3AEBC;}
 
   /* ============ התחברות, מסך מלא ============ */
@@ -139,12 +144,12 @@
   .picker{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media(max-width:620px){ .picker{grid-template-columns:1fr;} }
   .opt{display:flex; align-items:center; gap:14px; width:100%; text-align:right;
-    border:1px solid var(--line); border-radius:3px; background:#fff; padding:18px;
+    border:1px solid var(--line); border-radius:12px; background:#fff; padding:18px;
     font-size:17px; font-weight:600; color:var(--ink); transition:.12s;}
   .opt:hover{border-color:var(--slate); background:#FAFCFE;}
   .opt.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
   .opt[disabled]{opacity:.45;}
-  .opt .ic{width:42px; height:42px; flex:0 0 auto; border-radius:3px; display:flex;
+  .opt .ic{width:42px; height:42px; flex:0 0 auto; border-radius:10px; display:flex;
     align-items:center; justify-content:center; background:var(--sky-soft); color:var(--navy);}
   .opt.on .ic{background:var(--blue); color:#fff;}
   .opt .ic svg{width:22px; height:22px;}
@@ -160,7 +165,7 @@
   .subpanel .hdr .btn svg{width:16px; height:16px;}
   .sublist{display:grid; gap:10px;}
   .subopt{display:flex; align-items:center; gap:12px; width:100%; text-align:right;
-    border:1px solid var(--line); border-radius:3px; background:#fff; padding:15px 16px;
+    border:1px solid var(--line); border-radius:10px; background:#fff; padding:15px 16px;
     font-size:16px; font-weight:600; color:var(--ink);}
   .subopt:hover{border-color:var(--slate);}
   .subopt.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
@@ -178,7 +183,7 @@
   /* ============ סטטוסים ============ */
   .statusgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   @media(max-width:600px){.statusgrid{grid-template-columns:1fr 1fr;}}
-  .statuscell{border:1px solid var(--line); border-radius:3px; padding:15px 12px; text-align:center;
+  .statuscell{border:1px solid var(--line); border-radius:10px; padding:15px 12px; text-align:center;
     background:#fff; font-weight:600; font-size:15.5px; user-select:none; transition:.12s;}
   .statuscell:hover{border-color:var(--slate);}
   .statuscell.on{border-color:var(--navy); background:var(--navy); color:#fff;}
@@ -186,6 +191,7 @@
   .d-present{background:var(--present);} .d-late{background:var(--late);} .d-absent{background:var(--absent);}
 
   .approval{font-size:13px; font-weight:600; white-space:nowrap;}
+  .apinfo{font-size:12px; color:var(--muted); margin-top:3px; font-weight:500;}
   .ap-pending{color:var(--late);} .ap-ok{color:var(--present);}
   .ap-changed{color:var(--slate);} .ap-none{color:var(--absent); font-weight:700;}
 
@@ -211,7 +217,7 @@
 
   /* כרטיסי שוחר בטלפון, ללא גלילה לצדדים */
   .cardlist{display:none;}
-  .scard{border:1px solid var(--line); border-radius:4px; padding:14px 16px; margin:0 16px 12px;
+  .scard{border:1px solid var(--line); border-radius:12px; padding:16px; margin:0 16px 12px;
     background:#fff;}
   .scard.norep{border-color:#EBC9C9; background:#FDF4F4;}
   .scard.rowsaving{background:var(--sky-soft);}
@@ -224,8 +230,8 @@
   .scard .cur .chg{margin-inline-start:auto; color:var(--blue); font-weight:600; font-size:14px;
     background:none; border:none; padding:0;}
   .stgrid-m{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
-  .stbtn{display:flex; align-items:center; gap:9px; border:1px solid var(--line); border-radius:4px;
-    background:#fff; padding:12px 12px; font-size:15px; font-weight:600; color:var(--ink); text-align:right;}
+  .stbtn{display:flex; align-items:center; gap:9px; border:1px solid var(--line); border-radius:10px;
+    background:#fff; padding:13px 12px; font-size:15px; font-weight:600; color:var(--ink); text-align:right;}
   .stbtn.on{border-color:var(--blue); background:var(--sky-soft); box-shadow:inset 0 0 0 1px var(--blue);}
   .stbtn .ic{width:30px; height:30px; flex:0 0 auto; border-radius:4px; display:flex; align-items:center;
     justify-content:center; background:var(--sky-soft); color:var(--navy);}
@@ -300,6 +306,8 @@
     border-radius:50%; animation:spin .8s linear infinite; margin:40px auto;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
+  .repnote{background:var(--sky-soft); border:1px solid var(--line); border-inline-start:3px solid var(--blue);
+    border-radius:3px; padding:12px 16px; margin-bottom:16px; font-size:13.5px; color:var(--navy);}
   @media print{
     header.masthead, .docstrip, .toolbar, .no-print{display:none !important;}
     body{background:#fff;} main{padding:0; max-width:none;}
@@ -452,34 +460,36 @@ function spinner(){ return '<div class="spinner"></div>'; }
 function statusClass(s){ if(['נוכח','פעילות חוץ','טיול/סיור'].indexOf(s)>=0) return 'd-present';
   if(s==='איחור') return 'd-late'; return 'd-absent'; }
 
-/* בדיקת חיבור בטעינה. עד שהיא מסתיימת הכניסה נעולה. */
-el('loginBtn').disabled = true;
-el('loginBtn').textContent = 'בודק חיבור';
-
-(SERVED ? waitForApi(20000) : Promise.resolve(false)).then(function(bridge){
-  if(bridge){ MODE = 'live'; return; }
-  if(!WEB_APP_URL || WEB_APP_URL.indexOf('http') !== 0) throw new Error('לא הוגדרה כתובת של אפליקציית האינטרנט בקובץ');
-  MODE = 'remote';
-}).then(function(){
-  return callServer('ping');
-}).then(function(r){
-  el('loginBtn').disabled = false;
-  el('loginBtn').textContent = 'כניסה למערכת';
-  el('offlineNote').classList.add('hidden');
-  App.serverVersion = (r && r.version) ? r.version : '';
-}).catch(function(e){
-  MODE = 'none';
-  el('loginBtn').textContent = 'כניסה למערכת';
+/* בלי בדיקת חיבור מקדימה. אפשר להקליד ולהתחבר מיד.
+   ההתחברות עצמה היא גם בדיקת החיבור. */
+(function decideMode(){
+  if(SERVED){ MODE = 'live'; waitForApi(20000); return; }   // הגשר של גוגל מגיע תוך רגע
+  MODE = (WEB_APP_URL && WEB_APP_URL.indexOf('http') === 0) ? 'remote' : 'none';
+})();
+if(MODE === 'none'){
   el('idInput').disabled = true;
   el('offlineNote').classList.remove('hidden');
-  el('offlineDetail').innerHTML = 'פרטים: ' + esc(e && e.message ? e.message : 'לא ידוע');
-});
+  el('offlineDetail').innerHTML = 'פרטים: לא הוגדרה כתובת של אפליקציית האינטרנט בקובץ';
+} else {
+  try {
+    var savedId = localStorage.getItem('dohehad_id');
+    if(savedId){ el('idInput').value = savedId; }
+  } catch(e){}
+  el('idInput').focus();
+
+  // חימום החיבור ברקע, כדי שההתחברות הראשונה תהיה מהירה יותר
+  try { callServer('ping').then(function(r){ App.serverVersion = (r && r.version) ? r.version : ''; }); } catch(e){}
+}
 
 /* ============ התחברות ============ */
 el('loginBtn').addEventListener('click', doLogin);
 el('idInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 
 function doLogin(){
+  if(MODE === 'live' && !apiReady()){
+    el('loginBtn').disabled = true; el('loginBtn').textContent = 'מתחבר';
+    return waitForApi(20000).then(function(){ el('loginBtn').disabled=false; doLogin(); });
+  }
   var id = el('idInput').value.trim();
   if(!id){ toast('יש להזין מספר מזהה', true); return; }
   el('loginBtn').disabled=true; el('loginBtn').textContent='מתחבר';
@@ -487,7 +497,9 @@ function doLogin(){
     el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת';
     if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
     App.token=r.token; App.profile=r.profile; App.initial=r.initial||null;
-    if(r.version) App.serverVersion=r.version; enterPortal();
+    if(r.version) App.serverVersion=r.version;
+    try { localStorage.setItem('dohehad_id', id); } catch(e){}
+    enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
 
@@ -781,7 +793,7 @@ function renderClassPane(){
     return '<tr class="'+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'">'
       + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
-      + '<td><span class="approval '+apCls+'">'+esc(apTxt)+'</span></td>'
+      + '<td><span class="approval '+apCls+'">'+esc(apTxt)+'</span>'+approvedInfo(s)+'</td>'
       + '<td>'+actions+'</td></tr>';
   }).join('');
 
@@ -856,6 +868,7 @@ function renderClassPane(){
     return '<div class="scard '+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'"><div class="top">'
       + '<span class="nm"><span class="idx">'+idx+'.</span>'+esc(s.name)+candle+'</span>'
       + '<span class="approval '+apCls+'">'+esc(apTxt)+'</span></div>'
+      + approvedInfoCard(s)
       + '<div class="cur"><span class="muted">סטטוס</span><span class="chip">'+esc(s.status || 'טרם דווח')+'</span>'
       +   '<button class="chg mtoggle" data-id="'+esc(s.id)+'">'+(picking?'סגירה':'שינוי')+'</button></div>'
       + pickerHtml
@@ -954,6 +967,18 @@ function renderClassPane(){
         .catch(function(e){ c.cutoff = prev; renderClassPane(); toast(e.message, true); });
     });
   }
+}
+
+function seesApprover(){ var p=App.profile; return p && (p.canSeeAll); }  /* ראש צוות ומפקד שלוחה */
+function approvedInfo(s){
+  if(!seesApprover()) return '';
+  if(!s.approvedAt || (s.approval!=='אושר' && s.approval!=='שונה')) return '';
+  var who = s.approver ? (esc(s.approver)+(s.approverRole?(', '+esc(s.approverRole)):'')) : '';
+  return '<div class="apinfo">'+esc(s.approvedAt)+(who?(' | '+who):'')+'</div>';
+}
+function approvedInfoCard(s){
+  var t = approvedInfo(s);
+  return t ? '<div class="muted" style="font-size:12.5px;margin:-4px 0 10px">'+t.replace(/<[^>]*>/g,'')+'</div>' : '';
 }
 
 /* מעדכן את המונים בלי לפנות לשרת מחדש */
@@ -1116,6 +1141,18 @@ function cmdAction(id, mode){
   queueChange({ id:id, status:status, reason:reason, mode:(mode==='approve'?'approve':'set') }, st);
 }
 
+function seesApprover(){ var p=App.profile; return p && (p.canSeeAll); }  /* ראש צוות ומפקד שלוחה */
+function approvedInfo(s){
+  if(!seesApprover()) return '';
+  if(!s.approvedAt || (s.approval!=='אושר' && s.approval!=='שונה')) return '';
+  var who = s.approver ? (esc(s.approver)+(s.approverRole?(', '+esc(s.approverRole)):'')) : '';
+  return '<div class="apinfo">'+esc(s.approvedAt)+(who?(' | '+who):'')+'</div>';
+}
+function approvedInfoCard(s){
+  var t = approvedInfo(s);
+  return t ? '<div class="muted" style="font-size:12.5px;margin:-4px 0 10px">'+t.replace(/<[^>]*>/g,'')+'</div>' : '';
+}
+
 /* מעדכן את המונים בלי לפנות לשרת מחדש */
 function recount(c){
   var late=0, absent=0, noRep=0, pending=0;
@@ -1206,19 +1243,21 @@ function runGenerate(force){
 
 function showReport(r){
   closeModal();
+  App.lastReport = r.preview;
   el('view').innerHTML='<div class="fade">'
-    + '<div class="toolbar no-print"><button class="btn ghost" id="backFromRep">חזרה</button>'
-    + '<button class="btn gold" id="dlPdf">הורדת PDF</button>'
-    + '<button class="btn" id="dlXlsx">הורדת Excel</button>'
-    + '<button class="btn ghost" id="printRep">הדפסה</button></div>'
+    + '<div class="toolbar no-print">'
+    +   '<button class="btn ghost" id="backFromRep">חזרה</button>'
+    +   '<button class="btn gold" id="printRep">הדפסה ושמירה כ PDF</button>'
+    +   '<button class="btn" id="dlXlsx">הורדת Excel</button>'
+    + '</div>'
+    + '<div class="repnote no-print">התצוגה כאן היא לבדיקה. לפלט מדויק בגודל דף לחצו הדפסה ושמירה כ PDF, ובחלון ההדפסה בחרו שמירה כ PDF.</div>'
     + reportDoc(r.preview,'absent') + reportDoc(r.preview,'late') + '</div>';
   el('backFromRep').addEventListener('click', route);
-  el('printRep').addEventListener('click', function(){ window.print(); });
-  el('dlPdf').addEventListener('click', function(){ grabFile('pdf', this); });
+  el('printRep').addEventListener('click', function(){ openPrintable(r.preview); });
   el('dlXlsx').addEventListener('click', function(){ grabFile('xlsx', this); });
 }
 
-/* הקובץ נוצר רק בלחיצה, כדי שהדוח עצמו ייפתח מיד */
+/* הקובץ נוצר רק בלחיצה */
 function grabFile(fmt, btn){
   var label = btn.textContent;
   btn.disabled = true; btn.textContent = 'מכין את הקובץ';
@@ -1231,6 +1270,7 @@ function grabFile(fmt, btn){
   });
 }
 
+/* תצוגה על המסך, לבדיקה בלבד */
 function reportDoc(data, kind){
   var title = kind==='absent' ? 'דוח נעדרים יומי' : 'דוח מאחרים יומי';
   var namesH = kind==='absent' ? 'שמות נעדרים' : 'שמות מאחרים';
@@ -1256,7 +1296,7 @@ function reportDoc(data, kind){
   });
   return '<div class="formdoc">'
     + '<div class="formhead">'
-    +   '<div class="fh-side fh-right"><div>מסלול השוחרות שלוחת אשקלון<br>שלוחת אשקלון</div></div>'
+    +   '<div class="fh-side fh-right"><div>מסלול השוחרות<br>שלוחת אשקלון</div></div>'
     +   '<div class="fh-mid"><div class="t">'+title+'</div><div class="d">'+niceDate(data.date)+'</div></div>'
     +   '<div class="fh-side fh-left"><div>תאריך '+shortDate(data.date)+'<br>בלמ"ס</div></div>'
     + '</div>'
@@ -1267,12 +1307,105 @@ function reportDoc(data, kind){
     + '</div>';
 }
 
-function download(file){
-  var mime = /\.pdf$/.test(file.name) ? 'application/pdf'
-    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-  var a=document.createElement('a'); a.href='data:'+mime+';base64,'+file.data; a.download=file.name;
-  document.body.appendChild(a); a.click(); a.remove();
+/* ============================================================
+   מסמך הדפסה נקי בחלון נפרד. מתאים תמיד לגודל דף,
+   בלוק כיתה לעולם לא נחתך בין עמודים, כותרת חוזרת בכל עמוד.
+============================================================ */
+function printTableHTML(data, kind){
+  var title = kind==='absent' ? 'דוח נעדרים יומי' : 'דוח מאחרים יומי';
+  var namesH = kind==='absent' ? 'שמות נעדרים' : 'שמות מאחרים';
+  var reasonH = kind==='absent' ? 'סיבת ההיעדרות' : 'סיבת האיחור';
+  var cntH = kind==='absent' ? 'נעדרים' : 'מאחרים';
+
+  var groups = data.blocks.map(function(b){
+    var list = kind==='absent'?b.absentList:b.lateList;
+    var cnt  = kind==='absent'?b.absentCount:b.lateCount;
+    var n = Math.max(6, list.length);
+    var body='';
+    for(var i=0;i<n;i++){
+      var it=list[i]; body+='<tr>';
+      if(i===0){
+        body+='<td class="cls" rowspan="'+n+'">'+esc(b.cls)+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+b.matzevet+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+b.presentCount+'</td>'
+            + '<td class="num" rowspan="'+n+'">'+cnt+'</td>';
+      }
+      body+='<td class="names">'+(i+1)+'. '+(it?esc(it.name):'')+'</td>'
+          + '<td class="reason">'+(it?esc(it.reason):'')+'</td>'
+          + '<td class="num">'+(it?it.days:'')+'</td></tr>';
+    }
+    // כל בלוק כיתה הוא tbody נפרד עם איסור שבירה
+    return '<tbody class="blk">'+body+'</tbody>';
+  }).join('');
+
+  return ''
+    + '<table class="rep">'
+    + '<thead>'
+    +   '<tr class="doctitle"><th colspan="7">'
+    +     '<div class="dt-wrap"><div class="dt-side">מסלול השוחרות<br>שלוחת אשקלון</div>'
+    +     '<div class="dt-mid"><div class="dt-t">'+title+'</div><div class="dt-d">'+niceDate(data.date)+'</div></div>'
+    +     '<div class="dt-side dt-left">תאריך '+shortDate(data.date)+'<br>בלמ"ס</div></div>'
+    +   '</th></tr>'
+    +   '<tr class="colhead">'
+    +     '<th>כיתה</th><th>מצבת</th><th>נוכחים</th><th>'+cntH+'</th>'
+    +     '<th>'+namesH+'</th><th>'+reasonH+'</th><th>סה"כ ימים</th></tr>'
+    + '</thead>'
+    + groups
+    + '</table>'
+    + '<div class="sign"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>';
 }
+
+function openPrintable(data){
+  var css = ''
+    + '@page{ size:A4 portrait; margin:12mm; }'
+    + '*{ box-sizing:border-box; }'
+    + 'html,body{ margin:0; padding:0; }'
+    + 'body{ font-family:"Rubik","Assistant",Arial,sans-serif; color:#12263C; direction:rtl; }'
+    + '.page{ page-break-after:always; }'
+    + '.page:last-child{ page-break-after:auto; }'
+    + '.rep{ width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed; }'
+    + '.rep th,.rep td{ border:0.6pt solid #0E3A66; padding:5px 6px; text-align:center; vertical-align:middle; word-wrap:break-word; }'
+    + '.doctitle th{ border:none; padding:0 0 8px; }'
+    + '.dt-wrap{ display:flex; align-items:stretch; border:1pt solid #0E3A66; }'
+    + '.dt-side{ width:26%; padding:8px 10px; font-size:11px; color:#3a4a5e; display:flex; flex-direction:column; justify-content:center; }'
+    + '.dt-left{ border-inline-start:1pt solid #0E3A66; text-align:center; }'
+    + '.dt-side:first-child{ border-inline-end:1pt solid #0E3A66; }'
+    + '.dt-mid{ flex:1; text-align:center; padding:10px; }'
+    + '.dt-t{ font-family:"Miriam Libre",serif; font-weight:700; font-size:19px; color:#0E3A66; }'
+    + '.dt-d{ font-size:12px; color:#3a4a5e; margin-top:4px; }'
+    + '.colhead th{ background:#0E3A66; color:#fff; font-weight:700; font-size:12px; }'
+    + '.rep .cls{ font-family:"Miriam Libre",serif; font-weight:700; font-size:16px; color:#0E3A66; background:#EEF4FA; }'
+    + '.rep .num{ font-weight:700; }'
+    + '.rep .names{ text-align:right; }'
+    + '.rep .reason{ text-align:right; color:#3a4a5e; }'
+    + '.rep col.c-cls{ width:8%; } .rep col.c-mat{ width:8%; } .rep col.c-pre{ width:9%; } .rep col.c-cnt{ width:8%; }'
+    + '.rep col.c-nam{ width:24%; } .rep col.c-rea{ width:27%; } .rep col.c-day{ width:8%; }'
+    + 'thead{ display:table-header-group; }'          // כותרת חוזרת בכל עמוד
+    + 'tbody.blk{ break-inside:avoid; page-break-inside:avoid; }'  // בלוק כיתה לא נחתך
+    + 'tr{ break-inside:avoid; }'
+    + '.sign{ display:flex; gap:24px; margin-top:16px; font-size:11px; color:#3a4a5e; }'
+    + '.sign span{ flex:1; } .sign i{ display:block; border-bottom:0.8pt solid #0E3A66; height:22px; margin-top:6px; }';
+
+  var cols = '<colgroup><col class="c-cls"><col class="c-mat"><col class="c-pre"><col class="c-cnt">'
+           + '<col class="c-nam"><col class="c-rea"><col class="c-day"></colgroup>';
+
+  var abs = printTableHTML(data,'absent').replace('<table class="rep">', '<table class="rep">'+cols);
+  var late = printTableHTML(data,'late').replace('<table class="rep">', '<table class="rep">'+cols);
+
+  var html = '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">'
+    + '<title>דוח אחד ' + shortDate(data.date) + '</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@400;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">'
+    + '<style>'+css+'</style></head><body>'
+    + '<div class="page">'+abs+'</div>'
+    + '<div class="page">'+late+'</div>'
+    + '<script>window.onload=function(){ setTimeout(function(){ window.focus(); window.print(); }, 400); };<\/script>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank');
+  if(!w){ toast('הדפדפן חסם את חלון ההדפסה. יש לאשר חלונות קופצים לאתר', true); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
 function closeModal(){ el('modalHost').innerHTML=''; }
 
 </script>

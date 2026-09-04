@@ -354,41 +354,6 @@
     body{background:#fff;} main{padding:0; max-width:none;}
     .formdoc{page-break-after:always; margin-bottom:0;}
   }
-
-
-  /* ============ V10: תאריכים, דשבורד שוחר ואפסנאות ============ */
-  .v10-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
-  .datebox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;}
-  .datebox label{margin:0;font-size:12.5px;color:var(--muted);}
-  .datebox input{width:auto;padding:6px 8px;font-size:14px;border-radius:6px;}
-  .studenttabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-  .studenttabs .btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
-  .datechips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin-bottom:4px;scrollbar-width:thin;}
-  .datechip{white-space:nowrap;border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 12px;border-radius:9px;font-weight:600;font-size:13px;}
-  .datechip.on{border-color:var(--blue);background:var(--sky-soft);color:var(--navy);}
-  .datechip.closed{opacity:.65;}
-  .futuretag{display:inline-block;margin-inline-start:7px;padding:2px 7px;border-radius:999px;background:var(--sky-soft);color:var(--blue);font-size:11px;font-weight:700;vertical-align:middle;}
-  .student-link{border:0;background:transparent;color:var(--navy);font:inherit;font-weight:700;padding:0;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;cursor:pointer;}
-  .lockbox{border:1px solid #E7C786;border-inline-start:4px solid var(--late);background:#FFF9EC;padding:18px;border-radius:10px;margin-bottom:16px;}
-  .lockbox h3{margin:0 0 5px;font-family:var(--display);font-size:20px;}
-  .metricgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0;}
-  .metriccard{border:1px solid var(--line);background:#fff;border-radius:10px;padding:14px;}
-  .metriccard .mv{font-family:var(--display);font-size:28px;font-weight:700;color:var(--navy);line-height:1.1;}
-  .metriccard .ml{font-size:12.5px;color:var(--muted);margin-top:5px;}
-  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .supply-list{display:grid;gap:10px;}
-  .supply-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px;}
-  .supply-card .meta{font-size:12.5px;color:var(--muted);margin-top:5px;}
-  .statuspill{display:inline-block;padding:3px 8px;border-radius:999px;background:var(--sky-soft);color:var(--navy);font-size:12px;font-weight:700;}
-  .inventory-table{width:100%;border-collapse:collapse;font-size:14px;}
-  .inventory-table th,.inventory-table td{border-bottom:1px solid var(--line-2);padding:10px;text-align:right;vertical-align:middle;}
-  .inventory-table th{font-size:12.5px;color:var(--muted);}
-  .inventory-table input,.inventory-table select{padding:7px 9px;font-size:14px;min-width:78px;}
-  .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
-  .checkitem{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:10px;}
-  .checkitem input{width:auto;}
-  @media(max-width:850px){.metricgrid{grid-template-columns:1fr 1fr}.twocol{grid-template-columns:1fr}.v10-toolbar{align-items:stretch}.datebox{width:100%;justify-content:space-between}.datebox input{flex:1}.checkgrid{grid-template-columns:1fr}}
-
 </style>
 </head>
 <body>
@@ -466,7 +431,7 @@ var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWko
 var SERVED   = ('__SERVED__' === 'true');
 var EXEC_URL = '__EXEC_URL__';
 
-var CLIENT_VERSION = 'v10 2026/09/04';
+var CLIENT_VERSION = 'v9 2026/09/03';
 var MODE = 'pending';   // pending, live, remote, none
 
 function apiReady(){ return !!(window.google && google.script && google.script.run); }
@@ -574,7 +539,7 @@ function doLogin(){
   callServer('login', id).then(function(r){
     el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת';
     if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
-    App.token=r.token; App.profile=r.profile; App.initial=r.initial||null; saveSession_();
+    App.token=r.token; App.profile=r.profile; App.initial=r.initial||null;
     if(r.version) App.serverVersion=r.version;
     el('idInput').value = '';   // מנקים את השדה מיד אחרי כניסה מוצלחת
     enterPortal();
@@ -586,7 +551,7 @@ function enterPortal(){
   var p=App.profile;
   el('whoName').textContent = p.name||'';
   el('whoRole').textContent = p.kind==='student' ? ('כיתה '+p.cls) : (p.role + (p.rank?(' | '+p.rank):''));
-  el('stripDate').innerHTML = '<b>'+niceDate(App.date)+'</b>';
+  el('stripDate').innerHTML = 'מסדר בוקר <b>'+niceDate(App.date)+'</b>';
   el('stripScope').innerHTML = p.kind==='student' ? 'דיווח אישי'
     : ('היקף אחריות <b>'+(p.canSeeAll ? 'כלל השלוחה' : ('כיתות '+p.classes.join(', ')))+'</b>');
   var vn = el('verNote');
@@ -600,7 +565,7 @@ function enterPortal(){
 }
 el('logoutBtn').addEventListener('click', function(){
   stopPolling();
-  App.token=null; App.profile=null; App.initial=null; clearSession_();
+  App.token=null; App.profile=null; App.initial=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
   el('idInput').value=''; el('idInput').focus();
 });
@@ -822,7 +787,7 @@ function tipsBlock(){
     + '</div>';
 }
 
-function drawStudentV9(){
+function drawStudent(){
   var d = stu.day;
 
   var bd = (d.birthdays && d.birthdays.length)
@@ -870,7 +835,7 @@ function drawStudentV9(){
       + '<textarea id="reasonInp" rows="3" placeholder="למשל ביקור רופא, אישור הורים">'+esc(stu.reason)+'</textarea></div>'
     : '';
 
-  var panelTitle = (!stu.picking && stu.status) ? ('הדיווח שלי ל-'+shortDate(App.date)) : 'בחירת סטטוס';
+  var panelTitle = (!stu.picking && stu.status) ? 'הדיווח שלי להיום' : 'בחירת סטטוס';
 
   el('view').innerHTML = '<div class="fade">'+bd+heroBlock(d)+verdictBlock(d)
     + (d.afterCutoff && !d.report
@@ -941,12 +906,12 @@ function renderCommander(fromCache){
     .catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
 }
 
-function paintCommanderV9(d){
+function paintCommander(d){
   (function(){
     cmdState.data=d;
     var p=App.profile;
     var bar = p.canGenerate
-      ? '<div class="toolbar"><button class="btn gold" id="genBtn">הפקת דוח לתאריך הנבחר</button>'
+      ? '<div class="toolbar"><button class="btn gold" id="genBtn">הפקת דוח להיום</button>'
         + (p.canSeeAll ? '<button class="btn ghost" id="dashBtn">מבט שלוחה</button>' : '') + '</div>'
       : '';
     if(!d.classes.length){
@@ -981,7 +946,7 @@ function classSummary(c){
       }).join('') + '</span>';
 }
 
-function renderClassPaneV9(){
+function renderClassPane(){
   var c = cmdState.data.classes[cmdState.active], statuses = cmdState.data.statuses, ok = c.canApprove;
 
   var visible = c.students.filter(function(s){
@@ -1013,11 +978,11 @@ function renderClassPaneV9(){
 
   if(!rows) rows = '<tr><td colspan="5" class="muted center" style="padding:34px">לא נמצא שוחר בשם הזה</td></tr>';
 
-  var cutoffCtl = ok && App.date===todayStr()
+  var cutoffCtl = ok
     ? '<div><div style="display:flex;align-items:center;gap:9px"><span class="sub">שעת נוכחות אחרונה</span>'
       +'<input id="cutoffInp" type="time" value="'+esc(c.cutoff)+'" style="width:auto;padding:7px 10px">'
       +'<button class="btn slim sm" id="cutoffBtn">שמירה</button></div>'
-      +'<div class="sub" style="margin-top:6px;font-size:12.5px">השעה תקפה עד שהיא חולפת; מיד לאחר מכן שעת הדיווח חוזרת ל-08:00</div></div>'
+      +'<div class="sub" style="margin-top:6px;font-size:12.5px">תקף להיום בלבד. מחר בבוקר חוזר ל 08:00</div></div>'
     : '<span class="sub">שעת נוכחות אחרונה <b>'+esc(c.cutoff)+'</b></span>';
 
   // כרטיסים לטלפון עם בחירה בהקשה, בלי תפריט נפתח
@@ -1412,7 +1377,7 @@ function renderDashboard(){ el('view').innerHTML=spinner();
     }).join('');
     el('view').innerHTML='<div class="fade">'
       + '<div class="toolbar"><button class="btn ghost" id="backCmd">חזרה לכיתות</button>'
-      + (App.profile.canGenerate?'<button class="btn gold" id="genBtn2">הפקת דוח לתאריך הנבחר</button>':'')+'</div>'
+      + (App.profile.canGenerate?'<button class="btn gold" id="genBtn2">הפקת דוח להיום</button>':'')+'</div>'
       + '<div class="stat-strip">'
       +   '<div class="stat gold"><div class="n">'+totM+'</div><div class="l">מצבת חניכים</div></div>'
       +   '<div class="stat"><div class="n">'+totP+'</div><div class="l">נוכחים</div></div>'
@@ -1426,7 +1391,6 @@ function renderDashboard(){ el('view').innerHTML=spinner();
       + '</tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
     el('backCmd').addEventListener('click', renderCommander);
     if(el('genBtn2')) el('genBtn2').addEventListener('click', openGenerate);
-    augmentCommanderDateUI_();
   }).catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
 }
 
@@ -1518,7 +1482,7 @@ function reportDoc(data, kind){
     + '<div style="overflow-x:auto"><table class="rep"><thead><tr>'
     +   '<th>כיתה</th><th>מצבת חניכים</th><th>חניכים נוכחים</th><th>'+cntH+'</th>'
     +   '<th>'+namesH+'</th><th>'+reasonH+'</th><th>סה"כ ימים</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    + '<div class="signrow"><span>עורך הדוח: <b>'+esc(editorLabel_(data))+'</b><i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>'
+    + '<div class="signrow"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>'
     + '</div>';
 }
 
@@ -1567,7 +1531,7 @@ function printTableHTML(data, kind){
     + '</thead>'
     + groups
     + '</table>'
-    + '<div class="sign"><span>עורך הדוח: <b>'+esc(editorLabel_(data))+'</b><i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>';
+    + '<div class="sign"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>';
 }
 
 function openPrintable(data){
@@ -1620,235 +1584,6 @@ function openPrintable(data){
   if(!w){ toast('הדפדפן חסם את חלון ההדפסה. יש לאשר חלונות קופצים לאתר', true); return; }
   w.document.open(); w.document.write(html); w.document.close();
 }
-
-
-/* ======================================================================
-   V10 - לקוח: סנכרון מהיר, שמירת התחברות, תאריכים, נעילות ואפסנאות
-   ====================================================================== */
-var lastRevision = null;
-var syncPingBusy = false;
-var SESSION_KEY = 'dohehad_session_v10';
-
-function saveSession_(){
-  try{ if(App.token&&App.profile) localStorage.setItem(SESSION_KEY, JSON.stringify({token:App.token,profile:App.profile})); }catch(e){}
-}
-function clearSession_(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
-
-function editorLabel_(data){
-  if(!data||!data.editor) return 'פרטי המנפיק אינם זמינים';
-  return data.editor.label || [data.editor.name,(data.editor.rank||'דרגה לא הוזנה'),data.editor.role].filter(Boolean).join(' | ');
-}
-function isoDate_(slash){ return String(slash||'').replace(/\//g,'-'); }
-function slashDate_(iso){ return String(iso||'').replace(/-/g,'/'); }
-function addClientDays_(slash,n){ var p=slash.split('/'),d=new Date(+p[0],+p[1]-1,+p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0'); }
-function isManager_(){ return App.profile && (App.profile.role==='ראש צוות'||App.profile.role==='מפקד שלוחה'); }
-function setStripDate_(){ if(el('stripDate')) el('stripDate').innerHTML='<b>'+niceDate(App.date)+'</b>'; }
-
-/* בדיקת רקע זעירה בלבד; הנתונים המלאים נמשכים רק אם revision השתנה. */
-function startPolling(){
-  stopPolling(); lastRevision=null; syncPingBusy=false;
-  pollTick();
-  var ms=(App.profile&&App.profile.kind==='commander')?1200:3500;
-  pollTimer=setInterval(pollTick,ms);
-}
-function pollTick(){
-  if(!App.token||busyNow()||syncPingBusy) return;
-  syncPingBusy=true;
-  callServer('syncPing',App.token).then(function(r){
-    syncPingBusy=false;
-    if(!r) return;
-    expireCutoffsV10_(r.now);
-    if(lastRevision===null){lastRevision=r.revision;return;}
-    if(r.revision===lastRevision) return;
-    lastRevision=r.revision;
-    refreshVisibleV10_();
-  }).catch(function(){syncPingBusy=false;});
-}
-
-function clientMinutesV10_(hm){var m=String(hm||'').match(/^(\d{1,2}):(\d{2})$/);return m?(+m[1]*60 + +m[2]):-1;}
-function expireCutoffsV10_(serverNow){
-  if(App.date!==todayStr())return;var now=clientMinutesV10_(serverNow);if(now<0)return;
-  var changed=false;
-  if(App.profile&&App.profile.kind==='commander'&&cmdState.data){cmdState.data.classes.forEach(function(c){if(c.cutoff&&c.cutoff!=='08:00'&&now>clientMinutesV10_(c.cutoff)){c.cutoff='08:00';changed=true;}});if(changed&&App.viewMode==='commander'&&!busyNow())renderClassPane();}
-  if(App.profile&&App.profile.kind==='student'&&stu.day&&stu.day.cutoff&&stu.day.cutoff!=='08:00'&&now>clientMinutesV10_(stu.day.cutoff)){stu.day.cutoff='08:00';stu.day.afterCutoff=now>clientMinutesV10_('08:00');if(App.viewMode==='student'&&!busyNow())drawStudent();}
-}
-
-function refreshVisibleV10_(){
-  if(!App.profile||busyNow()) return;
-  if(App.profile.kind==='student'){
-    if(App.viewMode&&App.viewMode!=='student') return;
-    callServer('studentGetDay',App.token,App.date).then(function(d){if(!busyNow()){paintStudent(d);showUpdatedFlash();}}).catch(function(){});
-    return;
-  }
-  if(App.viewMode&&App.viewMode!=='commander') return;
-  var keep=cmdState.active;
-  callServer('commanderGetClasses',App.token,App.date).then(function(d){
-    if(busyNow())return; paintCommander(d); if(cmdState.data&&keep<cmdState.data.classes.length){cmdState.active=keep;renderTabs();renderClassPane();} showUpdatedFlash();
-  }).catch(function(){});
-}
-
-/* שחזור התחברות לאחר Refresh. היציאה המפורשת היא שמוחקת אותה. */
-(function restoreSessionV10(){
-  var raw=null; try{raw=localStorage.getItem(SESSION_KEY);}catch(e){}
-  if(!raw) return;
-  var saved; try{saved=JSON.parse(raw);}catch(e){clearSession_();return;}
-  if(!saved||!saved.token||!saved.profile){clearSession_();return;}
-  var ready=(MODE==='live')?waitForApi(20000):Promise.resolve(true);
-  ready.then(function(){
-    App.token=saved.token;App.profile=saved.profile;App.initial=null;App.date=todayStr();
-    return callServer('syncPing',App.token);
-  }).then(function(r){
-    lastRevision=r&&r.revision?r.revision:null; enterPortal();
-  }).catch(function(){ App.token=null;App.profile=null;clearSession_(); });
-})();
-
-/* ---------- מסך שוחר ---------- */
-function heroBlock(d){
-  var st=stu.status,badge=st?ic(statusIcon(st)):ic('hourglass');
-  var meta='<span>כיתה <b>'+esc(d.cls)+'</b></span>';
-  if(d.isFuture) meta+='<span><b>דיווח עתידי</b> - ניתן לשינוי עד '+esc(d.futureEditUntil||'07:20')+' ביום הדיווח</span>';
-  else meta+='<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span>';
-  return '<div class="hero"><div class="h-date">'+niceDate(App.date)+'</div><div class="h-meta">'+meta+'</div>'
-    +'<div class="h-status"><div class="h-badge">'+badge+'</div><div><div class="h-lbl">הסטטוס שלי בתאריך זה</div><div class="h-val">'+(st?esc(st):'טרם דווח')+'</div></div></div></div>';
-}
-function tipsBlock(){
-  var d=stu.day||{};
-  if(d.isFuture) return '<div class="tips"><div class="tip"><div class="t-ic">'+ic('clock')+'</div><div>דיווח עתידי ניתן לעדכון על ידי השוחר עד <b>07:20</b> בבוקר יום הדיווח. לאחר מכן רק מפקד יכול לשנותו.</div></div></div>';
-  return '<div class="tips"><div class="tip"><div class="t-ic">'+ic('clock')+'</div><div>דיווח נוכחות אפשרי עד השעה שנקבעה לכיתה. לאחר מכן יש לפנות למפקד.</div></div><div class="tip"><div class="t-ic">'+ic('check')+'</div><div>לאחר אישור מפקד, דיווח רגיל ננעל.</div></div></div>';
-}
-function studentTabsV10_(d,active){
-  var chips='';
-  if(d&&d.dateOptions){chips='<div class="datechips">'+d.dateOptions.map(function(x){var cl='datechip'+(x.date===App.date?' on':'')+((x.locked||x.isFuture&&!x.futureOpen)?' closed':'');return '<button class="'+cl+'" data-studate="'+esc(x.date)+'">'+shortDate(x.date)+(x.isFuture&&!x.futureOpen?' - סגור':'')+'</button>';}).join('')+'</div>';}
-  return '<div class="studenttabs"><button class="btn ghost '+(active==='attendance'?'on':'')+'" id="stuTabAttendance">נוכחות</button><button class="btn ghost '+(active==='supply'?'on':'')+'" id="stuTabSupply">אפסנאות</button></div>'+chips;
-}
-function bindStudentTabsV10_(d){
-  if(el('stuTabAttendance'))el('stuTabAttendance').addEventListener('click',function(){App.viewMode='student';renderStudent();});
-  if(el('stuTabSupply'))el('stuTabSupply').addEventListener('click',renderStudentSupplyV10_);
-  document.querySelectorAll('[data-studate]').forEach(function(b){b.addEventListener('click',function(){App.date=b.getAttribute('data-studate');setStripDate_();renderStudent();});});
-}
-function drawStudent(){
-  var d=stu.day;App.viewMode='student';setStripDate_();
-  if(d.interfaceLocked||d.futureClosed){
-    var msg=d.interfaceLocked?(d.lockMessage||'הממשק נעול ליום זה'):'דיווח עתידי ליום זה טרם נפתח על ידי ראש צוות או מפקד השלוחה.';
-    el('view').innerHTML='<div class="fade">'+studentTabsV10_(d,'attendance')+heroBlock(d)+verdictBlock(d)+'<div class="lockbox"><h3>הדיווח נעול</h3><div>'+esc(msg)+'</div></div></div>';
-    bindStudentTabsV10_(d);return;
-  }
-  drawStudentV9();
-  var root=el('view').firstElementChild;if(root)root.insertAdjacentHTML('afterbegin',studentTabsV10_(d,'attendance')+(d.isFuture?'<div class="banner lock"><b>דיווח עתידי</b> - הדיווח יסומן כך גם אצל המפקד.</div>':''));
-  bindStudentTabsV10_(d);
-}
-function renderStudentSupplyV10_(){
-  App.viewMode='studentSupply';el('view').innerHTML=spinner();
-  callServer('studentSupplyGet',App.token).then(function(d){
-    var inv=d.inventory.map(function(x){return '<tr><td class="name">'+esc(x.item)+'</td><td>'+x.quantity+'</td><td>'+esc(x.size||'אוניברסלי')+'</td><td>'+esc(x.signedAt||'לא הוזן')+'</td><td>'+esc(x.provider||'')+'</td></tr>';}).join('');
-    var req=d.requests.map(function(r){var confirm=r.status==='ממתינה לאישור שוחר'?'<button class="btn gold sm supply-confirm" data-r="'+esc(r.requestId)+'">לחץ לאישור קבלת ההזמנה</button>':'';return '<div class="supply-card"><div><b>'+esc(r.products.join(', '))+'</b> <span class="statuspill">'+esc(r.status)+'</span></div><div class="meta">בקשה: '+esc(r.createdAt)+' | גזרה: '+esc(r.gender)+'</div><div style="margin-top:6px">סיבה: '+esc(r.reason)+'</div>'+(r.provider?'<div class="meta">מדריך מספק: '+esc(r.provider)+'</div>':'')+(r.signedAt?'<div class="meta">תאריך חתימה: '+esc(r.signedAt)+'</div>':'')+(r.takenAt?'<div class="meta">תאריך לקיחת המדים: '+esc(r.takenAt)+'</div>':'')+(confirm?'<div style="margin-top:10px">'+confirm+'</div>':'')+'</div>';}).join('')||'<div class="muted">אין בקשות אפסנאות.</div>';
-    el('view').innerHTML='<div class="fade">'+studentTabsV10_(null,'supply')+'<div class="toolbar"><button class="btn gold" id="newSupplyReq">בקשה להחלפת מדים</button></div>'
-      +'<div class="panel"><div class="head"><h2>הפריטים הרשומים על שמי</h2></div><div class="body" style="overflow-x:auto"><table class="inventory-table"><thead><tr><th>מוצר</th><th>כמות</th><th>מידה</th><th>תאריך חתימה</th><th>מדריך מספק</th></tr></thead><tbody>'+inv+'</tbody></table></div></div>'
-      +'<div class="panel"><div class="head"><h2>בקשות החלפה</h2></div><div class="body supply-list">'+req+'</div></div></div>';
-    bindStudentTabsV10_(null);el('newSupplyReq').addEventListener('click',function(){openStudentSupplyRequestV10_(d.sizes);});
-    document.querySelectorAll('.supply-confirm').forEach(function(b){b.addEventListener('click',function(){b.disabled=true;callServer('studentSupplyConfirm',App.token,b.getAttribute('data-r')).then(function(){toast('קבלת ההזמנה אושרה');renderStudentSupplyV10_();}).catch(function(e){b.disabled=false;toast(e.message,true);});});});
-  }).catch(function(e){el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>';});
-}
-function openStudentSupplyRequestV10_(sizes){
-  var products=(sizes.items||[]).map(function(x){return '<label class="checkitem"><input type="checkbox" class="req-prod" value="'+esc(x)+'"> '+esc(x)+'</label>';}).join('');
-  el('modalHost').innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body"><h3>בקשה להחלפת מדים</h3><label>גזרת המדים</label><select id="reqGender"><option value="">בחירה</option><option>בנים</option><option>בנות</option></select><label style="margin-top:14px">מוצרים</label><div class="checkgrid">'+products+'</div><label style="margin-top:14px">סיבת ההחלפה</label><textarea id="reqReason" rows="3" placeholder="חובה לפרט מדוע נדרשת החלפה"></textarea><div class="m-actions"><button class="btn gold" id="reqSend">שליחת בקשה</button><button class="btn ghost" id="reqCancel">ביטול</button></div></div></div></div>';
-  el('reqCancel').addEventListener('click',closeModal);el('reqSend').addEventListener('click',function(){var prods=Array.from(document.querySelectorAll('.req-prod:checked')).map(function(x){return x.value;});var reason=el('reqReason').value.trim(),gender=el('reqGender').value;if(!gender){toast('יש לבחור גזרת מדים',true);return;}if(!prods.length){toast('יש לבחור לפחות מוצר אחד',true);return;}if(!reason){toast('חובה לציין סיבת החלפה',true);return;}el('reqSend').disabled=true;callServer('studentSupplyRequest',App.token,gender,prods,reason).then(function(){closeModal();toast('הבקשה נפתחה');renderStudentSupplyV10_();}).catch(function(e){el('reqSend').disabled=false;toast(e.message,true);});});
-}
-
-/* ---------- מסך מפקד ---------- */
-function paintCommander(d){App.viewMode='commander';setStripDate_();paintCommanderV9(d);augmentCommanderDateUI_();}
-function commanderDateHtml_(){
-  return '<div class="v10-toolbar" id="v10CommanderTools"><div class="datebox"><label for="cmdDateV10">תאריך עבודה</label><input type="date" id="cmdDateV10" min="2026-09-01" max="'+isoDate_(addClientDays_(todayStr(),7))+'" value="'+isoDate_(App.date)+'"></div>'
-    +'<button class="btn ghost" id="supplyOverviewBtn">אפסנאות ובקשות</button>'+(isManager_()?'<button class="btn ghost" id="dayCtrlBtn">ניהול יום דיווח</button>'+((App.date>=todayStr())?'<button class="btn ghost" id="bulkAllBtn">דיווח גורף לשלוחה</button>':''):'')+'</div>';
-}
-function augmentCommanderDateUI_(){
-  if(!el('view')||el('v10CommanderTools'))return;
-  var fade=el('view').querySelector('.fade')||el('view');fade.insertAdjacentHTML('afterbegin',commanderDateHtml_());
-  var inp=el('cmdDateV10');if(inp)inp.addEventListener('change',function(){changeCommanderDateV10_(slashDate_(inp.value));});
-  if(el('supplyOverviewBtn'))el('supplyOverviewBtn').addEventListener('click',renderCommanderSupplyOverviewV10_);
-  if(el('dayCtrlBtn'))el('dayCtrlBtn').addEventListener('click',openDayControlV10_);
-  if(el('bulkAllBtn'))el('bulkAllBtn').addEventListener('click',function(){openBulkV10_('ALL');});
-  document.querySelectorAll('#genBtn,#genBtn2').forEach(function(b){b.textContent='הפקת דוח לתאריך '+shortDate(App.date);});
-}
-function changeCommanderDateV10_(dateStr){
-  if(pendingCount()>0){flushOutbox();toast('מסיים שמירה לפני מעבר תאריך');setTimeout(function(){changeCommanderDateV10_(dateStr);},350);return;}
-  App.date=dateStr;setStripDate_();cmdState.active=0;filterText='';renderCommander();
-}
-function renderClassPane(){
-  if(!cmdState.data||!cmdState.data.classes.length)return;
-  var c=cmdState.data.classes[cmdState.active],orig=c.canApprove;
-  var allowed=!cmdState.data.interfaceLocked && (!cmdState.data.futureClosed || isManager_());
-  c.canApprove=orig&&allowed;renderClassPaneV9();c.canApprove=orig;
-  var pane=el('classPane');if(!pane)return;
-  if(cmdState.data.interfaceLocked){pane.insertAdjacentHTML('afterbegin','<div class="lockbox"><h3>הממשק נעול לתאריך זה</h3><div>'+esc((cmdState.data.dayControl&&cmdState.data.dayControl.message)||'אין לדווח ביום זה')+'</div></div>');}
-  else if(cmdState.data.futureClosed&&!isManager_()){pane.insertAdjacentHTML('afterbegin','<div class="lockbox"><h3>דיווח עתידי סגור</h3><div>היום העתידי טרם נפתח על ידי ראש צוות או מפקד השלוחה.</div></div>');}
-  else if(cmdState.data.isFuture){pane.insertAdjacentHTML('afterbegin','<div class="banner lock"><b>תאריך עתידי.</b> דיווחים קיימים מסומנים כ"דיווח עתידי". שינוי שוחר אפשרי עד 07:20 ביום הדיווח.</div>');}
-  var visible=c.students.filter(function(s){return !filterText||s.name.indexOf(filterText)>=0;});
-  var trs=pane.querySelectorAll('.rostertable tbody tr');trs.forEach(function(tr,i){var s=visible[i],nm=tr.querySelector('.name');if(!s||!nm)return;nm.classList.add('student-link');nm.setAttribute('data-student',s.id);if(s.futureReport)nm.insertAdjacentHTML('afterend','<span class="futuretag">דיווח עתידי</span>');});
-  var cards=pane.querySelectorAll('.cardlist .scard');cards.forEach(function(card,i){var s=visible[i],nm=card.querySelector('.nm');if(!s||!nm)return;nm.classList.add('student-link');nm.setAttribute('data-student',s.id);if(s.futureReport)nm.insertAdjacentHTML('beforeend','<span class="futuretag">דיווח עתידי</span>');});
-  pane.querySelectorAll('[data-student]').forEach(function(x){x.addEventListener('click',function(e){e.preventDefault();openStudentDashboardV10_(x.getAttribute('data-student'));});});
-  var foot=pane.querySelector('.approveall-foot');
-  if(foot&&!cmdState.data.interfaceLocked&&App.profile.role!=='עוזר'&&(App.date===todayStr()||(isManager_()&&App.date>todayStr()))){var b=document.createElement('button');b.className='btn ghost';b.id='bulkClassBtn';b.textContent='דיווח גורף לכיתה';b.addEventListener('click',function(){openBulkV10_(c.cls);});foot.appendChild(b);}
-  augmentCommanderDateUI_();
-}
-function openDayControlV10_(){
-  var d=cmdState.data&&cmdState.data.dayControl?cmdState.data.dayControl:{futureOpen:false,locked:false,message:''};var future=(App.date>todayStr());
-  el('modalHost').innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body"><h3>ניהול יום דיווח - '+shortDate(App.date)+'</h3>'+(future?'<label class="checkitem"><input type="checkbox" id="futureOpenChk" '+(d.futureOpen?'checked':'')+'> פתיחת דיווח עתידי לשוחרים</label>':'')+'<label class="checkitem" style="margin-top:10px"><input type="checkbox" id="lockDayChk" '+(d.locked&&!d.automaticWeekend?'checked':'')+'> נעילת ממשק ליום זה</label><label style="margin-top:14px">הודעה שתוצג כאשר היום נעול</label><textarea id="dayMsg" rows="3" placeholder="לדוגמה: היום אין מסדר נוכחות">'+esc(d.message||'')+'</textarea><div class="m-actions"><button class="btn gold" id="saveDayCtrl">שמירה</button><button class="btn ghost" id="cancelDayCtrl">ביטול</button></div></div></div></div>';
-  el('cancelDayCtrl').addEventListener('click',closeModal);el('saveDayCtrl').addEventListener('click',function(){var fo=el('futureOpenChk')?el('futureOpenChk').checked:false,lk=el('lockDayChk').checked,msg=el('dayMsg').value.trim();el('saveDayCtrl').disabled=true;callServer('setDayControl',App.token,App.date,fo,lk,msg).then(function(){closeModal();toast('הגדרות יום הדיווח נשמרו');renderCommander();}).catch(function(e){el('saveDayCtrl').disabled=false;toast(e.message,true);});});
-}
-function openBulkV10_(scope){
-  var opts=(cmdState.data?cmdState.data.statuses:[]).map(function(x){return '<option>'+esc(x)+'</option>';}).join('');
-  el('modalHost').innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body"><h3>דיווח גורף - '+(scope==='ALL'?'כל השלוחה':'כיתה '+esc(scope))+'</h3><div class="hint">תאריך: '+shortDate(App.date)+(App.date>todayStr()?' | דיווח עתידי':'')+'</div><label>סטטוס</label><select id="bulkStatus">'+opts+'</select><label style="margin-top:14px">סיבה / פירוט</label><textarea id="bulkReason" rows="3" placeholder="חובה לכל סטטוס שאינו נוכח"></textarea><div class="m-actions"><button class="btn gold" id="bulkGo">ביצוע דיווח גורף</button><button class="btn ghost" id="bulkCancel">ביטול</button></div></div></div></div>';
-  el('bulkCancel').addEventListener('click',closeModal);el('bulkGo').addEventListener('click',function(){var st=el('bulkStatus').value,rs=el('bulkReason').value.trim();if(st!=='נוכח'&&!rs){toast('חובה לפרט סיבה',true);return;}el('bulkGo').disabled=true;callServer('commanderBulkSet',App.token,App.date,scope,st,rs).then(function(r){closeModal();toast('עודכנו '+r.count+' שוחרים');renderCommander();}).catch(function(e){el('bulkGo').disabled=false;toast(e.message,true);});});
-}
-function pctV10_(x){return x==null?'--':(x+'%');}
-function openStudentDashboardV10_(id){
-  App.viewMode='studentDashboard';el('view').innerHTML=spinner();callServer('studentDashboard',App.token,id).then(function(d){
-    var m=d.metrics,s=d.student;
-    var metricCards=[['נוכחות השבוע',pctV10_(m.week.percent)],['נוכחות 30 יום',pctV10_(m.last30.percent)],['נוכחות מתחילת החודש',pctV10_(m.month.percent)],['נוכחות מתחילת המחצית',pctV10_(m.semester.percent)],['נוכחות מתחילת השנה',pctV10_(m.year.percent)]].map(function(x){return '<div class="metriccard"><div class="mv">'+x[1]+'</div><div class="ml">'+x[0]+'</div></div>';}).join('');
-    var inv=d.inventory.map(function(x){return inventoryRowV10_(x,d.sizes,d.canEditSupply);}).join('');
-    var req=d.requests.map(function(r){return requestCardCommanderV10_(r,d.canEditSupply);}).join('')||'<div class="muted">אין בקשות.</div>';
-    el('view').innerHTML='<div class="fade"><div class="toolbar"><button class="btn ghost" id="backStudentDash">חזרה לכיתה</button></div><div class="panel"><div class="head"><div><h2>'+esc(s.name)+'</h2><div class="sub">כיתה '+esc(s.cls)+' | מזהה התחברות <b>'+esc(s.loginId)+'</b></div></div></div><div class="body"><div class="twocol"><div><b>מספר אישי:</b> '+esc(s.personalNumber||'לא הוזן')+'</div><div><b>תעודת זהות:</b> '+esc(s.idNumber||'לא הוזנה')+'</div></div><div class="metricgrid">'+metricCards+'</div><div class="stat-strip" style="margin:0"><div class="stat late"><div class="n">'+m.week.late+'</div><div class="l">איחורים מתחילת השבוע</div></div><div class="stat red"><div class="n">'+m.week.absent+'</div><div class="l">היעדרויות מתחילת השבוע</div></div><div class="stat red"><div class="n">'+m.week.noReport+'</div><div class="l">לא דיווח מתחילת השבוע</div></div><div class="stat gold"><div class="n">'+m.year.late+'</div><div class="l">איחורים מאז 1.9.26</div></div></div><div class="hint">מאז 1.9.26: '+m.year.absent+' היעדרויות, '+m.year.noReport+' ימי אי-דיווח. ימי שישי, שבת וימים שננעלו כיום ללא דיווח אינם נספרים.</div></div></div>'
-      +'<div class="panel"><div class="head"><h2>אפסנאות</h2></div><div class="body" style="overflow-x:auto"><table class="inventory-table"><thead><tr><th>מוצר</th><th>כמות חתומה</th><th>גזרה</th><th>מידה</th><th>תאריך חתימה</th><th>מדריך מספק</th></tr></thead><tbody>'+inv+'</tbody></table>'+(d.canEditSupply?'<button class="btn gold" id="saveInventory" style="margin-top:14px">שמירת נתוני אפסנאות</button>':'')+'</div></div>'
-      +'<div class="panel"><div class="head"><h2>בקשות החלפה</h2></div><div class="body supply-list">'+req+'</div></div></div>';
-    el('backStudentDash').addEventListener('click',function(){App.viewMode='commander';renderCommander();});
-    if(el('saveInventory'))el('saveInventory').addEventListener('click',function(){saveInventoryV10_(s.id,d.inventory);});
-    document.querySelectorAll('.issue-req').forEach(function(b){b.addEventListener('click',function(){b.disabled=true;callServer('commanderSupplyIssue',App.token,b.getAttribute('data-r')).then(function(){toast('ההזמנה סומנה כהונפקה וממתינה לאישור השוחר');openStudentDashboardV10_(s.id);}).catch(function(e){b.disabled=false;toast(e.message,true);});});});
-  }).catch(function(e){el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>';});
-}
-function inventoryRowV10_(x,sizes,edit){
-  function options(arr,val){return '<option value=""></option>'+arr.map(function(z){return '<option '+(String(z)===String(val)?'selected':'')+'>'+esc(z)+'</option>';}).join('');}
-  var size=x.size||'',sizeCtl;
-  if(x.item==='חולצות')sizeCtl=edit?'<select class="inv-size" data-item="'+esc(x.item)+'">'+options(sizes.shirts,size)+'</select>':esc(size||'לא הוזן');
-  else if(x.item==='מכנסיים')sizeCtl=edit?'<select class="inv-size" data-item="'+esc(x.item)+'">'+options(sizes.pants,size)+'</select>':esc(size||'לא הוזן');
-  else if(x.item==='נעליים')sizeCtl=edit?'<select class="inv-size" data-item="'+esc(x.item)+'">'+options(sizes.shoes,size)+'</select>':esc(size||'לא הוזן');
-  else sizeCtl='אוניברסלי';
-  var gender=(x.item==='חולצות'||x.item==='מכנסיים')?(edit?'<select class="inv-gender" data-item="'+esc(x.item)+'"><option></option><option '+(x.gender==='בנים'?'selected':'')+'>בנים</option><option '+(x.gender==='בנות'?'selected':'')+'>בנות</option></select>':esc(x.gender||'לא הוזן')):'-';
-  var qty=edit?'<input type="number" min="0" class="inv-qty" data-item="'+esc(x.item)+'" value="'+x.quantity+'">':x.quantity;
-  return '<tr data-invitem="'+esc(x.item)+'"><td class="name">'+esc(x.item)+'</td><td>'+qty+'</td><td>'+gender+'</td><td>'+sizeCtl+'</td><td>'+esc(x.signedAt||'לא הוזן')+'</td><td>'+esc(x.provider||'')+'</td></tr>';
-}
-function saveInventoryV10_(studentId,original){
-  var items=original.map(function(x){var row=document.querySelector('tr[data-invitem="'+x.item+'"]'),q=row&&row.querySelector('.inv-qty'),sz=row&&row.querySelector('.inv-size'),g=row&&row.querySelector('.inv-gender');return {item:x.item,quantity:q?+q.value:x.quantity,size:sz?sz.value:x.size,gender:g?g.value:x.gender,signedAt:x.signedAt||''};});
-  el('saveInventory').disabled=true;callServer('commanderSupplyUpdate',App.token,studentId,items).then(function(){toast('נתוני האפסנאות נשמרו');openStudentDashboardV10_(studentId);}).catch(function(e){el('saveInventory').disabled=false;toast(e.message,true);});
-}
-function requestCardCommanderV10_(r,canEdit){
-  var issue=(canEdit&&r.status==='פתוחה')?'<button class="btn sm issue-req" data-r="'+esc(r.requestId)+'">סימון כהונפק</button>':'';
-  return '<div class="supply-card"><div><b>'+esc(r.studentName||'')+'</b> - '+esc(r.products.join(', '))+' <span class="statuspill">'+esc(r.status)+'</span></div><div class="meta">'+esc(r.createdAt)+' | כיתה '+esc(r.cls)+' | גזרה '+esc(r.gender)+'</div><div style="margin-top:5px">סיבה: '+esc(r.reason)+'</div>'+(r.provider?'<div class="meta">מדריך מספק: '+esc(r.provider)+'</div>':'')+(r.signedAt?'<div class="meta">תאריך חתימה: '+esc(r.signedAt)+'</div>':'')+(r.takenAt?'<div class="meta">תאריך לקיחת המדים: '+esc(r.takenAt)+'</div>':'')+(issue?'<div style="margin-top:10px">'+issue+'</div>':'')+'</div>';
-}
-function renderCommanderSupplyOverviewV10_(){
-  App.viewMode='supplyOverview';el('view').innerHTML=spinner();callServer('commanderSupplyRequests',App.token,'').then(function(d){var cards=d.requests.map(function(r){return requestCardCommanderV10_(r,true);}).join('')||'<div class="muted">לא קיימות בקשות.</div>';el('view').innerHTML='<div class="fade"><div class="toolbar"><button class="btn ghost" id="backSupplyOverview">חזרה</button></div><div class="panel"><div class="head"><h2>אפסנאות - כל הבקשות בתחום האחריות</h2></div><div class="body supply-list">'+cards+'</div></div></div>';el('backSupplyOverview').addEventListener('click',function(){App.viewMode='commander';renderCommander();});document.querySelectorAll('.issue-req').forEach(function(b){b.addEventListener('click',function(){b.disabled=true;callServer('commanderSupplyIssue',App.token,b.getAttribute('data-r')).then(function(){toast('ההזמנה סומנה כהונפקה');renderCommanderSupplyOverviewV10_();}).catch(function(e){b.disabled=false;toast(e.message,true);});});});}).catch(function(e){el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>';});
-}
-
-/* עדכון אופטימי של revision כדי למנוע משיכת יתר אחרי שמירה מקומית. */
-var flushOutboxV9_ = flushOutbox;
-function flushOutbox(){
-  if(INFLIGHT||!OUTBOX.length)return;var batch=OUTBOX;OUTBOX=[];INFLIGHT={batch:batch};setSyncNote();
-  callServer('commanderSetMany',App.token,App.date,batch).then(function(r){var failed=[];(r.results||[]).forEach(function(res){var st=findStudentById(res.id);if(!st)return;if(res.ok){st.saving=false;st.approvedAt=r.at;st.unsaved=false;}else{failed.push(res);st.saving=false;st.unsaved=true;}});INFLIGHT=null;if(r.revision)lastRevision=r.revision;setSyncNote();recountAll();renderTabs();if(!anyEditing())renderClassPane();if(failed.length)toast('השרת דחה '+failed.length+' שינויים: '+failed[0].error,true);if(OUTBOX.length)flushOutbox();}).catch(function(e){OUTBOX=INFLIGHT.batch.concat(OUTBOX);INFLIGHT=null;setSyncNote();toast('השמירה נכשלה, מנסה שוב',true);setTimeout(flushOutbox,1800);});
-}
-
-/* לחיצה נוספת על יציאה מנקה גם את ההתחברות השמורה בדפדפן. */
-el('logoutBtn').addEventListener('click',clearSession_);
-
 
 function closeModal(){ el('modalHost').innerHTML=''; }
 

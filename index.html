@@ -43,6 +43,11 @@
   .docstrip b{color:var(--ink); font-weight:700;}
   .syncnote{font-size:13px; color:var(--present); font-weight:600;}
   .syncnote.busy{color:var(--blue);}
+  .livenote{font-size:12.5px; color:var(--present); font-weight:600; opacity:0; transition:opacity .3s;
+    display:inline-flex; align-items:center;}
+  .livenote.show{opacity:1;}
+  .livenote.show::before{content:''; display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--present); margin-inline-end:6px;}
   .syncnote.busy::before{content:''; display:inline-block; width:8px; height:8px; border-radius:50%;
     background:var(--blue); margin-inline-end:7px; vertical-align:middle; animation:pulse 1s infinite;}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
@@ -402,6 +407,7 @@
     <div id="stripDate"></div>
     <div id="stripScope"></div>
     <div class="syncnote" id="syncNote"></div>
+    <div class="livenote" id="liveNote"></div>
     <div id="verNote" style="font-size:12px;color:var(--muted)"></div>
   </div></div>
   <main id="view"></main>
@@ -555,8 +561,10 @@ function enterPortal(){
     vn.style.color = mismatch ? 'var(--absent)' : 'var(--muted)';
   }
   route(true);
+  startPolling();
 }
 el('logoutBtn').addEventListener('click', function(){
+  stopPolling();
   App.token=null; App.profile=null; App.initial=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
   el('idInput').value=''; el('idInput').focus();
@@ -569,6 +577,85 @@ window.addEventListener('beforeunload', function(e){
 function route(fromCache){
   return App.profile.kind==='student' ? renderStudent(fromCache) : renderCommander(fromCache);
 }
+
+/* ============================================================
+   רענון ברקע. מושך נתונים בשקט כל כמה שניות, ומעדכן את המסך
+   רק אם משהו באמת השתנה, בלי לרענן ובלי להפריע לעריכה פעילה.
+============================================================ */
+var POLL_MS = 12000;      // כל 12 שניות
+var pollTimer = null;
+var lastSnapshot = null;
+
+function startPolling(){
+  stopPolling();
+  // בסיס ההשוואה נקבע ממה שכבר מוצג, כך שגם שינוי מוקדם ייתפס
+  lastSnapshot = snapshotOfCurrent();
+  pollTimer = setInterval(function(){ pollTick(); }, POLL_MS);
+}
+
+/* צילום מצב של מה שמוצג כרגע, באותו פורמט שהשרת מחזיר */
+function snapshotOfCurrent(){
+  try {
+    if(App.profile.kind === 'student'){
+      return stu.day ? JSON.stringify(stu.day) : null;
+    }
+    return cmdState.data ? JSON.stringify({date:cmdState.data.date, statuses:cmdState.data.statuses,
+      profile:cmdState.data.profile, classes:cmdState.data.classes}) : null;
+  } catch(e){ return null; }
+}
+function stopPolling(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+}
+
+/* לא נוגעים במסך כשהמשתמש באמצע פעולה, כדי לא לדרוס אותו */
+function busyNow(){
+  if(document.hidden) return true;                 // הכרטיסייה ברקע
+  if(pendingCount() > 0) return true;              // יש שמירה בתור
+  if(typeof anyEditing === 'function' && anyEditing()) return true;
+  if(el('modalHost') && el('modalHost').innerHTML.trim()) return true;  // חלון פתוח
+  var a = document.activeElement;
+  if(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) return true;
+  // באמצע בחירת סטטוס אצל השוחר
+  if(App.profile && App.profile.kind === 'student' && stu && stu.picking) return true;
+  return false;
+}
+
+function pollTick(){
+  if(!App.token || busyNow()) return;
+  var action = (App.profile.kind === 'student') ? 'studentGetDay' : 'commanderGetClasses';
+  callServer(action, App.token, App.date).then(function(d){
+    if(busyNow()) return;               // המצב השתנה בזמן הבקשה
+    var snap = JSON.stringify(d);
+    if(lastSnapshot === null){ lastSnapshot = snap; return; }  // אין בסיס עדיין
+    if(snap === lastSnapshot) return;   // אין שינוי, לא נוגעים
+    lastSnapshot = snap;
+
+    if(App.profile.kind === 'student'){
+      paintStudent(d);
+    } else {
+      // שומרים את הכרטיסייה הפעילה כדי לא לקפוץ לכיתה אחרת
+      var keep = cmdState.active;
+      paintCommander(d);
+      if(cmdState.data && keep < cmdState.data.classes.length){ cmdState.active = keep; renderTabs(); renderClassPane(); }
+    }
+    showUpdatedFlash();
+  }).catch(function(){ /* שקט, ננסה שוב בסבב הבא */ });
+}
+
+/* חיווי עדין שהמידע התעדכן */
+function showUpdatedFlash(){
+  var n = el('liveNote');
+  if(!n) return;
+  n.textContent = 'עודכן זה עתה';
+  n.classList.add('show');
+  clearTimeout(n._t);
+  n._t = setTimeout(function(){ n.classList.remove('show'); }, 2500);
+}
+
+document.addEventListener('visibilitychange', function(){
+  // חוזרים לכרטיסייה, מרעננים מיד
+  if(!document.hidden && App.token && !busyNow()) pollTick();
+});
 
 /* ============ מסך השוחר ============ */
 /* אייקוני קו רשמיים, ללא אימוג'י */
@@ -796,6 +883,7 @@ function send(status, reason){
   callServer('studentSubmit', App.token, App.date, status, reason).then(function(){
     stu.saving = false;
     if(el('saveNote')) el('saveNote').textContent = 'נשמר';
+    lastSnapshot = snapshotOfCurrent();
   }).catch(function(e){
     stu.status = before.status; stu.reason = before.reason;
     stu.day.report = before.report; stu.saving = false;

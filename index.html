@@ -481,34 +481,45 @@ function unwrap_(r){
     var j;
     try { j = JSON.parse(txt); }
     catch(e){ throw new Error('השרת החזיר תשובה לא צפויה. ייתכן שהפריסה אינה מעודכנת, יש לפרוס מחדש עם New version'); }
-    if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
+    if(!j.ok){ var er = new Error(j.error || 'שגיאת מערכת'); er._app = true; throw er; }
     return j.data;
   });
 }
 
-/* פנייה מאתר חיצוני עם ניסיון חוזר, כי בקשה בודדת לאפס סקריפט לפעמים נכשלת זמנית. */
-function fetchOnce_(action, args){
-  var body = JSON.stringify({ action:action, args:args });
+/* פנייה יחידה. GET הוא הדרך היציבה מול אפס סקריפט, בלי preflight ובלי בעיות הפניה של POST.
+   כל הארגומנטים אצלנו קטנים, לכן GET מתאים. POST משמש רק כגיבוי. */
+function fetchGet_(action, args){
+  var url = WEB_APP_URL + '?action=' + encodeURIComponent(action) +
+            '&args=' + encodeURIComponent(JSON.stringify(args)) +
+            '&t=' + Date.now();   // עוקף מטמון דפדפן
+  return fetch(url, { method:'GET', redirect:'follow' }).then(unwrap_);
+}
+function fetchPost_(action, args){
   return fetch(WEB_APP_URL, {
     method:'POST', redirect:'follow',
     headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-    body: body
-  }).then(unwrap_).catch(function(err){
-    // נפילת רשת. ניסיון שני דרך GET
-    var url = WEB_APP_URL + '?action=' + encodeURIComponent(action) +
-              '&args=' + encodeURIComponent(JSON.stringify(args));
-    return fetch(url, { method:'GET', redirect:'follow' }).then(unwrap_);
+    body: JSON.stringify({ action:action, args:args })
+  }).then(unwrap_);
+}
+function fetchOnce_(action, args){
+  // GET קודם. אם נכשל ברמת הרשת, מנסים POST.
+  return fetchGet_(action, args).catch(function(err){
+    if(err && err._app) throw err;    // שגיאת תוכן מהשרת, לא לנסות שוב
+    return fetchPost_(action, args);
   });
 }
+function delay_(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+/* ניסיונות חוזרים עם השהיה גדלה. שגיאת תוכן מהשרת עוצרת מיד. */
 function callRemote(action, args){
-  return fetchOnce_(action, args).catch(function(err){
-    // ניסיון שלישי אחרי המתנה קצרה, מטפל בכשל רשת חולף
-    return new Promise(function(res){ setTimeout(res, 800); })
-      .then(function(){ return fetchOnce_(action, args); })
-      .catch(function(){
-        throw new Error('אין חיבור לשרת כרגע. אם זה חוזר, ודאו שהפריסה עודכנה עם New version');
-      });
-  });
+  function attempt(n){
+    return fetchOnce_(action, args).catch(function(err){
+      if(err && err._app) throw err;          // שגיאה אמיתית מהשרת, אין טעם לנסות שוב
+      if(n >= 4) throw new Error('אין חיבור לשרת כרגע. נסו שוב בעוד רגע');
+      return delay_(600 * (n + 1)).then(function(){ return attempt(n + 1); });
+    });
+  }
+  return attempt(0);
 }
 
 function callServer(action){

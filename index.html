@@ -1821,10 +1821,20 @@ function openLock(){
 
 /* ============ דיווח עתידי, החלפה על ידי ראש צוות או שלוחה ============ */
 function toggleFuture(current){
-  callServer('setFutureEnabled', App.token, !current).then(function(r){
-    toast(r.enabled ? 'דיווח עתידי נפתח' : 'דיווח עתידי נסגר');
-    renderCommander();
-  }).catch(function(e){ toast(e.message, true); });
+  var next = !current;
+  // עדכון מיידי על המסך, בלי טעינה. השמירה רצה ברקע.
+  if(cmdState.data) cmdState.data.futureOpen = next;
+  var btn = el('futureBtn');
+  if(btn) btn.textContent = next ? 'סגירת דיווח עתידי' : 'פתיחת דיווח עתידי';
+  toast(next ? 'דיווח עתידי נפתח' : 'דיווח עתידי נסגר');
+
+  callServer('setFutureEnabled', App.token, next).catch(function(e){
+    // כשל, מחזירים את המצב הקודם
+    if(cmdState.data) cmdState.data.futureOpen = current;
+    var b = el('futureBtn');
+    if(b) b.textContent = current ? 'סגירת דיווח עתידי' : 'פתיחת דיווח עתידי';
+    toast(e.message, true);
+  });
 }
 
 </script>

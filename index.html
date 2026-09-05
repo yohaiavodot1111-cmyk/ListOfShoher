@@ -895,7 +895,7 @@ function drawStudent(){
   if(d.locked){
     var future = (stuDate && stuDate !== App.date);
   var dayTabsHtml = '<div class="daytabs" id="dayTabs"></div>';
-  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לשנות עד השעה 07:20.</div>' : '';
+  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לעדכן אותו עד אותו היום.</div>' : '';
   el('view').innerHTML = '<div class="fade">'+bd+dayTabsHtml+futureBadge+heroBlock(d)+verdictBlock(d)+tipsBlock()+'</div>';
     return;
   }
@@ -940,7 +940,7 @@ function drawStudent(){
 
   var future = (stuDate && stuDate !== App.date);
   var dayTabsHtml = '<div class="daytabs" id="dayTabs"></div>';
-  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לשנות עד השעה 07:20.</div>' : '';
+  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לעדכן אותו עד אותו היום.</div>' : '';
   el('view').innerHTML = '<div class="fade">'+bd+dayTabsHtml+futureBadge+heroBlock(d)+verdictBlock(d)
     + (d.afterCutoff && !d.report
         ? '<div class="banner warn">חלף מועד דיווח הנוכחות. ניתן לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')

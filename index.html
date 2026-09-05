@@ -978,23 +978,44 @@ function drawStudent(){
 
 /* מציג את התוצאה מיד, ומאמת מול השרת ברקע */
 function send(status, reason){
-  var before = { status: stu.status, reason: stu.reason, report: stu.day.report };
-
+  // עדכון מיידי על המסך. השמירה רצה ברקע עם ניסיונות חוזרים, כך שדיווח לא הולך לאיבוד.
   stu.status = status; stu.reason = reason; stu.saving = true; stu.picking = false;
   stu.day.report = { status:status, reason:reason, approval:'ממתין', reportedAt:nowHM() };
   drawStudent();
   toast('הדיווח נשלח');
+  if(el('saveNote')) el('saveNote').textContent = 'שומר';
 
-  callServer('studentSubmit', App.token, stuDate||App.date, status, reason).then(function(){
+  var theDate = stuDate || App.date;
+  sendWithRetry(theDate, status, reason, 0);
+}
+
+/* שולח את דיווח השוחר ומנסה שוב אם יש כשל רשת חולף, במקום לאבד את הדיווח או להבהיל. */
+function sendWithRetry(theDate, status, reason, attempt){
+  callServer('studentSubmit', App.token, theDate, status, reason).then(function(){
     stu.saving = false;
     if(el('saveNote')) el('saveNote').textContent = 'נשמר';
     lastSnapshot = snapshotOfCurrent();
     loadStuDays();
   }).catch(function(e){
-    stu.status = before.status; stu.reason = before.reason;
-    stu.day.report = before.report; stu.saving = false;
-    drawStudent();
-    toast(e.message, true);
+    var msg = (e && e.message) ? e.message : '';
+    // שגיאת תוכן אמיתית מהשרת, למשל אושר כבר, אין טעם לנסות שוב
+    var permanent = /אושר|הרשאה|לא חוקי|חובה לפרט|חלף מועד|נעול|התחברות|פג תוקף/.test(msg);
+    if(permanent){
+      if(el('saveNote')) el('saveNote').textContent = '';
+      stu.saving = false;
+      toast(msg, true);
+      renderStudent();   // מרעננים למצב האמיתי מהשרת
+      return;
+    }
+    if(attempt < 6){
+      // כשל רשת חולף. ממשיכים לנסות ברקע, הדיווח נשאר על המסך
+      if(el('saveNote')) el('saveNote').textContent = 'מנסה שוב';
+      setTimeout(function(){ sendWithRetry(theDate, status, reason, attempt+1); }, 2000);
+    } else {
+      if(el('saveNote')) el('saveNote').textContent = 'ההודעה תישלח כשהחיבור יחזור';
+      // ניסיון אחרון בעוד זמן ארוך יותר, בלי להבהיל את השוחר
+      setTimeout(function(){ sendWithRetry(theDate, status, reason, 0); }, 15000);
+    }
   });
 }
 

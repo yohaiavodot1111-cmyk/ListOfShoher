@@ -349,6 +349,26 @@
 
   .repnote{background:var(--sky-soft); border:1px solid var(--line); border-inline-start:3px solid var(--blue);
     border-radius:3px; padding:12px 16px; margin-bottom:16px; font-size:13.5px; color:var(--navy);}
+  .dhead{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:22px 24px 0;}
+  .dname{font-family:var(--display); font-weight:700; font-size:22px; color:var(--navy);}
+  .dmeta{font-size:13px; color:var(--muted);}
+  .dgrid{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:18px;}
+  @media(max-width:560px){ .dgrid{grid-template-columns:1fr 1fr 1fr;} }
+  .dcard{border:1px solid var(--line); border-radius:10px; padding:12px 8px; text-align:center; background:#fff;}
+  .dval{font-family:var(--display); font-weight:700; font-size:24px; line-height:1;}
+  .dlbl{font-size:11.5px; color:var(--muted); margin-top:5px;}
+  .drow{display:flex; justify-content:space-between; padding:11px 2px; border-top:1px solid var(--line-2); font-size:14.5px;}
+  .drow b{font-weight:700;}
+  .daytabs{display:flex; gap:8px; overflow-x:auto; margin-bottom:14px; padding-bottom:4px;}
+  .daytab{flex:0 0 auto; border:1px solid var(--line); border-radius:10px; background:#fff; padding:9px 13px;
+    font-weight:600; font-size:13.5px; color:var(--navy); white-space:nowrap;}
+  .daytab.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .daytab .dd{display:block; font-size:11px; color:var(--muted); font-weight:500;}
+  .daytab.on .dd{color:var(--sky);}
+  .daytab .done{color:var(--present); font-size:11px;}
+  .daytab.on .done{color:#bfe6d3;}
+  .namelink{color:var(--navy); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .namelink:hover{border-bottom-color:var(--slate); color:var(--slate);}
   @media print{
     header.masthead, .docstrip, .toolbar, .no-print{display:none !important;}
     body{background:#fff;} main{padding:0; max-width:none;}
@@ -431,7 +451,7 @@ var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyPLD5anMCMKB-SCPhWko
 var SERVED   = ('__SERVED__' === 'true');
 var EXEC_URL = '__EXEC_URL__';
 
-var CLIENT_VERSION = 'v9 2026/09/03';
+var CLIENT_VERSION = 'v13 2026/09/05';
 var MODE = 'pending';   // pending, live, remote, none
 
 function apiReady(){ return !!(window.google && google.script && google.script.run); }
@@ -457,23 +477,37 @@ function callLive(action, args){
 }
 
 function unwrap_(r){
-  return r.json().then(function(j){
+  return r.text().then(function(txt){
+    var j;
+    try { j = JSON.parse(txt); }
+    catch(e){ throw new Error('השרת החזיר תשובה לא צפויה. ייתכן שהפריסה אינה מעודכנת, יש לפרוס מחדש עם New version'); }
     if(!j.ok) throw new Error(j.error || 'שגיאת מערכת');
     return j.data;
   });
 }
 
-/* פנייה מאתר חיצוני. מנסה POST, ואם הדפדפן חוסם עובר ל GET. */
-function callRemote(action, args){
+/* פנייה מאתר חיצוני עם ניסיון חוזר, כי בקשה בודדת לאפס סקריפט לפעמים נכשלת זמנית. */
+function fetchOnce_(action, args){
   var body = JSON.stringify({ action:action, args:args });
   return fetch(WEB_APP_URL, {
     method:'POST', redirect:'follow',
     headers:{ 'Content-Type':'text/plain;charset=utf-8' },
     body: body
-  }).then(unwrap_).catch(function(){
+  }).then(unwrap_).catch(function(err){
+    // נפילת רשת. ניסיון שני דרך GET
     var url = WEB_APP_URL + '?action=' + encodeURIComponent(action) +
               '&args=' + encodeURIComponent(JSON.stringify(args));
     return fetch(url, { method:'GET', redirect:'follow' }).then(unwrap_);
+  });
+}
+function callRemote(action, args){
+  return fetchOnce_(action, args).catch(function(err){
+    // ניסיון שלישי אחרי המתנה קצרה, מטפל בכשל רשת חולף
+    return new Promise(function(res){ setTimeout(res, 800); })
+      .then(function(){ return fetchOnce_(action, args); })
+      .catch(function(){
+        throw new Error('אין חיבור לשרת כרגע. אם זה חוזר, ודאו שהפריסה עודכנה עם New version');
+      });
   });
 }
 
@@ -492,6 +526,8 @@ var HE_DAYS=['ראשון','שני','שלישי','רביעי','חמישי','שי�
 var HE_MONTHS=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 function niceDate(str){ var p=str.split('/'), d=new Date(+p[0],+p[1]-1,+p[2]);
   return 'יום ' + HE_DAYS[d.getDay()] + ', ' + (+p[2]) + ' ב' + HE_MONTHS[+p[1]-1] + ' ' + p[0]; }
+function toISO(str){ return String(str).replace(/\//g,'-'); }
+function fromISO(v){ var p=String(v).split('-'); return p.length===3 ? p[0]+'/'+p[1]+'/'+p[2] : ''; }
 function shortDate(str){ var p=str.split('/'); return (+p[2])+'.'+(+p[1])+'.'+p[0]; }
 
 function el(id){ return document.getElementById(id); }
@@ -514,14 +550,29 @@ if(MODE === 'none'){
   el('offlineNote').classList.remove('hidden');
   el('offlineDetail').innerHTML = 'פרטים: לא הוגדרה כתובת של אפליקציית האינטרנט בקובץ';
 } else {
-  // לא שומרים ולא ממלאים מספר מזהה. השדה תמיד ריק כדי שלא ייחשף לאדם הבא.
   try { localStorage.removeItem('dohehad_id'); } catch(e){}
   el('idInput').value = '';
   el('idInput').setAttribute('autocomplete', 'off');
-  el('idInput').focus();
 
-  // חימום החיבור ברקע, כדי שההתחברות הראשונה תהיה מהירה יותר
-  try { callServer('ping').then(function(r){ App.serverVersion = (r && r.version) ? r.version : ''; }); } catch(e){}
+  // שחזור חיבור אחרי רענון דף. הטוקן חתום ובעל תוקף, כך שזה בטוח.
+  var restored = false;
+  try {
+    var raw = sessionStorage.getItem('dohehad_session');
+    if(raw){
+      var sess = JSON.parse(raw);
+      if(sess && sess.token && sess.profile){
+        App.token = sess.token; App.profile = sess.profile; App.initial = null;
+        restored = true;
+        if(MODE === 'live' && !apiReady()){ waitForApi(20000).then(enterPortal); }
+        else { enterPortal(); }
+      }
+    }
+  } catch(e){}
+
+  if(!restored){
+    el('idInput').focus();
+    try { callServer('ping').then(function(r){ App.serverVersion = (r && r.version) ? r.version : ''; }); } catch(e){}
+  }
 }
 
 /* ============ התחברות ============ */
@@ -541,30 +592,29 @@ function doLogin(){
     if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
     App.token=r.token; App.profile=r.profile; App.initial=r.initial||null;
     if(r.version) App.serverVersion=r.version;
-    el('idInput').value = '';   // מנקים את השדה מיד אחרי כניסה מוצלחת
+    try { sessionStorage.setItem('dohehad_session', JSON.stringify({token:r.token, profile:r.profile})); } catch(e){}
+    el('idInput').value = '';
     enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
 
 function enterPortal(){
+  if(!App.token || !App.profile){ return; }
   el('login').classList.add('hidden'); el('portal').classList.remove('hidden');
   var p=App.profile;
   el('whoName').textContent = p.name||'';
   el('whoRole').textContent = p.kind==='student' ? ('כיתה '+p.cls) : (p.role + (p.rank?(' | '+p.rank):''));
-  el('stripDate').innerHTML = 'מסדר בוקר <b>'+niceDate(App.date)+'</b>';
+  el('stripDate').innerHTML = '<b>'+niceDate(App.date)+'</b>';
   el('stripScope').innerHTML = p.kind==='student' ? 'דיווח אישי'
     : ('היקף אחריות <b>'+(p.canSeeAll ? 'כלל השלוחה' : ('כיתות '+p.classes.join(', ')))+'</b>');
   var vn = el('verNote');
-  if(vn){
-    var mismatch = App.serverVersion && App.serverVersion !== CLIENT_VERSION;
-    vn.textContent = mismatch ? ('גרסת שרת ' + App.serverVersion + ' אינה תואמת') : '';
-    vn.style.color = mismatch ? 'var(--absent)' : 'var(--muted)';
-  }
+  if(vn){ vn.textContent = ''; }
   route(true);
   startPolling();
 }
 el('logoutBtn').addEventListener('click', function(){
   stopPolling();
+  try { sessionStorage.removeItem('dohehad_session'); } catch(e){}
   App.token=null; App.profile=null; App.initial=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
   el('idInput').value=''; el('idInput').focus();
@@ -578,11 +628,21 @@ function route(fromCache){
   return App.profile.kind==='student' ? renderStudent(fromCache) : renderCommander(fromCache);
 }
 
+function sessionExpired_(msg){
+  stopPolling();
+  try { sessionStorage.removeItem('dohehad_session'); } catch(e){}
+  App.token=null; App.profile=null; App.initial=null;
+  el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
+  el('idInput').value=''; el('idInput').disabled=false; el('idInput').focus();
+  if(msg) toast(msg, true);
+}
+function isAuthError_(m){ return /התחברות|פג תוקף|הרשאה/.test(String(m||'')); }
+
 /* ============================================================
    רענון ברקע. מושך נתונים בשקט כל כמה שניות, ומעדכן את המסך
    רק אם משהו באמת השתנה, בלי לרענן ובלי להפריע לעריכה פעילה.
 ============================================================ */
-var POLL_MS = 12000;      // כל 12 שניות
+var POLL_MS = 6000;       // רענון רקע, מאוזן מול עומס
 var pollTimer = null;
 var lastSnapshot = null;
 
@@ -610,6 +670,7 @@ function stopPolling(){
 /* לא נוגעים במסך כשהמשתמש באמצע פעולה, כדי לא לדרוס אותו */
 function busyNow(){
   if(document.hidden) return true;                 // הכרטיסייה ברקע
+  if(typeof INFLIGHT !== 'undefined' && INFLIGHT) return true;  // שמירה נשלחת כרגע
   if(pendingCount() > 0) return true;              // יש שמירה בתור
   if(typeof anyEditing === 'function' && anyEditing()) return true;
   if(el('modalHost') && el('modalHost').innerHTML.trim()) return true;  // חלון פתוח
@@ -620,10 +681,14 @@ function busyNow(){
   return false;
 }
 
+var pollInFlight = false;
 function pollTick(){
-  if(!App.token || busyNow()) return;
-  var action = (App.profile.kind === 'student') ? 'studentGetDay' : 'commanderGetClasses';
-  callServer(action, App.token, App.date).then(function(d){
+  if(!App.token || busyNow() || pollInFlight) return;
+  pollInFlight = true;
+  var isStu = (App.profile.kind === 'student');
+  var pollDate = isStu ? (stuDate || App.date) : App.date;
+  var action = isStu ? 'studentGetDay' : 'commanderGetClasses';
+  callServer(action, App.token, pollDate).then(function(d){
     if(busyNow()) return;               // המצב השתנה בזמן הבקשה
     var snap = JSON.stringify(d);
     if(lastSnapshot === null){ lastSnapshot = snap; return; }  // אין בסיס עדיין
@@ -639,7 +704,8 @@ function pollTick(){
       if(cmdState.data && keep < cmdState.data.classes.length){ cmdState.active = keep; renderTabs(); renderClassPane(); }
     }
     showUpdatedFlash();
-  }).catch(function(){ /* שקט, ננסה שוב בסבב הבא */ });
+  }).catch(function(){ /* שקט, ננסה שוב בסבב הבא */ })
+    .then(function(){ pollInFlight = false; });
 }
 
 /* חיווי עדין שהמידע התעדכן */
@@ -698,12 +764,35 @@ function isAbsence(x){ return ABSENCE.some(function(a){ return a.key===x; }); }
 
 var stu = { day:null, status:null, reason:'', showAbsence:false, saving:false, picking:false };
 
+var stuDate = null;   // התאריך שהשוחר מדווח עליו כרגע
 function renderStudent(fromCache){
-  if(fromCache && App.initial){ paintStudent(App.initial); App.initial = null; return; }
+  if(!stuDate) stuDate = App.date;
+  if(fromCache && App.initial && stuDate===App.date){ loadStuDays(); paintStudent(App.initial); App.initial = null; return; }
   el('view').innerHTML = spinner();
-  callServer('studentGetDay', App.token, App.date)
-    .then(paintStudent)
-    .catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+  callServer('studentGetDay', App.token, stuDate)
+    .then(function(d){ loadStuDays(); paintStudent(d); })
+    .catch(function(e){ if(isAuthError_(e.message)) return sessionExpired_('החיבור פג, יש להתחבר שוב');
+      el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+}
+
+var stuDays = null;
+function loadStuDays(){
+  callServer('studentDays', App.token).then(function(r){ stuDays = r; drawDayTabs(); }).catch(function(){});
+}
+function drawDayTabs(){
+  var host = el('dayTabs');
+  if(!host || !stuDays || !stuDays.futureOpen || stuDays.days.length<=1){ if(host) host.innerHTML=''; return; }
+  var names=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  host.innerHTML = stuDays.days.map(function(x){
+    var p=x.date.split('/'); var g=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+    var lbl = x.date===stuDays.today ? 'היום' : names[g];
+    var done = x.status ? '<span class="done">דווח</span>' : '';
+    return '<button class="daytab'+(x.date===stuDate?' on':'')+'" data-d="'+x.date+'">'+lbl
+      +'<span class="dd">'+(+p[2])+'.'+(+p[1])+'</span>'+done+'</button>';
+  }).join('');
+  host.querySelectorAll('.daytab').forEach(function(b){
+    b.addEventListener('click', function(){ stuDate=b.getAttribute('data-d'); renderStudent(); });
+  });
 }
 
 function paintStudent(d){
@@ -729,7 +818,7 @@ function heroBlock(d){
   var st = stu.status;
   var badge = st ? ic(statusIcon(st)) : ic('hourglass');
   return '<div class="hero">'
-    + '<div class="h-date">'+niceDate(App.date)+'</div>'
+    + '<div class="h-date">'+niceDate(stuDate||App.date)+'</div>'
     + '<div class="h-meta"><span>כיתה <b>'+esc(d.cls)+'</b></span>'
     +   '<span>דיווח נוכחות עד <b>'+esc(d.cutoff)+'</b></span></div>'
     + '<div class="h-status"><div class="h-badge">'+badge+'</div>'
@@ -793,9 +882,21 @@ function drawStudent(){
   var bd = (d.birthdays && d.birthdays.length)
     ? '<div class="banner ok">יום הולדת שמח לחבר לכיתה: '+d.birthdays.map(esc).join(', ')+'</div>' : '';
 
+  // יום נעול על ידי ראש צוות או שלוחה
+  if(d.dayLock && d.dayLock.locked){
+    el('view').innerHTML = '<div class="fade">'+heroBlock(d)
+      + '<div class="verdict wait" style="border-top-color:var(--slate)">'
+      + '<div class="v-head"><div class="v-ic" style="background:var(--sky-soft);color:var(--navy)">'+ic('ban')+'</div>'
+      + '<div><div class="v-ttl">'+esc(d.dayLock.message||'אין דיווח היום')+'</div>'
+      + '<div class="v-sub">היום נעול לדיווח על ידי הפיקוד</div></div></div></div></div>';
+    return;
+  }
   // מצב נעול: תקציר עשיר בלבד
   if(d.locked){
-    el('view').innerHTML = '<div class="fade">'+bd+heroBlock(d)+verdictBlock(d)+tipsBlock()+'</div>';
+    var future = (stuDate && stuDate !== App.date);
+  var dayTabsHtml = '<div class="daytabs" id="dayTabs"></div>';
+  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לשנות עד השעה 07:20.</div>' : '';
+  el('view').innerHTML = '<div class="fade">'+bd+dayTabsHtml+futureBadge+heroBlock(d)+verdictBlock(d)+tipsBlock()+'</div>';
     return;
   }
 
@@ -837,7 +938,10 @@ function drawStudent(){
 
   var panelTitle = (!stu.picking && stu.status) ? 'הדיווח שלי להיום' : 'בחירת סטטוס';
 
-  el('view').innerHTML = '<div class="fade">'+bd+heroBlock(d)+verdictBlock(d)
+  var future = (stuDate && stuDate !== App.date);
+  var dayTabsHtml = '<div class="daytabs" id="dayTabs"></div>';
+  var futureBadge = future ? '<div class="banner warn">זהו דיווח עתידי לתאריך '+esc(shortDate(stuDate))+'. ניתן לשנות עד השעה 07:20.</div>' : '';
+  el('view').innerHTML = '<div class="fade">'+bd+dayTabsHtml+futureBadge+heroBlock(d)+verdictBlock(d)
     + (d.afterCutoff && !d.report
         ? '<div class="banner warn">חלף מועד דיווח הנוכחות. ניתן לדווח סטטוס אחר, ולנוכחות יש לפנות למפקד.</div>' : '')
     + '<div class="panel"><div class="head"><h2>'+panelTitle+'</h2></div>'
@@ -849,6 +953,7 @@ function drawStudent(){
     + tipsBlock()
     + '</div>';
 
+  drawDayTabs();
   if(el('openPicker')) el('openPicker').addEventListener('click', function(){ stu.picking = true; stu.showAbsence = isAbsence(stu.status); drawStudent(); });
   if(el('absBtn')) el('absBtn').addEventListener('click', function(){ stu.showAbsence = true; drawStudent(); });
   if(el('backBtn')) el('backBtn').addEventListener('click', function(){ stu.showAbsence = false; drawStudent(); });
@@ -880,10 +985,11 @@ function send(status, reason){
   drawStudent();
   toast('הדיווח נשלח');
 
-  callServer('studentSubmit', App.token, App.date, status, reason).then(function(){
+  callServer('studentSubmit', App.token, stuDate||App.date, status, reason).then(function(){
     stu.saving = false;
     if(el('saveNote')) el('saveNote').textContent = 'נשמר';
     lastSnapshot = snapshotOfCurrent();
+    loadStuDays();
   }).catch(function(e){
     stu.status = before.status; stu.reason = before.reason;
     stu.day.report = before.report; stu.saving = false;
@@ -903,16 +1009,23 @@ function renderCommander(fromCache){
   if(fromCache && App.initial){ var c0 = App.initial; App.initial = null; return paintCommander(c0); }
   el('view').innerHTML = spinner();
   callServer('commanderGetClasses', App.token, App.date).then(paintCommander)
-    .catch(function(e){ el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
+    .catch(function(e){ if(isAuthError_(e.message)) return sessionExpired_('החיבור פג, יש להתחבר שוב');
+      el('view').innerHTML='<div class="panel"><div class="body">'+esc(e.message)+'</div></div>'; });
 }
 
 function paintCommander(d){
   (function(){
     cmdState.data=d;
     var p=App.profile;
-    var bar = p.canGenerate
-      ? '<div class="toolbar"><button class="btn gold" id="genBtn">הפקת דוח להיום</button>'
-        + (p.canSeeAll ? '<button class="btn ghost" id="dashBtn">מבט שלוחה</button>' : '') + '</div>'
+    var canFuture = (p.role === 'ראש צוות' || p.role === 'מפקד שלוחה');
+    var bar = (p.canGenerate || canFuture)
+      ? '<div class="toolbar">'
+        + (p.canGenerate ? '<button class="btn gold" id="genBtn">הפקת דוח להיום</button>' : '')
+        + (p.canSeeAll ? '<button class="btn ghost" id="dashBtn">מבט שלוחה</button>' : '')
+        + (canFuture ? '<button class="btn ghost" id="futureBtn">'+(d.futureOpen?'סגירת דיווח עתידי':'פתיחת דיווח עתידי')+'</button>' : '')
+        + '<button class="btn ghost" id="bulkBtn">דיווח גורף</button>'
+        + (canFuture ? '<button class="btn ghost" id="lockBtn">'+((d.dayLock&&d.dayLock.locked)?'ביטול נעילת היום':'נעילת היום')+'</button>' : '')
+        + '</div>'
       : '';
     if(!d.classes.length){
       el('view').innerHTML='<div class="fade">'+bar+'<div class="panel"><div class="body muted">לא משויכות אליך כיתות לצפייה.</div></div></div>';
@@ -923,11 +1036,25 @@ function paintCommander(d){
     bindCmdTop();
     renderTabs();
     renderClassPane();
+    if(d.dayLock && d.dayLock.locked){
+      var pane = el('classPane');
+      if(pane) pane.insertAdjacentHTML('afterbegin',
+        '<div class="banner warn" style="margin-bottom:16px">היום נעול לדיווח. הודעה לשוחרים: '+esc(d.dayLock.message||'')+'</div>');
+    }
   })();
 }
 function bindCmdTop(){
   if(el('genBtn')) el('genBtn').addEventListener('click', openGenerate);
   if(el('dashBtn')) el('dashBtn').addEventListener('click', renderDashboard);
+  if(el('futureBtn')) el('futureBtn').addEventListener('click', function(){
+    toggleFuture(!!(cmdState.data && cmdState.data.futureOpen));
+  });
+  if(el('bulkBtn')) el('bulkBtn').addEventListener('click', openBulk);
+  if(el('lockBtn')) el('lockBtn').addEventListener('click', function(){
+    var locked = !!(cmdState.data && cmdState.data.dayLock && cmdState.data.dayLock.locked);
+    if(locked){ callServer('setDayLock', App.token, App.date, false, '').then(function(){ toast('נעילת היום בוטלה'); renderCommander(); }).catch(function(e){toast(e.message,true);}); }
+    else openLock();
+  });
 }
 
 var filterText = '';
@@ -970,7 +1097,7 @@ function renderClassPane(){
         + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">שמירה</button></div>'
       : '<span class="muted">צפייה בלבד</span>';
     return '<tr class="'+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'">'
-      + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <span class="name">'+esc(s.name)+'</span>'+candle+'</td>'
+      + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <a class="name namelink" data-id="'+esc(s.id)+'" href="#">'+esc(s.name)+'</a>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
       + '<td><span class="approval '+apCls+'">'+esc(apTxt)+'</span>'+approvedInfo(s)+'</td>'
       + '<td>'+actions+'</td></tr>';
@@ -1006,7 +1133,7 @@ function renderClassPane(){
 
     if(!ok){
       return '<div class="scard '+(s.noReport?'norep':'')+'"><div class="top">'
-        + '<span class="nm"><span class="idx">'+idx+'.</span>'+esc(s.name)+candle+'</span>'
+        + '<span class="nm"><span class="idx">'+idx+'.</span><a class="namelink" data-id="'+esc(s.id)+'" href="#">'+esc(s.name)+'</a>'+candle+'</span>'
         + '<span class="approval '+apCls+'">'+esc(apTxt)+'</span></div>'
         + '<div class="muted" style="font-size:14px">סטטוס: '+esc(s.status)+(s.reason?' | '+esc(s.reason):'')+'</div></div>';
     }
@@ -1098,6 +1225,9 @@ function renderClassPane(){
       b.addEventListener('click', function(){ cmdAction(b.getAttribute('data-id'), 'set'); });
     });
     // בורר הסטטוס בטלפון, בהקשה
+    document.querySelectorAll('.namelink').forEach(function(a){
+      a.addEventListener('click', function(e){ e.preventDefault(); openDashboard(a.getAttribute('data-id')); });
+    });
     document.querySelectorAll('.mtoggle').forEach(function(b){
       b.addEventListener('click', function(){
         var st = findStudentById(b.getAttribute('data-id'));
@@ -1404,10 +1534,11 @@ function openGenerate(){
   }
   runGenerate(false);
 }
-function runGenerate(force){
+function runGenerate(force, dateOverride){
   var host=el('modalHost');
   host.innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body center">'+spinner()+'<div class="muted">מכין את הדוח</div></div></div></div>';
-  callServer('generateReport', App.token, App.date, force).then(function(r){
+  var d = dateOverride || App.reportDate || App.date;
+  callServer('generateReport', App.token, d, force).then(function(r){
     if(r.needConfirm){
       host.innerHTML='<div class="modal-bg"><div class="modal"><div class="m-body"><h3>אישור הפקה</h3><p>'+esc(r.message)+'</p>'
         +'<div class="m-actions"><button class="btn gold" id="mYes">הפקה עם הנתונים הנוכחיים</button>'
@@ -1428,19 +1559,29 @@ function showReport(r){
     +   '<button class="btn ghost" id="backFromRep">חזרה</button>'
     +   '<button class="btn gold" id="printRep">הדפסה ושמירה כ PDF</button>'
     +   '<button class="btn" id="dlXlsx">הורדת Excel</button>'
+    +   '<label style="display:flex;align-items:center;gap:8px;margin-inline-start:auto">'
+    +     '<span class="sub" style="color:var(--muted)">תאריך הדוח</span>'
+    +     '<input type="date" id="repDate" value="'+toISO(App.date)+'" style="width:auto"></label>'
     + '</div>'
     + '<div class="repnote no-print">התצוגה כאן היא לבדיקה. לפלט מדויק בגודל דף לחצו הדפסה ושמירה כ PDF, ובחלון ההדפסה בחרו שמירה כ PDF.</div>'
     + reportDoc(r.preview,'absent') + reportDoc(r.preview,'late') + '</div>';
   el('backFromRep').addEventListener('click', route);
   el('printRep').addEventListener('click', function(){ openPrintable(r.preview); });
   el('dlXlsx').addEventListener('click', function(){ grabFile('xlsx', this); });
+  el('repDate').addEventListener('change', function(){
+    var d = fromISO(this.value);
+    if(!d) return;
+    App.reportDate = d;
+    runGenerate(true, d);   // תאריך עבר, מפיקים ישירות
+  });
 }
 
 /* הקובץ נוצר רק בלחיצה */
 function grabFile(fmt, btn){
   var label = btn.textContent;
+  var d = (App.lastReport && App.lastReport.date) ? App.lastReport.date : App.date;
   btn.disabled = true; btn.textContent = 'מכין את הקובץ';
-  callServer('exportReport', App.token, App.date, fmt).then(function(f){
+  callServer('exportReport', App.token, d, fmt).then(function(f){
     btn.disabled = false; btn.textContent = label;
     download(f);
   }).catch(function(e){
@@ -1482,7 +1623,8 @@ function reportDoc(data, kind){
     + '<div style="overflow-x:auto"><table class="rep"><thead><tr>'
     +   '<th>כיתה</th><th>מצבת חניכים</th><th>חניכים נוכחים</th><th>'+cntH+'</th>'
     +   '<th>'+namesH+'</th><th>'+reasonH+'</th><th>סה"כ ימים</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    + '<div class="signrow"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>'
+    + '<div class="signrow"><span>עורך הדוח '+(data.issuer?('<b>'+esc(data.issuer)+'</b>'):'')+'<i></i></span>'
+    +   '<span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>'
     + '</div>';
 }
 
@@ -1531,7 +1673,8 @@ function printTableHTML(data, kind){
     + '</thead>'
     + groups
     + '</table>'
-    + '<div class="sign"><span>עורך הדוח<i></i></span><span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>';
+    + '<div class="sign"><span>עורך הדוח '+(data.issuer?('<b>'+esc(data.issuer)+'</b>'):'')+'<i></i></span>'
+    +   '<span>מפקד השלוחה<i></i></span><span>חתימה<i></i></span></div>';
 }
 
 function openPrintable(data){
@@ -1586,6 +1729,103 @@ function openPrintable(data){
 }
 
 function closeModal(){ el('modalHost').innerHTML=''; }
+
+/* ============ דשבורד שוחר ============ */
+function pctColor(p){ return p>=90?'var(--present)':(p>=75?'var(--late)':'var(--absent)'); }
+function statCard(label, val, sub){
+  return '<div class="dcard"><div class="dval" style="color:'+pctColor(val)+'">'+val+'%</div>'
+    + '<div class="dlbl">'+esc(label)+'</div>'+(sub?'<div class="dsub">'+esc(sub)+'</div>':'')+'</div>';
+}
+function openDashboard(id){
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg"><div class="modal" style="max-width:560px"><div class="m-body center">'+spinner()+'</div></div></div>';
+  callServer('studentDashboard', App.token, id, App.date).then(function(d){
+    var idLine = d.ma ? ('מספר אישי '+esc(d.ma)) : '';
+    if(d.tz) idLine += (idLine?' | ':'')+'תעודת זהות '+esc(d.tz);
+    host.innerHTML='<div class="modal-bg" id="dbg"><div class="modal" style="max-width:560px">'
+      + '<div class="dhead"><div><div class="dname">'+esc(d.name)+'</div>'
+      +   '<div class="dmeta">כיתה '+esc(d.cls)+'</div>'
+      +   '<div class="dmeta" style="margin-top:2px">'+idLine+'</div></div>'
+      +   '<button class="btn ghost sm" id="dClose">סגירה</button></div>'
+      + '<div class="m-body">'
+      +   '<div class="dgrid">'
+      +     statCard('שבוע אחרון', d.week.pct)
+      +     statCard('30 יום', d.last30.pct)
+      +     statCard('מתחילת החודש', d.month.pct)
+      +     statCard('מתחילת המחצית', d.half.pct)
+      +     statCard('מתחילת השנה', d.year.pct)
+      +   '</div>'
+      +   '<div class="drow"><span>איחורים מ 1.9</span><b>'+d.seasonLate+'</b></div>'
+      +   '<div class="drow"><span>היעדרויות מ 1.9</span><b>'+d.seasonAbsent+'</b></div>'
+      +   '<div class="drow"><span>ימים ללא דיווח מ 1.9</span><b>'+d.seasonNoReport+'</b></div>'
+      +   '<div class="drow"><span>סך איחורים</span><b>'+d.lateCount+'</b></div>'
+      + '</div></div></div>';
+    el('dClose').addEventListener('click', closeModal);
+    el('dbg').addEventListener('click', function(e){ if(e.target===el('dbg')) closeModal(); });
+  }).catch(function(e){ closeModal(); toast(e.message, true); });
+}
+
+/* ============ דיווח גורף ============ */
+function openBulk(){
+  var p = App.profile;
+  var canAll = (p.role==='ראש צוות' || p.role==='מפקד שלוחה');
+  var canFutureBulk = canAll;
+  var statuses = cmdState.data ? cmdState.data.statuses : ['נוכח','איחור','נעדר'];
+  var classOpts = (cmdState.data ? cmdState.data.classes : []).map(function(c){ return '<option value="'+esc(c.cls)+'">כיתה '+esc(c.cls)+'</option>'; }).join('');
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg" id="bbg"><div class="modal"><div class="m-body">'
+    + '<h3>דיווח גורף</h3>'
+    + '<p class="muted" style="margin-top:-4px">קובע סטטוס זהה לכל השוחרים בבת אחת. שימושי לחג או לפעילות מיוחדת.</p>'
+    + '<label style="margin-top:12px">היקף</label>'
+    + '<select id="bScope">'+(canAll?'<option value="all">כל השלוחה</option>':'')+classOpts+'</select>'
+    + '<label style="margin-top:12px">תאריך</label>'
+    + '<input type="date" id="bDate" value="'+toISO(App.date)+'">'
+    + (canFutureBulk?'<div class="muted" style="font-size:12.5px;margin-top:4px">ניתן לבחור תאריך עתידי, א עד ה בלבד</div>':'<div class="muted" style="font-size:12.5px;margin-top:4px">מדריך כיתה יכול לדווח גורף להיום בלבד</div>')
+    + '<label style="margin-top:12px">סטטוס</label>'
+    + '<select id="bStatus">'+statuses.map(function(o){return '<option>'+esc(o)+'</option>';}).join('')+'</select>'
+    + '<div id="bReasonWrap" style="margin-top:12px"><label>סיבה</label><textarea id="bReason" rows="2" placeholder="פירוט, חובה לכל סטטוס שאינו נוכח"></textarea></div>'
+    + '<div class="m-actions"><button class="btn gold" id="bGo">ביצוע דיווח גורף</button><button class="btn ghost" id="bCancel">ביטול</button></div>'
+    + '</div></div></div>';
+  el('bCancel').addEventListener('click', closeModal);
+  el('bbg').addEventListener('click', function(e){ if(e.target===el('bbg')) closeModal(); });
+  el('bGo').addEventListener('click', function(){
+    var scope=el('bScope').value, date=fromISO(el('bDate').value), status=el('bStatus').value, reason=el('bReason').value.trim();
+    if(status!=='נוכח' && !reason){ toast('חובה לפרט סיבה', true); return; }
+    var btn=el('bGo'); btn.disabled=true; btn.textContent='מבצע';
+    callServer('bulkReport', App.token, date, scope, status, reason).then(function(r){
+      closeModal(); toast('דווחו '+r.count+' שוחרים'); renderCommander();
+    }).catch(function(e){ btn.disabled=false; btn.textContent='ביצוע דיווח גורף'; toast(e.message, true); });
+  });
+}
+
+/* ============ נעילת יום ============ */
+function openLock(){
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg" id="lbg"><div class="modal"><div class="m-body">'
+    + '<h3>נעילת היום</h3>'
+    + '<p class="muted" style="margin-top:-4px">כשהיום נעול, השוחרים אינם מדווחים ומוצגת להם ההודעה שתנוסח כאן.</p>'
+    + '<label style="margin-top:12px">הודעה לשוחרים</label>'
+    + '<textarea id="lMsg" rows="3" placeholder="לדוגמה: היום חג, אין דיווח נוכחות">אין דיווח היום</textarea>'
+    + '<div class="m-actions"><button class="btn gold" id="lGo">נעילת היום</button><button class="btn ghost" id="lCancel">ביטול</button></div>'
+    + '</div></div></div>';
+  el('lCancel').addEventListener('click', closeModal);
+  el('lbg').addEventListener('click', function(e){ if(e.target===el('lbg')) closeModal(); });
+  el('lGo').addEventListener('click', function(){
+    var msg=el('lMsg').value.trim() || 'אין דיווח היום';
+    var btn=el('lGo'); btn.disabled=true; btn.textContent='נועל';
+    callServer('setDayLock', App.token, App.date, true, msg).then(function(){
+      closeModal(); toast('היום ננעל'); renderCommander();
+    }).catch(function(e){ btn.disabled=false; btn.textContent='נעילת היום'; toast(e.message, true); });
+  });
+}
+
+/* ============ דיווח עתידי, החלפה על ידי ראש צוות או שלוחה ============ */
+function toggleFuture(current){
+  callServer('setFutureEnabled', App.token, !current).then(function(r){
+    toast(r.enabled ? 'דיווח עתידי נפתח' : 'דיווח עתידי נסגר');
+    renderCommander();
+  }).catch(function(e){ toast(e.message, true); });
+}
 
 </script>
 </body>

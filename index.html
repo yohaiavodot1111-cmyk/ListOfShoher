@@ -1124,10 +1124,11 @@ function renderClassPane(){
     var sel = '<select class="sel-sm stat-sel" data-id="'+esc(s.id)+'" '+(ok?'':'disabled')+'>'
       + statuses.map(function(o){ return '<option '+(o===s.status?'selected':'')+'>'+esc(o)+'</option>'; }).join('') + '</select>';
     var reason = '<input class="reason-inp reason-cell" data-id="'+esc(s.id)+'" value="'+esc(s.reason)+'" placeholder="סיבה" '+(ok?'':'disabled')+'>';
+    var nadonBtn = (s.status==='איחור') ? '<button class="btn slim sm act-nadon" data-id="'+esc(s.id)+'">נדון</button>' : '';
     var actions = ok
       ? '<div class="rowactions">'+(s.noReport?'':'<button class="btn slim sm act-approve" data-id="'+esc(s.id)+'">אישור</button>')
-        + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">שמירה</button></div>'
-      : '<span class="muted">צפייה בלבד</span>';
+        + '<button class="btn sm act-save" data-id="'+esc(s.id)+'">שמירה</button>'+nadonBtn+'</div>'
+      : '<div class="rowactions"><span class="muted">צפייה בלבד</span>'+nadonBtn+'</div>';
     return '<tr class="'+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'">'
       + '<td><span class="idx">'+(c.students.indexOf(s)+1)+'.</span> <a class="name namelink" data-id="'+esc(s.id)+'" href="#">'+esc(s.name)+'</a>'+candle+'</td>'
       + '<td>'+sel+'</td><td style="min-width:180px">'+reason+'</td>'
@@ -1198,10 +1199,11 @@ function renderClassPane(){
     var reasonHtml = needReason
       ? '<div class="row2"><input class="reason-inp reason-cell-m" data-id="'+esc(s.id)+'" value="'+esc(s.reason)+'" placeholder="סיבה"></div>' : '';
 
-    var acts = s.noReport
+    var nadonBtnM = (s.status==='איחור') ? '<button class="btn ghost act-nadon" data-id="'+esc(s.id)+'" style="margin-top:8px;width:100%">הורדת נדון איחור</button>' : '';
+    var acts = (s.noReport
       ? '<div class="acts single"><button class="btn act-save-m" data-id="'+esc(s.id)+'">שמירה</button></div>'
       : '<div class="acts"><button class="btn gold act-approve-m" data-id="'+esc(s.id)+'">אישור</button>'
-        + '<button class="btn ghost act-save-m" data-id="'+esc(s.id)+'">שמירה</button></div>';
+        + '<button class="btn ghost act-save-m" data-id="'+esc(s.id)+'">שמירה</button></div>') + nadonBtnM;
 
     return '<div class="scard '+(s.noReport?'norep ':'')+(s.saving?'rowsaving':'')+'"><div class="top">'
       + '<span class="nm"><span class="idx">'+idx+'.</span>'+esc(s.name)+candle+'</span>'
@@ -1758,6 +1760,99 @@ function openPrintable(data){
   var w = window.open('', '_blank');
   if(!w){ toast('הדפדפן חסם את חלון ההדפסה. יש לאשר חלונות קופצים לאתר', true); return; }
   w.document.open(); w.document.write(html); w.document.close();
+}
+
+/* ============ נדון איחור ============ */
+function heDate_(str){ var p=String(str).split('/'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
+
+function openNadon(studentId){
+  // פותחים את החלון מיד בלחיצה, כדי לשמור על מחוות המשתמש ולא להיחסם. ממלאים אותו כשהנתונים חוזרים.
+  var w = window.open('', '_blank');
+  if(!w){ toast('הדפדפן חסם את חלון ההדפסה. יש לאשר חלונות קופצים לאתר', true); return; }
+  try {
+    w.document.open();
+    w.document.write('<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>נדון</title></head>'
+      + '<body style="font-family:Arial,sans-serif;direction:rtl;padding:28px;color:#333">מכין נדון...</body></html>');
+    w.document.close();
+  } catch(e){}
+  callServer('nadonInfo', App.token, studentId, App.date).then(function(d){
+    writeNadonDoc(w, d);
+  }).catch(function(e){ try{ w.close(); }catch(_){} toast(e.message, true); });
+}
+
+function nadonCountText_(n){
+  n = n || 0;
+  if(n === 1) return 'פעם אחת';
+  if(n === 2) return 'פעמיים';
+  return n + ' פעמים';
+}
+
+function writeNadonDoc(w, d){
+  var cmd = d.commander || {};
+  var css = ''
+    + '@page{ size:A4 portrait; margin:14mm 16mm; }'
+    + '*{ box-sizing:border-box; }'
+    + 'html,body{ margin:0; padding:0; }'
+    + 'body{ font-family:"David Libre","Frank Ruhl Libre",serif; color:#000; direction:rtl; font-size:15px; line-height:1.6; }'
+    + '.cls{ text-align:center; font-size:12px; margin-bottom:6px; }'
+    + '.ctl{ width:100%; border-collapse:collapse; font-size:11px; margin-bottom:26px; }'
+    + '.ctl td{ border:0.8pt solid #000; padding:3px 6px; text-align:center; }'
+    + '.head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px; }'
+    + '.unit{ font-weight:700; line-height:1.5; }'
+    + '.al{ margin-bottom:20px; }'
+    + '.al u{ text-underline-offset:3px; }'
+    + '.row2{ display:flex; gap:40px; margin-bottom:6px; }'
+    + '.fld{ display:flex; gap:8px; align-items:flex-end; }'
+    + '.fld .v{ min-width:120px; border-bottom:0.8pt solid #000; padding:0 6px 2px; }'
+    + '.subj{ font-weight:700; margin:24px 0 20px; }'
+    + '.subj u{ text-underline-offset:3px; }'
+    + '.body-line{ margin-bottom:6px; }'
+    + '.uline{ border-bottom:0.8pt solid #000; height:26px; margin:0 0 4px; }'
+    + '.note{ margin-top:22px; }'
+    + '.sign{ margin-top:40px; }'
+    + '.sigline{ width:230px; border-bottom:0.8pt solid #000; height:1px; margin-bottom:6px; }'
+    + '.sigrow{ display:flex; gap:34px; font-size:14px; }';
+
+  var html = '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">'
+    + '<title>נדון איחור ' + esc(d.name) + '</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=David+Libre:wght@400;700&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">'
+    + '<style>'+css+'</style></head><body>'
+    + '<div class="cls">שמור</div>'
+    + '<table class="ctl"><tbody>'
+    +   '<tr><td>בח"א 21 נוהל מס\' 2.2.9.08.19.421</td><td>מהדורה: 00</td><td>עמוד 1 מתוך 1</td></tr>'
+    +   '<tr><td>פרק: בקרת הדרכה והסמכה</td><td>עורך: סמל אלה מזור</td><td>תאריך:</td></tr>'
+    +   '<tr><td>שם הנוהל: תיק אישי לחניך</td><td>מאשר על: רס"ן צדוק יחזקאל</td><td>05/05/11</td></tr>'
+    +   '<tr><td colspan="3" style="text-align:right">נספח ו\' טופס הנדון</td></tr>'
+    + '</tbody></table>'
+    + '<div class="head">'
+    +   '<div class="unit">צבא הגנה לישראל<br>שלוחת אשקלון<br>דואר צבאי 02229<br>טלפון: 0369 7581</div>'
+    +   '<div></div>'
+    + '</div>'
+    + '<div class="al">אל: <u>תיק אישי</u></div>'
+    + '<div class="row2">'
+    +   '<div class="fld">תאריך: <span class="v">'+esc(heDate_(d.date))+'</span></div>'
+    + '</div>'
+    + '<div class="row2">'
+    +   '<div class="fld">כיתה: <span class="v">'+esc(d.cls)+'</span></div>'
+    + '</div>'
+    + '<div class="subj"><u>הנדון:</u>&nbsp;&nbsp;&nbsp;איחור .</div>'
+    + '<div class="body-line">בתאריך ' + esc(heDate_(d.date)) + ' החניך\\ה ' + esc(d.name) + '</div>'
+    + '<div class="body-line">איחר\\ה למסדר בוקר ' + esc(nadonCountText_(d.lateCount)) + ' במהלך השבוע</div>'
+    + '<div class="uline"></div><div class="uline"></div><div class="uline"></div>'
+    + '<div class="uline"></div><div class="uline"></div><div class="uline"></div><div class="uline"></div>'
+    + '<div class="note">החניך יודע כי הדבר מצוין בתיקו האישי.</div>'
+    + '<div class="sign">'
+    +   '<div class="sigline"></div>'
+    +   '<div class="sigrow"><span>מ.א ' + esc(cmd.id||'') + '</span>'
+    +   '<span>דרגה ' + esc(cmd.rank||'') + '</span>'
+    +   '<span>שם ' + esc(cmd.name||'') + '</span>'
+    +   '<span>חתימה</span></div>'
+    + '</div>'
+    + '<script>window.onload=function(){ setTimeout(function(){ window.focus(); window.print(); }, 400); };<\/script>'
+    + '</body></html>';
+
+  try { w.document.open(); w.document.write(html); w.document.close(); }
+  catch(e){ toast('לא ניתן לפתוח את הנדון', true); }
 }
 
 function closeModal(){ el('modalHost').innerHTML=''; }

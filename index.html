@@ -1239,6 +1239,11 @@ function renderClassPane(){
     var ns = el('searchInp'); ns.focus(); ns.setSelectionRange(pos, pos);
   });
 
+  // כפתור הנדון פעיל לכל מי שרואה את הכיתה, גם בצפייה בלבד
+  document.querySelectorAll('.act-nadon').forEach(function(b){
+    b.addEventListener('click', function(){ openNadon(b.getAttribute('data-id')); });
+  });
+
   if(ok){
     document.querySelectorAll('.stat-sel, .stat-sel-m').forEach(function(el){
       el.addEventListener('change', function(){ stagePick(el.getAttribute('data-id'), 'status', el.value); });
@@ -1766,18 +1771,39 @@ function openPrintable(data){
 function heDate_(str){ var p=String(str).split('/'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
 
 function openNadon(studentId){
-  // פותחים את החלון מיד בלחיצה, כדי לשמור על מחוות המשתמש ולא להיחסם. ממלאים אותו כשהנתונים חוזרים.
-  var w = window.open('', '_blank');
-  if(!w){ toast('הדפדפן חסם את חלון ההדפסה. יש לאשר חלונות קופצים לאתר', true); return; }
-  try {
-    w.document.open();
-    w.document.write('<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>נדון</title></head>'
-      + '<body style="font-family:Arial,sans-serif;direction:rtl;padding:28px;color:#333">מכין נדון...</body></html>');
-    w.document.close();
-  } catch(e){}
+  // פותחים את החלון מיד בלחיצה, כדי לשמור על מחוות המשתמש. אם הדפדפן חוסם, יש מסלול חלופי בתוך הדף.
+  var w = null;
+  try { w = window.open('', '_blank'); } catch(e){ w = null; }
+  if(w){
+    try {
+      w.document.open();
+      w.document.write('<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>נדון</title></head>'
+        + '<body style="font-family:Arial,sans-serif;direction:rtl;padding:28px;color:#333">מכין נדון...</body></html>');
+      w.document.close();
+    } catch(e){}
+  }
   callServer('nadonInfo', App.token, studentId, App.date).then(function(d){
-    writeNadonDoc(w, d);
-  }).catch(function(e){ try{ w.close(); }catch(_){} toast(e.message, true); });
+    if(w){ writeNadonDoc(w, d); }
+    else { nadonOverlay(d); }   // חלון נחסם, מציגים בתוך הדף עם כפתור הדפסה
+  }).catch(function(e){ try{ if(w) w.close(); }catch(_){} toast(e.message, true); });
+}
+
+/* מסלול חלופי: מציג את הנדון בתוך הדף עם כפתור הדפסה, אם החלון הקופץ נחסם. */
+function nadonOverlay(d){
+  var host = el('modalHost');
+  host.innerHTML = '<div class="modal-bg" id="novl"><div class="modal" style="max-width:640px">'
+    + '<div class="m-body">'
+    + '<div id="nadonFrame" style="border:1px solid var(--line);border-radius:6px;overflow:hidden;height:60vh"></div>'
+    + '<div class="m-actions"><button class="btn gold" id="nPrint">הדפסה ושמירה כ PDF</button>'
+    + '<button class="btn ghost" id="nClose">סגירה</button></div></div></div></div>';
+  var frame = document.createElement('iframe');
+  frame.style.cssText = 'width:100%;height:100%;border:0';
+  el('nadonFrame').appendChild(frame);
+  var doc = frame.contentWindow.document;
+  writeNadonDoc({ document: { open:function(){}, write:function(h){ doc.open(); doc.write(h.replace(/<script[\s\S]*?<\/script>/,'')); doc.close(); }, close:function(){} } }, d);
+  el('nClose').addEventListener('click', closeModal);
+  el('novl').addEventListener('click', function(e){ if(e.target===el('novl')) closeModal(); });
+  el('nPrint').addEventListener('click', function(){ try{ frame.contentWindow.focus(); frame.contentWindow.print(); }catch(e){ toast('לא ניתן להדפיס', true); } });
 }
 
 function nadonCountText_(n){

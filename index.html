@@ -1475,7 +1475,7 @@ function cmdAction(id, mode){
   var status = sel ? sel.value : st.status;
   var reason = rin ? rin.value.trim() : (st.reason || '');
 
-  if(mode==='set' && status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+  if(status!=='נוכח' && !reason){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
 
   var c = cmdState.data.classes[cmdState.active];
   if(!st.saving){

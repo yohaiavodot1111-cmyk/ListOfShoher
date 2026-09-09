@@ -398,9 +398,12 @@
       <label for="idInput">מספר מזהה</label>
       <input id="idInput" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off"
         spellcheck="false" name="dohehad-id-field" placeholder="הזינו את המספר המזהה שלכם">
-      <label for="pwInput" style="margin-top:14px">סיסמה <span style="font-weight:400;color:var(--muted)">(למפקדים בלבד)</span></label>
-      <input id="pwInput" type="password" autocomplete="off" autocorrect="off" autocapitalize="off"
-        spellcheck="false" name="dohehad-pw-field" placeholder="שוחרים משאירים ריק">
+      <div id="pwWrap" class="hidden" style="margin-top:14px">
+        <div class="banner" style="margin-bottom:12px;border-inline-start-color:var(--blue)">על מנת לפתוח את ממשק הניהול, יש להזין את הסיסמה שלך</div>
+        <label for="pwInput">סיסמה</label>
+        <input id="pwInput" type="password" autocomplete="off" autocorrect="off" autocapitalize="off"
+          spellcheck="false" name="dohehad-pw-field" placeholder="הזינו את הסיסמה שלכם">
+      </div>
       <button class="btn gold" id="loginBtn">כניסה למערכת</button>
 
       <div class="banner warn hidden" id="offlineNote" style="margin:22px 0 0">
@@ -593,6 +596,7 @@ if(MODE === 'none'){
 el('loginBtn').addEventListener('click', doLogin);
 el('idInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 if(el('pwInput')) el('pwInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+el('idInput').addEventListener('input', function(){ if(el('pwWrap') && !el('pwWrap').classList.contains('hidden')){ el('pwWrap').classList.add('hidden'); if(el('pwInput')) el('pwInput').value=''; } });
 
 function doLogin(){
   if(MODE === 'live' && !apiReady()){
@@ -600,16 +604,27 @@ function doLogin(){
     return waitForApi(20000).then(function(){ el('loginBtn').disabled=false; doLogin(); });
   }
   var id = el('idInput').value.trim();
-  var pw = el('pwInput') ? el('pwInput').value : '';
+  var pwVisible = el('pwWrap') && !el('pwWrap').classList.contains('hidden');
+  var pw = (pwVisible && el('pwInput')) ? el('pwInput').value : '';
   if(!id){ toast('יש להזין מספר מזהה', true); return; }
   el('loginBtn').disabled=true; el('loginBtn').textContent='מתחבר';
   callServer('login', id, pw).then(function(r){
     el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת';
-    if(!r.ok){ toast(r.message||'התחברות נכשלה', true); return; }
+    if(r && r.needPassword){
+      if(el('pwWrap')) el('pwWrap').classList.remove('hidden');
+      if(el('pwInput')){ el('pwInput').value=''; el('pwInput').focus(); }
+      return;
+    }
+    if(!r.ok){
+      toast(r.message||'התחברות נכשלה', true);
+      if(el('pwInput')) el('pwInput').value='';
+      return;
+    }
     App.token=r.token; App.profile=r.profile; App.initial=r.initial||null;
     if(r.version) App.serverVersion=r.version;
     try { sessionStorage.setItem('dohehad_session', JSON.stringify({token:r.token, profile:r.profile})); } catch(e){}
     el('idInput').value = ''; if(el('pwInput')) el('pwInput').value = '';
+    if(el('pwWrap')) el('pwWrap').classList.add('hidden');
     enterPortal();
   }).catch(function(e){ el('loginBtn').disabled=false; el('loginBtn').textContent='כניסה למערכת'; toast(e.message, true); });
 }
@@ -633,7 +648,9 @@ el('logoutBtn').addEventListener('click', function(){
   try { sessionStorage.removeItem('dohehad_session'); } catch(e){}
   App.token=null; App.profile=null; App.initial=null;
   el('portal').classList.add('hidden'); el('login').classList.remove('hidden');
-  el('idInput').value=''; el('idInput').focus();
+  el('idInput').value=''; if(el('pwInput')) el('pwInput').value='';
+  if(el('pwWrap')) el('pwWrap').classList.add('hidden');
+  el('idInput').focus();
 });
 
 window.addEventListener('beforeunload', function(e){

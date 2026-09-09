@@ -358,6 +358,16 @@
   .dval{font-family:var(--display); font-weight:700; font-size:24px; line-height:1;}
   .dlbl{font-size:11.5px; color:var(--muted); margin-top:5px;}
   .drow{display:flex; justify-content:space-between; padding:11px 2px; border-top:1px solid var(--line-2); font-size:14.5px;}
+  .dsec{font-weight:700; font-size:14px; color:var(--navy); margin:18px 0 8px; padding-top:14px; border-top:1px solid var(--line);}
+  .dhl{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0 6px;}
+  .dhl-item{background:var(--sky-soft); border-radius:10px; padding:12px 8px; text-align:center;}
+  .dhl-n{font-family:var(--display); font-weight:700; font-size:24px; color:var(--navy); line-height:1;}
+  .dhl-l{font-size:11.5px; color:var(--muted); margin-top:5px;}
+  .brk{display:flex; align-items:center; gap:10px; padding:5px 2px; font-size:13.5px;}
+  .brk-k{width:110px; flex:0 0 auto; color:var(--ink);}
+  .brk-bar{flex:1 1 auto; height:12px; background:var(--line-2); border-radius:6px; overflow:hidden;}
+  .brk-fill{height:100%; border-radius:6px;}
+  .brk-n{width:28px; flex:0 0 auto; text-align:left; font-weight:700; color:var(--muted);}
   .drow b{font-weight:700;}
   .daytabs{display:flex; gap:8px; overflow-x:auto; margin-bottom:14px; padding-bottom:4px;}
   .daytab{flex:0 0 auto; border:1px solid var(--line); border-radius:10px; background:#fff; padding:9px 13px;
@@ -1929,13 +1939,59 @@ function statCard(label, val, sub){
   return '<div class="dcard"><div class="dval" style="color:'+pctColor(val)+'">'+val+'%</div>'
     + '<div class="dlbl">'+esc(label)+'</div>'+(sub?'<div class="dsub">'+esc(sub)+'</div>':'')+'</div>';
 }
+function trendText_(t){
+  if(t > 2) return '<span style="color:var(--present)">שיפור של '+t+' אחוז ב 30 הימים האחרונים</span>';
+  if(t < -2) return '<span style="color:var(--absent)">ירידה של '+Math.abs(t)+' אחוז ב 30 הימים האחרונים</span>';
+  return '<span style="color:var(--muted)">יציב ב 30 הימים האחרונים</span>';
+}
+function agoText_(n){
+  if(n < 0) return 'אין';
+  if(n === 0) return 'היום';
+  if(n === 1) return 'לפני יום פעילות';
+  return 'לפני ' + n + ' ימי פעילות';
+}
+function dashHighlights(d){
+  return '<div class="dhl">'
+    + '<div class="dhl-item"><div class="dhl-n">'+(d.currentStreak||0)+'</div><div class="dhl-l">רצף נוכחות נוכחי</div></div>'
+    + '<div class="dhl-item"><div class="dhl-n">'+(d.longestStreak||0)+'</div><div class="dhl-l">הרצף הארוך ביותר</div></div>'
+    + '<div class="dhl-item"><div class="dhl-n" style="font-size:16px">'+(d.worstDay?('יום '+esc(d.worstDay)):'אין')+'</div><div class="dhl-l">היום החלש בשבוע</div></div>'
+    + '</div>'
+    + '<div class="drow"><span>מגמה</span><b>'+trendText_(d.trend||0)+'</b></div>'
+    + '<div class="drow"><span>היעדרות אחרונה</span><b>'+agoText_(d.daysSinceAbsent)+'</b></div>'
+    + '<div class="drow"><span>איחור אחרון</span><b>'+agoText_(d.daysSinceLate)+'</b></div>';
+}
+function dashBreakdown(d){
+  var bs = d.byStatus || {};
+  var order = ['נוכח','איחור','פעילות חוץ','טיול/סיור','מחלה','חופשה משפחתית','נעדר','היעדרות ללא אישור','השעיה','לא דיווח'];
+  var total = 0; order.forEach(function(k){ total += (bs[k]||0); });
+  if(!total) return '';
+  var colorOf = function(k){
+    if(k==='נוכח'||k==='פעילות חוץ'||k==='טיול/סיור') return 'var(--present)';
+    if(k==='איחור') return 'var(--late)';
+    return 'var(--absent)';
+  };
+  var rows = order.filter(function(k){ return bs[k]; }).map(function(k){
+    var n = bs[k], w = Math.round(n/total*100);
+    return '<div class="brk"><div class="brk-k">'+esc(k)+'</div>'
+      + '<div class="brk-bar"><div class="brk-fill" style="width:'+w+'%;background:'+colorOf(k)+'"></div></div>'
+      + '<div class="brk-n">'+n+'</div></div>';
+  }).join('');
+  return '<div class="dsec">פילוח הסטטוסים מתחילת השנה</div>'+rows;
+}
+function dashReasons(d){
+  if(!d.reasons || !d.reasons.length) return '';
+  var rows = d.reasons.map(function(r){
+    return '<div class="drow"><span>'+esc(r.reason)+'</span><b>'+r.n+'</b></div>';
+  }).join('');
+  return '<div class="dsec">סיבות נפוצות</div>'+rows;
+}
 function openDashboard(id){
   var host=el('modalHost');
   host.innerHTML='<div class="modal-bg"><div class="modal" style="max-width:560px"><div class="m-body center">'+spinner()+'</div></div></div>';
   callServer('studentDashboard', App.token, id, App.date).then(function(d){
     var idLine = d.ma ? ('מספר אישי '+esc(d.ma)) : '';
     if(d.tz) idLine += (idLine?' | ':'')+'תעודת זהות '+esc(d.tz);
-    host.innerHTML='<div class="modal-bg" id="dbg"><div class="modal" style="max-width:560px">'
+    host.innerHTML='<div class="modal-bg" id="dbg"><div class="modal" style="max-width:620px;max-height:90vh;overflow:auto">'
       + '<div class="dhead"><div><div class="dname">'+esc(d.name)+'</div>'
       +   '<div class="dmeta">כיתה '+esc(d.cls)+'</div>'
       +   '<div class="dmeta" style="margin-top:2px">'+idLine+'</div></div>'
@@ -1948,10 +2004,13 @@ function openDashboard(id){
       +     statCard('מתחילת המחצית', d.half.pct)
       +     statCard('מתחילת השנה', d.year.pct)
       +   '</div>'
+      +   dashHighlights(d)
+      +   dashBreakdown(d)
+      +   dashReasons(d)
       +   '<div class="drow"><span>איחורים מ 1.9</span><b>'+d.seasonLate+'</b></div>'
       +   '<div class="drow"><span>היעדרויות מ 1.9</span><b>'+d.seasonAbsent+'</b></div>'
       +   '<div class="drow"><span>ימים ללא דיווח מ 1.9</span><b>'+d.seasonNoReport+'</b></div>'
-      +   '<div class="drow"><span>סך איחורים</span><b>'+d.lateCount+'</b></div>'
+      +   '<div class="drow"><span>ימים שנספרו מ 1.9</span><b>'+(d.trackedDays||0)+'</b></div>'
       + '</div></div></div>';
     el('dClose').addEventListener('click', closeModal);
     el('dbg').addEventListener('click', function(e){ if(e.target===el('dbg')) closeModal(); });

@@ -127,6 +127,28 @@
   }
 
   /* ============ מסך השוחר ============ */
+  .ml-nav{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
+  .ml-title{font-family:var(--display); font-weight:700; font-size:18px; color:var(--navy);}
+  .ml-wd{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:4px;}
+  .ml-wd div{text-align:center; font-size:12px; color:var(--muted); font-weight:700;}
+  .ml-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-cell{aspect-ratio:1; border:1px solid var(--line); border-radius:8px; background:#fff;
+    font-size:14px; font-weight:600; color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .cal-cell.cal-empty{border:none; background:none; cursor:default;}
+  .cal-present{background:#E7F3EC; border-color:#BFE0CC; color:var(--present);}
+  .cal-late{background:#FBF1DC; border-color:#EAD6A6; color:var(--late);}
+  .cal-absent{background:#FBE3E3; border-color:#EEC2C2; color:var(--absent);}
+  .cal-none{background:#F4F6F9; border-color:var(--line); color:var(--muted);}
+  .cal-weekend{background:#EEF1F5; border-color:var(--line-2); color:#AAB4C0;}
+  .cal-future{background:#fff; border-color:var(--line-2); color:#C7D0DA; cursor:default;}
+  .cal-today{outline:2px solid var(--blue); outline-offset:1px;}
+  .ml-legend{display:flex; flex-wrap:wrap; gap:14px; margin-top:14px; font-size:12.5px; color:var(--muted);}
+  .ml-legend i{display:inline-block; width:12px; height:12px; border-radius:3px; margin-inline-end:5px; vertical-align:middle; border:1px solid var(--line);}
+  .ml-detail{margin-top:16px; padding-top:14px; border-top:1px solid var(--line);}
+  .mld-date{font-family:var(--display); font-weight:700; font-size:16px; color:var(--navy); margin-bottom:8px;}
+  .mld-row{display:flex; justify-content:space-between; padding:6px 2px; font-size:14px; border-top:1px solid var(--line-2);}
+  .mld-edit{margin-top:12px; padding-top:12px; border-top:1px solid var(--line-2);}
+  .mld-edit select{width:100%;}
   .info-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
   @media(max-width:620px){ .info-strip{grid-template-columns:1fr;} }
   .info-c{display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line);
@@ -965,8 +987,9 @@ function infoStrip(d){
       + '<div class="info-s">20 ביוני</div></div></div>');
   }
 
-  if(!cards.length) return '';
-  return '<div class="info-strip">'+cards.join('')+'</div>';
+  var strip = cards.length ? '<div class="info-strip">'+cards.join('')+'</div>' : '';
+  strip += '<div style="margin-bottom:16px"><button class="btn ghost" id="myLogBtn">יומן חודשי</button></div>';
+  return strip;
 }
 
 function drawStudent(){
@@ -1048,6 +1071,7 @@ function drawStudent(){
     + '</div>';
 
   drawDayTabs();
+  if(el('myLogBtn')) el('myLogBtn').addEventListener('click', function(){ openMonthLog(null, false); });
   if(el('openPicker')) el('openPicker').addEventListener('click', function(){ stu.picking = true; stu.showAbsence = isAbsence(stu.status); drawStudent(); });
   if(el('absBtn')) el('absBtn').addEventListener('click', function(){ stu.showAbsence = true; drawStudent(); });
   if(el('backBtn')) el('backBtn').addEventListener('click', function(){ stu.showAbsence = false; drawStudent(); });
@@ -1982,6 +2006,112 @@ function download(f){
   } catch(e){ toast('ההורדה נכשלה', true); }
 }
 
+/* ============ יומן חודשי, לבקרה בלבד ============ */
+var HE_MON = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+var HE_WD  = ['א','ב','ג','ד','ה','ו','ש'];
+var mlState = { id:null, forCommander:false, y:0, m:0, data:null };
+
+function statusClass_(st){
+  if(!st) return '';
+  if(st==='נוכח'||st==='פעילות חוץ'||st==='טיול/סיור') return 'cal-present';
+  if(st==='איחור') return 'cal-late';
+  return 'cal-absent';
+}
+
+function openMonthLog(studentId, forCommander){
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg" id="mlbg"><div class="modal" style="max-width:560px"><div class="m-body center">'+spinner()+'</div></div></div>';
+  var t = App.date.split('/');
+  mlState.id = studentId || null;
+  mlState.forCommander = !!forCommander;
+  mlState.y = +t[0]; mlState.m = +t[1];
+  loadMonth();
+}
+function loadMonth(){
+  callServer('monthLog', App.token, mlState.id, mlState.y, mlState.m).then(function(d){
+    mlState.data = d; drawMonth();
+  }).catch(function(e){ closeModal(); toast(e.message, true); });
+}
+function shiftMonth(delta){
+  mlState.m += delta;
+  if(mlState.m < 1){ mlState.m = 12; mlState.y--; }
+  if(mlState.m > 12){ mlState.m = 1; mlState.y++; }
+  var host=el('modalHost');
+  var body = host.querySelector('.ml-grid-wrap');
+  if(body) body.innerHTML = spinner();
+  loadMonth();
+}
+function drawMonth(){
+  var d = mlState.data;
+  var first = new Date(d.year, d.month-1, 1).getDay();   // 0 ראשון
+  var cells = '';
+  for(var i=0;i<first;i++) cells += '<div class="cal-cell cal-empty"></div>';
+  d.days.forEach(function(x){
+    var cls = x.future ? 'cal-future' : (x.weekend ? 'cal-weekend' : (x.status ? statusClass_(x.status) : 'cal-none'));
+    var isToday = (x.date === d.today) ? ' cal-today' : '';
+    cells += '<button class="cal-cell '+cls+isToday+'" data-date="'+x.date+'">'+x.day+'</button>';
+  });
+  var host=el('modalHost');
+  host.innerHTML='<div class="modal-bg" id="mlbg"><div class="modal" style="max-width:560px">'
+    + '<div class="dhead"><div><div class="dname">יומן חודשי</div>'
+    +   '<div class="dmeta">'+esc(d.name)+' | כיתה '+esc(d.cls)+'</div></div>'
+    +   '<button class="btn ghost sm" id="mlClose">סגירה</button></div>'
+    + '<div class="m-body">'
+    +   '<div class="ml-nav"><button class="btn ghost sm" id="mlPrev">חודש קודם</button>'
+    +     '<div class="ml-title">'+HE_MON[d.month-1]+' '+d.year+'</div>'
+    +     '<button class="btn ghost sm" id="mlNext">חודש הבא</button></div>'
+    +   '<div class="ml-grid-wrap"><div class="ml-wd">'+HE_WD.map(function(w){return '<div>'+w+'</div>';}).join('')+'</div>'
+    +   '<div class="ml-grid">'+cells+'</div></div>'
+    +   '<div class="ml-legend"><span><i class="cal-present"></i>נוכח</span><span><i class="cal-late"></i>איחור</span>'
+    +     '<span><i class="cal-absent"></i>היעדרות</span><span><i class="cal-none"></i>לא דיווח</span></div>'
+    +   '<div id="mlDetail" class="ml-detail muted">בחרו יום כדי לראות את הדיווח</div>'
+    + '</div></div></div>';
+  el('mlClose').addEventListener('click', closeModal);
+  el('mlbg').addEventListener('click', function(e){ if(e.target===el('mlbg')) closeModal(); });
+  el('mlPrev').addEventListener('click', function(){ shiftMonth(-1); });
+  el('mlNext').addEventListener('click', function(){ shiftMonth(1); });
+  host.querySelectorAll('.cal-cell[data-date]').forEach(function(c){
+    c.addEventListener('click', function(){ showDay(c.getAttribute('data-date')); });
+  });
+}
+function showDay(dateStr){
+  var d = mlState.data;
+  var x = d.days.filter(function(z){ return z.date===dateStr; })[0];
+  if(!x) return;
+  var det = el('mlDetail');
+  var head = '<div class="mld-date">'+esc(shortDate(x.date))+'</div>';
+  if(x.future){ det.className='ml-detail'; det.innerHTML = head+'<div class="muted">יום עתידי</div>'; return; }
+  if(x.weekend && !x.status){ det.className='ml-detail'; det.innerHTML = head+'<div class="muted">סוף שבוע</div>'; return; }
+  var body = '';
+  if(x.status){
+    body += '<div class="mld-row"><span>סטטוס</span><b>'+esc(x.status)+'</b></div>';
+    if(x.reason) body += '<div class="mld-row"><span>סיבה</span><b>'+esc(x.reason)+'</b></div>';
+    if(x.approval) body += '<div class="mld-row"><span>אישור</span><b>'+esc(x.approval)+(x.approvedAt?(' '+esc(x.approvedAt)):'')+'</b></div>';
+    if(x.approver) body += '<div class="mld-row"><span>טופל על ידי</span><b>'+esc(x.approver)+'</b></div>';
+  } else {
+    body += '<div class="muted">לא דווח ביום זה</div>';
+  }
+  // מפקד יכול לתקן דיווח ישן, שוחר לא
+  if(mlState.forCommander){
+    var opts = d.statuses.map(function(o){ return '<option '+(o===x.status?'selected':'')+'>'+esc(o)+'</option>'; }).join('');
+    body += '<div class="mld-edit"><select id="mldSel">'+opts+'</select>'
+      + '<input id="mldReason" class="reason-inp" placeholder="סיבה" value="'+esc(x.reason)+'" style="margin-top:8px">'
+      + '<button class="btn gold sm" id="mldSave" style="margin-top:8px">שמירת תיקון</button></div>';
+  }
+  det.className='ml-detail';
+  det.innerHTML = head + body;
+  if(mlState.forCommander && el('mldSave')){
+    el('mldSave').addEventListener('click', function(){
+      var st=el('mldSel').value, rs=el('mldReason').value.trim();
+      if(st!=='נוכח' && !rs){ toast('חובה לפרט סיבה עבור הסטטוס שנבחר', true); return; }
+      var btn=el('mldSave'); btn.disabled=true; btn.textContent='שומר';
+      callServer('commanderSetStatus', App.token, dateStr, mlState.id, st, rs, 'set').then(function(){
+        toast('התיקון נשמר'); loadMonth();
+      }).catch(function(e){ btn.disabled=false; btn.textContent='שמירת תיקון'; toast(e.message, true); });
+    });
+  }
+}
+
 function closeModal(){ el('modalHost').innerHTML=''; }
 
 /* ============ דשבורד שוחר ============ */
@@ -2046,7 +2176,8 @@ function openDashboard(id){
       + '<div class="dhead"><div><div class="dname">'+esc(d.name)+'</div>'
       +   '<div class="dmeta">כיתה '+esc(d.cls)+'</div>'
       +   '<div class="dmeta" style="margin-top:2px">'+idLine+'</div></div>'
-      +   '<button class="btn ghost sm" id="dClose">סגירה</button></div>'
+      +   '<div style="display:flex;gap:8px"><button class="btn ghost sm" id="dLog">יומן חודשי</button>'
+      +   '<button class="btn ghost sm" id="dClose">סגירה</button></div></div>'
       + '<div class="m-body">'
       +   '<div class="dgrid">'
       +     statCard('שבוע אחרון', d.week.pct)
@@ -2064,6 +2195,7 @@ function openDashboard(id){
       +   '<div class="drow"><span>ימים שנספרו מ 1.9</span><b>'+(d.trackedDays||0)+'</b></div>'
       + '</div></div></div>';
     el('dClose').addEventListener('click', closeModal);
+    if(el('dLog')) el('dLog').addEventListener('click', function(){ openMonthLog(d.id, true); });
     el('dbg').addEventListener('click', function(e){ if(e.target===el('dbg')) closeModal(); });
   }).catch(function(e){ closeModal(); toast(e.message, true); });
 }
